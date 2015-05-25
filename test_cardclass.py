@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import sys
 import unittest
 import cardbase
 
@@ -28,8 +27,8 @@ class Test_cardClass(unittest.TestCase):
     def test_cardHasEdition(self):
         self.assertIsNotNone(self.card.edition)
         
-    def test_cardHasArt(self):
-        self.assertIsNotNone(self.card.art)
+    def test_cardHasScan(self):
+        self.assertIsNotNone(self.card.scan)
     
     def test_cardHasArtist(self):
         self.assertIsNotNone(self.card.artist)
@@ -52,25 +51,8 @@ class Test_cardClass(unittest.TestCase):
     def test_cardHasToughness(self):
         self.assertIsNotNone(self.card.toughness)
         
-    def test_cardHasFoil(self):
-        self.assertIsNotNone(self.card.foil)
-        
     def test_cardHasLoyalty(self):
         self.assertIsNotNone(self.card.loyalty)
-
-class Test_cardInformationIsFetched(unittest.TestCase):
-    
-    @classmethod
-    def setUpClass(cls):
-        # fetch shivan dragon info by the card's collector number (281 in M15)
-        cls.card = cardbase.fetchCard("m15", 281)
-
-    # Tests
-    def test_somethingIsFetched(self):
-        self.assertIsInstance(self.card, cardbase.Card)
-    
-    def test_correctTitleIsFetched(self):
-        self.assertEqual(self.card.title, "Shivan Dragon")
 
 def test():
     unittest.main(exit=False)
