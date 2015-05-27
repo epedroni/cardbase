@@ -90,15 +90,21 @@ def getRarity(page):
     
 def getPower(page):
     power = extractSubTitle(page)
-    power = re.search("([0-9X\*]+)/[0-9X\*]+", power).group(1)
+    power = re.search("([0-9X\*]+)/[0-9X\*]+", power)
     
-    return power
+    if power:
+        return power.group(1)
+    else:
+        return ""
     
 def getToughness(page):
     toughness = extractSubTitle(page)
-    toughness = re.search("[0-9X\*]+/([0-9X\*]+)", toughness).group(1)
+    toughness = re.search("[0-9X\*]+/([0-9X\*]+)", toughness)
     
-    return toughness
+    if toughness:
+        return toughness.group(1)
+    else:
+        return ""
     
 def getLoyalty(page):
     loyalty = extractSubTitle(page)

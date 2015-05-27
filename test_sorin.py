@@ -5,49 +5,50 @@ import unittest
 import cardbase
 from lxml import html
 
+
 class Test_cardInformationParsing(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        with open("callow", "r") as file:
+        with open("sorin", "r") as file:
             cls.page = html.fromstring(file.read())
 
     # Tests
     def test_correctTitleIsParsed(self):
-        self.assertEqual(cardbase.getTitle(self.page), "Callow Jushi")
+        self.assertEqual(cardbase.getTitle(self.page), "Sorin Markov")
     
     def test_correctCostIsParsed(self):
-        self.assertEqual(cardbase.getCost(self.page), "1UU")
+        self.assertEqual(cardbase.getCost(self.page), "3BBB")
         
     def test_correctColourIsParsed(self):
-        self.assertEqual(cardbase.getColour(self.page), "U")
+        self.assertEqual(cardbase.getColour(self.page), "B")
         
     def test_correctTypeIsParsed(self):
-        self.assertEqual(cardbase.getType(self.page), "Creature")
+        self.assertEqual(cardbase.getType(self.page), "Planeswalker")
         
     def test_correctSubTypeIsParsed(self):
-        self.assertEqual(cardbase.getSubType(self.page), "Human Wizard")
+        self.assertEqual(cardbase.getSubType(self.page), "Sorin")
         
     def test_correctArtistIsParsed(self):
-        self.assertEqual(cardbase.getArtist(self.page), "Tsutomu Kawade")
+        self.assertEqual(cardbase.getArtist(self.page), "Michael Komarck")
         
     def test_correctTextIsParsed(self):
-        self.assertEqual(cardbase.getText(self.page), ["Whenever you cast a Spirit or Arcane spell, you may put a ki counter on Callow Jushi.", "At the beginning of the end step, if there are two or more ki counters on Callow Jushi, you may flip it."])
+        self.assertEqual(cardbase.getText(self.page), ["+2: Sorin Markov deals 2 damage to target creature or player and you gain 2 life.", "−3: Target opponent's life total becomes 10.", "−7: You control target player during that player's next turn."])
         
     def test_correctFlavourIsParsed(self):
         self.assertEqual(cardbase.getFlavour(self.page), "")
         
     def test_correctRarityIsParsed(self):
-        self.assertEqual(cardbase.getRarity(self.page), "Uncommon")
+        self.assertEqual(cardbase.getRarity(self.page), "Mythic Rare")
         
     def test_correctPowerIsParsed(self):
-        self.assertEqual(cardbase.getPower(self.page), "2")
+        self.assertEqual(cardbase.getPower(self.page), "")
 
     def test_correctToughnessIsParsed(self):
-        self.assertEqual(cardbase.getToughness(self.page), "2")
+        self.assertEqual(cardbase.getToughness(self.page), "")
         
     def test_correctLoyaltyIsParsed(self):
-        self.assertEqual(cardbase.getLoyalty(self.page), "")
+        self.assertEqual(cardbase.getLoyalty(self.page), "4")
 
 def test():
     unittest.main(exit=False)
