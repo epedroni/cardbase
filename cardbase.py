@@ -39,7 +39,7 @@ def extractSubTitle(page):
 
 def getCost(page):
     cost = extractSubTitle(page)
-    cost = re.search(" ([0-9X]*[WGRBU]*) ", cost)
+    cost = re.search(" ([0-9X]*[WGRBU\{\}/]*) ", cost)
     
     if cost:
         return cost.group(1)
@@ -48,7 +48,7 @@ def getCost(page):
     
 def getColour(page):
     colours = extractSubTitle(page)
-    colours = re.search(" [0-9X]*([WGRBU]*) ", colours)
+    colours = re.search(" [0-9X]*([WGRBU\{\}/]*) ", colours)
     if colours:
         colours = colours.group(1)
         
@@ -57,6 +57,7 @@ def getColour(page):
         colours = re.sub("R+", "R", colours)
         colours = re.sub("B+", "B", colours)
         colours = re.sub("G+", "G", colours)
+        colours = re.sub("[\{\}/]*", "", colours)
         
         return colours
         
@@ -65,7 +66,7 @@ def getColour(page):
     
 def getType(page):
     types = extractSubTitle(page)
-    types = re.search("([A-Za-z ]*) —", types).group(1)
+    types = re.search("([A-Za-z ]*)( —)?", types).group(1).strip()
     
     return types
 
@@ -90,7 +91,8 @@ def getText(page):
 def getFlavour(page):
     flavour = page.xpath("/html/body/table[3]/tr/td[2]/p[3]/i/text()")
     if flavour:
-        return flavour[0]
+        flavour = re.sub("\n", "", " ".join(flavour))
+        return flavour
     else:
         return ""
     
