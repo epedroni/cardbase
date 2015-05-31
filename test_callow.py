@@ -9,7 +9,7 @@ class Test_cardInformationParsing(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        with open("callow", "r") as file:
+        with open("testcards/callow", "r") as file:
             cls.page = html.fromstring(file.read())
 
     # Tests
@@ -48,6 +48,22 @@ class Test_cardInformationParsing(unittest.TestCase):
         
     def test_correctLoyaltyIsParsed(self):
         self.assertEqual(cardbase.getLoyalty(self.page), "")
+
+class Test_additionalCardData(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.card = cardbase.fetchCard("bok", "31a")
+    
+    def test_cardHasCorrectEdition(self):
+        self.assertEqual(self.card.edition, "bok")
+    
+    def test_cardHasCorrectScan(self):
+        self.assertEqual(self.card.scan, "http://magiccards.info/scans/en/bok/31a.jpg")
+
+    def test_cardHasCorrectNumber(self):
+        self.assertEqual(self.card.number, "31a")
+        
 
 def test():
     unittest.main(exit=False)

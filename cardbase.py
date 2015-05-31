@@ -39,20 +39,29 @@ def extractSubTitle(page):
 
 def getCost(page):
     cost = extractSubTitle(page)
+    cost = re.search(" ([0-9X]*[WGRBU]*) ", cost)
     
-    return re.search(" ([0-9X]*[WGRBU]*) ", cost).group(1)
+    if cost:
+        return cost.group(1)
+    else:
+        return ""
     
 def getColour(page):
     colours = extractSubTitle(page)
-    colours = re.search(" [0-9X]*([WGRBU]*) ", colours).group(1)
-    
-    colours = re.sub("U+", "U", colours)
-    colours = re.sub("W+", "W", colours)
-    colours = re.sub("R+", "R", colours)
-    colours = re.sub("B+", "B", colours)
-    colours = re.sub("G+", "G", colours)
-    
-    return colours
+    colours = re.search(" [0-9X]*([WGRBU]*) ", colours)
+    if colours:
+        colours = colours.group(1)
+        
+        colours = re.sub("U+", "U", colours)
+        colours = re.sub("W+", "W", colours)
+        colours = re.sub("R+", "R", colours)
+        colours = re.sub("B+", "B", colours)
+        colours = re.sub("G+", "G", colours)
+        
+        return colours
+        
+    else:
+        return ""
     
 def getType(page):
     types = extractSubTitle(page)
@@ -62,9 +71,12 @@ def getType(page):
 
 def getSubType(page):
     subtypes = extractSubTitle(page)
-    subtypes = re.search("— ([A-Za-z ]*) ", subtypes).group(1)
+    subtypes = re.search("— ([A-Za-z ]*)", subtypes)
     
-    return subtypes
+    if subtypes:
+        return subtypes.group(1).strip()
+    else:
+        return ""
 
 def getArtist(page):
     artist = page.xpath("/html/body/table[3]/tr/td[2]/p[4]/text()")[0]

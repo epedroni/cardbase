@@ -14,7 +14,7 @@ class Test_cardInformationParsing(unittest.TestCase):
         # cls.page = html.fromstring(requests.get("http://magiccards.info/m15/en/281.html").text)
         
         # but actually, use the pre-fetched file to avoid querying the server too much
-        with open("shivandragon", "r") as file:
+        with open("testcards/shivandragon", "r") as file:
             cls.page = html.fromstring(file.read())
 
     # Tests
