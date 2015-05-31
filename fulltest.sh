@@ -1,3 +1,3 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 
 python -m unittest test_shivandragon test_callow test_cardclass test_sorin test_island test_shoal test_coecon
