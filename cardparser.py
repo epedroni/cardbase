@@ -1,4 +1,5 @@
 import re
+import requests
 from lxml import html
 
 class Card():
@@ -20,29 +21,28 @@ class Card():
         self.toughness = ""
         self.loyalty = ""
 
+class CardNotFoundException(Exception):
+    pass
+
 # fetching functions
 def makeUrl(cardSet, cardNo):
     return "http://magiccards.info/" + cardSet + "/en/" + cardNo + ".html"
 
 def remoteFetch(url):
-    return requests.get(url).text
+    return html.fromstring(requests.get(url).text)
 
-def fetchCard(cardSet, cardNo):
-    # build object
-    card = Card()
-    card.edition = cardSet
-    card.scan = "http://magiccards.info/scans/en/" + cardSet + "/" + cardNo + ".jpg"
-    card.number = cardNo
-    
-    #setRemoteData(card, makeUrl(cardSet, cardNo))
-    
-    return card
+def isValid(page):
+    notFound = page.xpath("/html/body/h1/text()")
+    response404 = page.xpath("/html/body/h1/text()")
+    if notFound:
+        raise CardNotFoundException()
 
-def setRemoteData(card, url, fetchCallback=remoteFetch):
+def setRemoteData(card, url):
     # fetch card from upstream
-    page = html.fromstring(fetchCallback(url))
+    page = html.fromstring(requests.get(url).text)
+    isValid(page)
     
-    # set remote data
+    # parse and set data
     card.title = getTitle(page)
     card.cost = getCost(page)
     card.convertedCost = getConvertedCost(page)
@@ -57,6 +57,18 @@ def setRemoteData(card, url, fetchCallback=remoteFetch):
     card.toughness = getToughness(page)
     card.loyalty = getLoyalty(page)
 
+
+def fetchCard(cardSet, cardNo):
+    # build object
+    card = Card()
+    card.edition = cardSet
+    card.scan = "http://magiccards.info/scans/en/" + cardSet + "/" + cardNo + ".jpg"
+    card.number = cardNo
+    
+    setRemoteData(card, makeUrl(cardSet, cardNo))
+    
+    return card
+
 # parsing functions
 def getTitle(page):
     return page.xpath("/html/body/table[3]/tr/td[2]/span/a/text()")[0]
@@ -65,7 +77,9 @@ def extractSubTitle(page):
     line = page.xpath("/html/body/table[3]/tr/td[2]/p[1]/text()")[0]
     line = re.sub("\n", "", line)
     line = re.sub(" +", " ", line)
-    return line.strip()
+    line = line.strip()
+    
+    return line
 
 def getCost(page):
     cost = extractSubTitle(page)
@@ -88,18 +102,13 @@ def getConvertedCost(page):
 def getColour(page):
     colours = extractSubTitle(page)
     colours = re.search(" [0-9X]*([WGRBU\{\}/]*) ", colours)
+    
     if colours:
         colours = colours.group(1)
-        
-        colours = re.sub("U+", "U", colours)
-        colours = re.sub("W+", "W", colours)
-        colours = re.sub("R+", "R", colours)
-        colours = re.sub("B+", "B", colours)
-        colours = re.sub("G+", "G", colours)
         colours = re.sub("[\{\}/]*", "", colours)
+        colours = re.sub(r"(.)\1+", r"\1", colours)
         
         return colours
-        
     else:
         return ""
     
@@ -121,10 +130,12 @@ def getSubType(page):
 def getArtist(page):
     artist = page.xpath("/html/body/table[3]/tr/td[2]/p[4]/text()")[0]
     artist = re.sub("Illus. ", "", artist)
+    
     return artist
     
 def getText(page):
     text = page.xpath("/html/body/table[3]/tr/td[2]/p[2]/b/text()")
+    
     return text
     
 def getFlavour(page):
