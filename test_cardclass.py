@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import unittest
-import cardbase
+import cardparser
 
 class Test_cardClass(unittest.TestCase):
     
     def setUp(self):
-        self.card = cardbase.Card()
+        self.card = cardparser.Card()
 
     # Tests
     def test_cardHasTitle(self):
@@ -14,6 +14,9 @@ class Test_cardClass(unittest.TestCase):
         
     def test_cardHasCost(self):
         self.assertIsNotNone(self.card.cost)
+    
+    def test_cardHasConvertedCost(self):
+        self.assertIsNotNone(self.card.convertedCost)
         
     def test_cardHasColour(self):
         self.assertIsNotNone(self.card.colour)

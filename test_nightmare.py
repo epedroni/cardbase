@@ -1,64 +1,61 @@
 #!/usr/bin/env python3
 
-import sys
 import unittest
-import cardbase
 from lxml import html
-
+import cardparser
 
 class Test_cardInformationParsing(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        # fetch shivan dragon info by the card's collector number (281 in M15)
-        # cls.page = html.fromstring(requests.get("http://magiccards.info/m15/en/281.html").text)
-        
-        # but actually, use the pre-fetched file to avoid querying the server too much
         with open("testcards/nightmare", "r") as file:
             cls.page = html.fromstring(file.read())
 
     # Tests
     def test_correctTitleIsParsed(self):
-        self.assertEqual(cardbase.getTitle(self.page), "Nightmare")
+        self.assertEqual(cardparser.getTitle(self.page), "Nightmare")
     
     def test_correctCostIsParsed(self):
-        self.assertEqual(cardbase.getCost(self.page), "5B")
+        self.assertEqual(cardparser.getCost(self.page), "5B")
+        
+    def test_correctConvertedCostIsParsed(self):
+        self.assertEqual(cardparser.getConvertedCost(self.page), "6")
         
     def test_correctColourIsParsed(self):
-        self.assertEqual(cardbase.getColour(self.page), "B")
+        self.assertEqual(cardparser.getColour(self.page), "B")
         
     def test_correctTypeIsParsed(self):
-        self.assertEqual(cardbase.getType(self.page), "Creature")
+        self.assertEqual(cardparser.getType(self.page), "Creature")
         
     def test_correctSubTypeIsParsed(self):
-        self.assertEqual(cardbase.getSubType(self.page), "Nightmare Horse")
+        self.assertEqual(cardparser.getSubType(self.page), "Nightmare Horse")
         
     def test_correctArtistIsParsed(self):
-        self.assertEqual(cardbase.getArtist(self.page), "Vance Kovacs")
+        self.assertEqual(cardparser.getArtist(self.page), "Vance Kovacs")
         
     def test_correctTextIsParsed(self):
-        self.assertEqual(cardbase.getText(self.page), ["Flying (This creature can't be blocked except by creatures with flying or reach.)", "Nightmare's power and toughness are each equal to the number of Swamps you control."])
+        self.assertEqual(cardparser.getText(self.page), ["Flying (This creature can't be blocked except by creatures with flying or reach.)", "Nightmare's power and toughness are each equal to the number of Swamps you control."])
         
     def test_correctFlavourIsParsed(self):
-        self.assertEqual(cardbase.getFlavour(self.page), "The thunder of its hooves beats dreams into despair.")
+        self.assertEqual(cardparser.getFlavour(self.page), "The thunder of its hooves beats dreams into despair.")
         
     def test_correctRarityIsParsed(self):
-        self.assertEqual(cardbase.getRarity(self.page), "Rare")
+        self.assertEqual(cardparser.getRarity(self.page), "Rare")
         
     def test_correctPowerIsParsed(self):
-        self.assertEqual(cardbase.getPower(self.page), "*")
+        self.assertEqual(cardparser.getPower(self.page), "*")
 
     def test_correctToughnessIsParsed(self):
-        self.assertEqual(cardbase.getToughness(self.page), "*")
+        self.assertEqual(cardparser.getToughness(self.page), "*")
         
     def test_correctLoyaltyIsParsed(self):
-        self.assertEqual(cardbase.getLoyalty(self.page), "")
+        self.assertEqual(cardparser.getLoyalty(self.page), "")
 
 class Test_additionalCardData(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.card = cardbase.fetchCard("m15", "276")
+        cls.card = cardparser.fetchCard("m15", "276")
     
     def test_cardHasCorrectEdition(self):
         self.assertEqual(self.card.edition, "m15")

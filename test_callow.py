@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-import sys
 import unittest
-import cardbase
 from lxml import html
+import cardparser
 
 class Test_cardInformationParsing(unittest.TestCase):
     
@@ -14,46 +13,49 @@ class Test_cardInformationParsing(unittest.TestCase):
 
     # Tests
     def test_correctTitleIsParsed(self):
-        self.assertEqual(cardbase.getTitle(self.page), "Callow Jushi")
+        self.assertEqual(cardparser.getTitle(self.page), "Callow Jushi")
     
     def test_correctCostIsParsed(self):
-        self.assertEqual(cardbase.getCost(self.page), "1UU")
+        self.assertEqual(cardparser.getCost(self.page), "1UU")
+        
+    def test_correctConvertedCostIsParsed(self):
+        self.assertEqual(cardparser.getConvertedCost(self.page), "3")
         
     def test_correctColourIsParsed(self):
-        self.assertEqual(cardbase.getColour(self.page), "U")
+        self.assertEqual(cardparser.getColour(self.page), "U")
         
     def test_correctTypeIsParsed(self):
-        self.assertEqual(cardbase.getType(self.page), "Creature")
+        self.assertEqual(cardparser.getType(self.page), "Creature")
         
     def test_correctSubTypeIsParsed(self):
-        self.assertEqual(cardbase.getSubType(self.page), "Human Wizard")
+        self.assertEqual(cardparser.getSubType(self.page), "Human Wizard")
         
     def test_correctArtistIsParsed(self):
-        self.assertEqual(cardbase.getArtist(self.page), "Tsutomu Kawade")
+        self.assertEqual(cardparser.getArtist(self.page), "Tsutomu Kawade")
         
     def test_correctTextIsParsed(self):
-        self.assertEqual(cardbase.getText(self.page), ["Whenever you cast a Spirit or Arcane spell, you may put a ki counter on Callow Jushi.", "At the beginning of the end step, if there are two or more ki counters on Callow Jushi, you may flip it."])
+        self.assertEqual(cardparser.getText(self.page), ["Whenever you cast a Spirit or Arcane spell, you may put a ki counter on Callow Jushi.", "At the beginning of the end step, if there are two or more ki counters on Callow Jushi, you may flip it."])
         
     def test_correctFlavourIsParsed(self):
-        self.assertEqual(cardbase.getFlavour(self.page), "")
+        self.assertEqual(cardparser.getFlavour(self.page), "")
         
     def test_correctRarityIsParsed(self):
-        self.assertEqual(cardbase.getRarity(self.page), "Uncommon")
+        self.assertEqual(cardparser.getRarity(self.page), "Uncommon")
         
     def test_correctPowerIsParsed(self):
-        self.assertEqual(cardbase.getPower(self.page), "2")
+        self.assertEqual(cardparser.getPower(self.page), "2")
 
     def test_correctToughnessIsParsed(self):
-        self.assertEqual(cardbase.getToughness(self.page), "2")
+        self.assertEqual(cardparser.getToughness(self.page), "2")
         
     def test_correctLoyaltyIsParsed(self):
-        self.assertEqual(cardbase.getLoyalty(self.page), "")
+        self.assertEqual(cardparser.getLoyalty(self.page), "")
 
 class Test_additionalCardData(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.card = cardbase.fetchCard("bok", "31a")
+        cls.card = cardparser.fetchCard("bok", "31a")
     
     def test_cardHasCorrectEdition(self):
         self.assertEqual(self.card.edition, "bok")
