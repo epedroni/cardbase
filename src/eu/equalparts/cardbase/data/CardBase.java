@@ -1,23 +1,12 @@
 package eu.equalparts.cardbase.data;
-import java.io.File;
+
+import java.util.ArrayList;
 
 public class CardBase {
 
-	public static void main(String... args) {
-		
-	}
+	private ArrayList<Card> cards;
+	private ArrayList<Deck> decks;
 	
-	/**
-	 * Parse a cardbase file and create an associated CardBase object.
-	 */
-	public CardBase(File cardbase) {
-
-	}
-
-	/**
-	 * Create an empty CardBase.
-	 */
-	public CardBase() {
-
-	}
+	
+	
 }

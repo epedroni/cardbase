@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,7 +49,7 @@ public class Test {
 
 //		@SuppressWarnings("unchecked")
 		CardSet set = mapper.readValue(new File("M15.json"), CardSet.class);
-		System.out.println(set.getCardByNumber("281").getName());
+		System.out.println(set.getCardByNumber("281").name);
 		
 	}
 
@@ -58,9 +57,9 @@ public class Test {
 		List<Card> allCards = new ArrayList<Card>();
 
 		for (CardSet set : sets.values()) {
-			for (Card card : set.getCards()) {
-				card.setSetCode(set.getCode());
-				card.setSetName(set.getName());
+			for (Card card : set.cards) {
+				card.setCode = set.code;
+				card.setName = set.name;
 				// System.out.println(set.getName() + ": " + card.getName());
 
 				allCards.add(card);
