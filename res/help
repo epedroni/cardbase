@@ -1,22 +1,12 @@
-# cardbase
+You are using Cardbasecli (Cardbase command line interface).
+This tool is designed to facilitate adding and removing new cards as they are added to or removed from the physical collection.
 
-The primary purpose of cardbase is to create a digital representation of your own MTG collection. A cardbase file (.cb) is simply a JSON file containing an array of card objects. The card data structure used is a superset of that used in [MTG JSON](http://mtgjson.com/), and in fact that is where most of the data comes from.
-
-To-do list:
-* Build basic GUI to visualise the cards
-* Allow sorting by field
-* Basic deck building - decks can be built and stored
-* Statistical deck analysis - cost distribution, etc
-
-
-## Command Line Interface (CLI) - cardbasecli
-
-### Loading a Cardbase
+Loading a Cardbase
 
 To use, first make sure to load the cardbase by passing it as the first argument to the program, e.g. cardbasecli ~/mycardbase.cb. To start a new clean cardbase, run cardbasecli without arguments.
 
 
-### Adding Cards
+Adding Cards
 
 To add cards, first use "set" to enter the code of the set to which the card belongs, e.g. to add 2015 Core Set cards, enter "set M15". To see a list of all valid set codes, type "sets".
 Once a set is selected, simply type the card's set number and it will be added to the collection. You may add more of the same card one at a time, or by specifying the quantity following the set number.
@@ -29,7 +19,7 @@ For example, to add 3 M15 edition Shivan Dragons, do:
 Alternatively, pressing return immediately after adding a card repeats that action. If return was pressed one more time after the example above, three more Shivan Dragons would be added. This can be repeated indefinitely, but only works with card additions.
 
 
-### Removing Cards
+Removing Cards
 
 To remove cards, first choose a set and then type "remove" followed by the card's set number. To remove more of the same card, add the desired count after the card number.
 
@@ -41,12 +31,12 @@ For example, to remove 2 of your 3 M15 Shivan Dragons, do:
 Note that it is only necessary to choose the set if it wasn't already selected.
 
 
-### Undo
+Undo
 
 You may take back your last action by typing "undo". This only works for add and remove actions, and only if the set has not been changed since. Only the most recent action can be undone.
 
 
-### Viewing the Cardbase
+Viewing the Cardbase
 
 Cardbasecli also offers some very basic commands to view the current state of the cardbase: glance and peruse.
 
@@ -56,6 +46,6 @@ peruse: prints the same list as glance, but with more information about each car
 Peruse optionally accepts a card number as an argument. If present, only that card's information is printed.
  
 
-### Committing Changes and Exiting
+Committing Changes and Exiting
 
 Any changes made on this tool must be manually written to the file. If you make a mistake, simply exit and your cardbase will not be modified. To write changes, use the "write" command. To save to a new file, type "write" followed by the file name (no spaces allowed). To exit, simply type "exit".

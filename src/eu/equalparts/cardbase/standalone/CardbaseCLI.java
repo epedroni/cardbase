@@ -3,6 +3,7 @@ package eu.equalparts.cardbase.standalone;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -22,14 +23,28 @@ import eu.equalparts.cardbase.query.IO;
  * This provides a lightweight CLI for interacting with cardbase files. 
  * 
  */
-public class CardBaseCLI {
+public class CardbaseCLI {
 
+	private enum LastAction {
+		ADD, REMOVE;
+		public Integer count;
+		public Card card;
+		
+		public void set(Card card, Integer count) {
+			this.card = card;
+			this.count = count;
+		}
+		
+	}
+	private static LastAction lastAction = null;
+	
 	private static CardSet selectedSet = null;
 	private static HashMap<String, CardSet> setCache = new HashMap<String, CardSet>();
 	private static CardBaseManager cbm;
 	private static boolean exit = false;
 	private static String help = "No help file was found";
-	private static File cardBaseFile;
+	private static File cardBaseFile = null;
+	private static boolean savePrompt = false;
 
 	/**
 	 * Execute the interface.
@@ -52,10 +67,8 @@ public class CardBaseCLI {
 					System.exit(0);
 				}
 			} else {
-				//System.out.println("No cardbase file was provided, initialising a clean cardbase");
-				System.out.println("Loading testbase for debugging purposes");
-				cardBaseFile = new File("testbase");
-				cbm = new CardBaseManager(cardBaseFile);
+				System.out.println("No cardbase file was provided, initialising a clean cardbase");
+				cbm = new CardBaseManager();
 			}
 
 			// initialise necessary components
@@ -63,9 +76,9 @@ public class CardBaseCLI {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 			System.out.println("Loading externals");
-			File helpFile = new File("help");
-			if (helpFile.exists() && helpFile.canRead()) {
-				help = new Scanner(helpFile).useDelimiter("\\Z").next();
+			InputStream is = CardbaseCLI.class.getResourceAsStream("/help");
+			if (is != null) {
+				help = new Scanner(is).useDelimiter("\\Z").next();
 			} else {
 				System.out.println("Help file is not available, I hope you know how to use the program!");
 			}
@@ -105,25 +118,24 @@ public class CardBaseCLI {
 			 * Write current CardBase to file
 			 */
 			case "write":
+				File output;
+				
 				if (commands.length > 1) {
-					File output = new File(commands[1]);
-					if (output.exists()) {
-						if(output.isFile()) {
-							if (output.canWrite()) {
-								IO.writeCardBase(output, cbm.cardBase);
-								cardBaseFile = output;
-								System.out.println("Cardbase saved to " + output.getAbsolutePath());
-							} else {
-								System.out.println(commands[1] + " cannot be written to, nothing was written");
-							}
-						} else {
-							System.out.println(commands[1] + " is not a file, nothing was written");
-						}
-					} else {
-						System.out.println(commands[1] + " does not exist, nothing was written");
+					output = new File(sanitiseFileName(commands[1]));
+				} else {
+					output = cardBaseFile;
+				}
+				
+				if (output != null) {
+					if (output.exists() && (!output.isFile() || !output.canWrite())) {
+						System.out.println("Could not write to " + output.getAbsolutePath());
+						return;
 					}
-				} else if (cardBaseFile != null) {
-					System.out.println("Writing to " + cardBaseFile.getAbsolutePath());
+					
+					IO.writeCardBase(output, cbm.cardBase);
+					cardBaseFile = output;
+					System.out.println("Cardbase was saved to " + output.getAbsolutePath());
+					savePrompt = false;
 				} else {
 					System.out.println("Please provide a file name");
 				}
@@ -133,7 +145,12 @@ public class CardBaseCLI {
 			 * Exit procedures
 			 */
 			case "exit":
-				exit = true;
+				if (savePrompt) {
+					System.out.println("Don't forget to save. If you really wish to quit without saving, type exit again.");
+					savePrompt = false;
+				} else {
+					exit = true;
+				}
 				break;
 
 			/*
@@ -159,6 +176,7 @@ public class CardBaseCLI {
 							setCache.put(mcs.code, selectedSet);
 						}
 						System.out.println("Selected set: " + mcs.name);
+						lastAction = null;
 						return;
 					}
 				}
@@ -169,9 +187,14 @@ public class CardBaseCLI {
 			 * Print a brief list of the complete cardbase.
 			 */
 			case "glance":
+				Card current;
+				int total = 0;
 				for (Iterator<Card> i = cbm.cardIterator(); i.hasNext();) {
-					printGlance(i.next());
+					current = i.next();
+					printGlance(current);
+					total += current.count;
 				}
+				System.out.println("Total: " + total);
 				break;
 			
 			/*
@@ -197,6 +220,22 @@ public class CardBaseCLI {
 				break;
 				
 			/*
+			 * Undo previous action.
+			 */
+			case "undo":
+				if (lastAction != null) {
+					if (lastAction == LastAction.ADD) {
+						remove(lastAction.card, lastAction.count);
+					} else if (lastAction ==  LastAction.REMOVE) {
+						add(lastAction.card, lastAction.count);
+					}
+					lastAction = null;
+				} else {
+					System.out.println("Nothing to undo");
+				}
+				break;
+				
+			/*
 			 * Remove one or more cards
 			 */
 			case "remove":
@@ -212,8 +251,7 @@ public class CardBaseCLI {
 									return;
 								}
 							}
-							cbm.removeCard(remove, count);
-							System.out.println("Removed " + count + "x " + remove.name);
+							remove(remove, count);
 						} else {
 							System.out.println(commands[1] + " does not correspond to a card in " + selectedSet.name);
 						}
@@ -230,21 +268,24 @@ public class CardBaseCLI {
 			 */
 			default:
 				if (selectedSet != null) {
-					Card newCard = selectedSet.getCardByNumber(commands[0]);
-					if (newCard != null) {
-						Integer count = 1;
-						if (commands.length > 1 && commands[1].matches("[0-9]+")) {
-							count = Integer.valueOf(commands[1]);
-							if (count <= 0) {
-								System.out.println("Can't add " + count + " cards");
-								return;
-							}
-						}
-						newCard.setCode = selectedSet.code;
-						cbm.addCard(newCard, count);
-						System.out.println("Added " + count + "x " + newCard.name);
+					if (commands.length == 1 && commands[0].isEmpty()) {
+						if (lastAction == LastAction.ADD)
+							add(lastAction.card, lastAction.count);
 					} else {
-						System.out.println(commands[0] + " does not correspond to a card in " + selectedSet.name);
+						Card newCard = selectedSet.getCardByNumber(commands[0]);
+						if (newCard != null) {
+							Integer count = 1;
+							if (commands.length > 1 && commands[1].matches("[0-9]+")) {
+								count = Integer.valueOf(commands[1]);
+								if (count <= 0) {
+									System.out.println("Can't add " + count + " cards");
+									return;
+								}
+							}
+							add(newCard, count);
+						} else {
+							System.out.println(commands[0] + " does not correspond to a card in " + selectedSet.name);
+						}
 					}
 				} else {
 					System.out.println("Select a set before adding cards.");
@@ -254,6 +295,31 @@ public class CardBaseCLI {
 		}
 	}
 	
+	private static void add(Card card, Integer count) {
+		card.setCode = selectedSet.code;
+		cbm.addCard(card, count);
+		System.out.println("Added " + count + "x " + card.name);
+		savePrompt = true;
+		lastAction = LastAction.ADD;
+		lastAction.set(card, count);
+	}
+	
+	private static void remove(Card card, Integer count) {
+		cbm.removeCard(card, count);
+		System.out.println("Removed " + count + "x " + card.name);
+		savePrompt = true;
+		lastAction = LastAction.REMOVE;
+		lastAction.set(card, count);
+	}
+	
+	private static String sanitiseFileName(String name) {
+		name = name.replaceAll("[^-_.A-Za-z0-9]", "");
+		if (!name.endsWith(".cb")) {
+			name = name.concat(".cb");
+		}
+		return name;
+	}
+
 	private static void printPerusal(Card card) {
 		printGlance(card);
 		if (card.type != null) System.out.println("\t" + card.type);

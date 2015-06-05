@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.data.CardBase;
+import eu.equalparts.cardbase.data.Cardbase;
 import eu.equalparts.cardbase.data.CardSet;
 import eu.equalparts.cardbase.data.MetaCardSet;
 
@@ -59,8 +59,8 @@ public class IO {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public static CardBase readCardBase(File file) throws JsonParseException, JsonMappingException, IOException {
-		return mapper.readValue(file, CardBase.class);
+	public static Cardbase readCardBase(File file) throws JsonParseException, JsonMappingException, IOException {
+		return mapper.readValue(file, Cardbase.class);
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class IO {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public static void writeCardBase(File file, CardBase cardBase) throws JsonGenerationException, JsonMappingException, IOException {
+	public static void writeCardBase(File file, Cardbase cardBase) throws JsonGenerationException, JsonMappingException, IOException {
 		mapper.writeValue(file, cardBase);
 	}
 	

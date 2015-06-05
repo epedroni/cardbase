@@ -12,7 +12,7 @@ import eu.equalparts.cardbase.query.IO;
 public class CardBaseManager {
 	
 	private ArrayList<MetaCardSet> metaSets;
-	public CardBase cardBase;
+	public Cardbase cardBase;
 
 	/**
 	 * Parse a cardbase file and create an associated CardBase object.
@@ -33,7 +33,7 @@ public class CardBaseManager {
 	 */
 	public CardBaseManager() throws JsonParseException, JsonMappingException, IOException {
 		metaSets = IO.getAllMetaSets();
-		cardBase = new CardBase();
+		cardBase = new Cardbase();
 	}
 	
 	public ArrayList<MetaCardSet> getAllMetaSets() {

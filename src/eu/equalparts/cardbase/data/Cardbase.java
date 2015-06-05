@@ -2,7 +2,7 @@ package eu.equalparts.cardbase.data;
 
 import java.util.ArrayList;
 
-public class CardBase {
+public class Cardbase {
 
 	public ArrayList<Card> cards = new ArrayList<>();
 	public ArrayList<Deck> decks = new ArrayList<>();
