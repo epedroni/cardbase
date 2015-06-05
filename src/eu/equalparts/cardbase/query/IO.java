@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.data.Cardbase;
 import eu.equalparts.cardbase.data.CardSet;
+import eu.equalparts.cardbase.data.Cardbase;
 import eu.equalparts.cardbase.data.MetaCardSet;
 
 public class IO {

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.data.Card;
-import eu.equalparts.cardbase.data.CardBaseManager;
+import eu.equalparts.cardbase.data.CardbaseManager;
 import eu.equalparts.cardbase.data.CardSet;
 import eu.equalparts.cardbase.data.MetaCardSet;
 import eu.equalparts.cardbase.query.IO;
@@ -22,28 +22,65 @@ import eu.equalparts.cardbase.query.IO;
 /**
  * This provides a lightweight CLI for interacting with cardbase files. 
  * 
+ * @author Eduardo Pedroni
  */
 public class CardbaseCLI {
 
-	private enum LastAction {
-		ADD, REMOVE;
-		public Integer count;
-		public Card card;
+	/**
+	 * Enum type to store actions.
+	 * 
+	 * @author Eduardo Pedroni
+	 */
+	private enum Action {
 		
+		ADD, REMOVE;
+		public Card card;
+		public Integer count;
+		
+		/**
+		 * Sets both fields at once.
+		 * 
+		 * @param card the card last modified.
+		 * @param count the amount that was added or removed.
+		 */
 		public void set(Card card, Integer count) {
 			this.card = card;
 			this.count = count;
 		}
-		
 	}
-	private static LastAction lastAction = null;
 	
+	/**
+	 * The last action performed by the user.
+	 */
+	private static Action lastAction = null;
+	/**
+	 * The currently selected set, from which new cards are added.
+	 */
 	private static CardSet selectedSet = null;
+	/**
+	 * A cache of CardSets to avoid querying the server many times for the same information.
+	 */
 	private static HashMap<String, CardSet> setCache = new HashMap<String, CardSet>();
-	private static CardBaseManager cbm;
+	/**
+	 * The manager object which provides a façade to the cardbase data structure.
+	 */
+	private static CardbaseManager cbm;
+	/**
+	 * Exit flag, program breaks out of the main loop when true.
+	 */
 	private static boolean exit = false;
-	private static String help = "No help file was found";
-	private static File cardBaseFile = null;
+	/**
+	 * Printed to the console when the user enter the help command.
+	 */
+	private static String help = "Not available, check project page.";
+	/**
+	 * The cardbase file off which we are currently working, if any.
+	 */
+	private static File cardbaseFile = null;
+	/**
+	 * Save flag is raised when cards are added or removed and causes a prompt to be shown
+	 * if the user tries to exit with unsaved changed.
+	 */
 	private static boolean savePrompt = false;
 
 	/**
@@ -53,42 +90,37 @@ public class CardbaseCLI {
 	 */
 	public static void main(String... args) {
 
-		System.out.println("Welcome to cardbase");
-
+		System.out.println("Welcome to Cardbase CLI!");
+		
 		try {
-			// construct the cardbase
+			// make the CardbaseManager
 			if (args.length > 0) {
-				cardBaseFile = new File(args[0]);
-				if (cardBaseFile.exists() && cardBaseFile.isFile() && cardBaseFile.canRead()) {
-					System.out.println("Loading cardbase from " + args[0]);
-					cbm = new CardBaseManager(cardBaseFile);
+				cardbaseFile = new File(args[0]);
+				if (cardbaseFile.exists() && cardbaseFile.isFile() && cardbaseFile.canRead()) {
+					System.out.println("Loading cardbase from \"" + args[0] + "\".");
+					cbm = new CardbaseManager(cardbaseFile);
 				} else {
-					System.out.println(args[0] + " appears to be invalid");
+					System.out.println(args[0] + " appears to be invalid.");
 					System.exit(0);
 				}
 			} else {
-				System.out.println("No cardbase file was provided, initialising a clean cardbase");
-				cbm = new CardBaseManager();
+				System.out.println("No cardbase file was provided, creating a clean cardbase.");
+				cbm = new CardbaseManager();
 			}
 
-			// initialise necessary components
-			System.out.println("Fetching card sets from upstream");
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-			System.out.println("Loading externals");
+			// prepare interface
+			BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
 			InputStream is = CardbaseCLI.class.getResourceAsStream("/help");
 			if (is != null) {
 				help = new Scanner(is).useDelimiter("\\Z").next();
 			} else {
-				System.out.println("Help file is not available, I hope you know how to use the program!");
+				System.out.println("Help file was not found, check the project page for help instead.");
 			}
 			
+			// the main loop
 			while (!exit) {
 				System.out.print(selectedSet == null ? "> " : selectedSet.code + " > ");
-				String rawInput = br.readLine().trim().toLowerCase();
-				String[] commands = rawInput.split("[ \t]+");
-
-				parse(commands);
+				interpret(consoleReader.readLine().trim().toLowerCase().split("[ \t]+"));
 			}
 
 		} catch (JsonParseException e) {
@@ -104,49 +136,59 @@ public class CardbaseCLI {
 
 	}
 
-	private static void parse(String[] commands) throws JsonParseException, JsonMappingException, MalformedURLException, IOException {
+	/**
+	 * Handle console commands appropriately.
+	 * 
+	 * REMINDER sort out these exceptions
+	 * 
+	 * @param commands the array of commands, already sanitised.
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	private static void interpret(String[] commands) throws JsonParseException, JsonMappingException, MalformedURLException, IOException {
 		if (commands.length > 0) {
 			switch (commands[0]) {
 			/*
-			 * Show help
+			 * Show help.
 			 */
 			case "help":
 				System.out.println(help);
 				break;
 			
 			/*
-			 * Write current CardBase to file
+			 * Write current cardbase to file.
 			 */
 			case "write":
-				File output;
-				
+				File outputFile;
 				if (commands.length > 1) {
-					output = new File(sanitiseFileName(commands[1]));
+					outputFile = new File(sanitiseFileName(commands[1]));
 				} else {
-					output = cardBaseFile;
+					outputFile = cardbaseFile;
 				}
 				
-				if (output != null) {
-					if (output.exists() && (!output.isFile() || !output.canWrite())) {
-						System.out.println("Could not write to " + output.getAbsolutePath());
+				if (outputFile != null) {
+					if (outputFile.exists() && (!outputFile.isFile() || !outputFile.canWrite())) {
+						System.out.println("Could not write to \"" + outputFile.getAbsolutePath() + "\".");
 						return;
 					}
-					
-					IO.writeCardBase(output, cbm.cardBase);
-					cardBaseFile = output;
-					System.out.println("Cardbase was saved to " + output.getAbsolutePath());
+					IO.writeCardBase(outputFile, cbm.cardBase);
+					// we are now working off outputFile, which may or may not be the same as cardbaseFile at this point
+					cardbaseFile = outputFile;
+					System.out.println("Cardbase was saved to \"" + outputFile.getAbsolutePath() + "\".");
 					savePrompt = false;
 				} else {
-					System.out.println("Please provide a file name");
+					System.out.println("Please provide a file name.");
 				}
 				break;
-
+				
 			/*
-			 * Exit procedures
+			 * Exit procedure.
 			 */
 			case "exit":
 				if (savePrompt) {
-					System.out.println("Don't forget to save. If you really wish to quit without saving, type exit again.");
+					System.out.println("Don't forget to save. If you really wish to quit without saving, type \"exit\" again.");
 					savePrompt = false;
 				} else {
 					exit = true;
@@ -154,37 +196,41 @@ public class CardbaseCLI {
 				break;
 
 			/*
-			 * Print a list of valid set codes
+			 * Print a list of valid set codes.
 			 */
 			case "sets":
-				for (MetaCardSet mcs : cbm.getAllMetaSets()) {
-					System.out.println(mcs);
+				for (MetaCardSet set : cbm.getAllMetaSets()) {
+					// MetaCardSet has an overridden toString().
+					System.out.println(set);
 				}
 				break;
 
 			/*
-			 * Select a set, any card numbers provided will be fetched from that set
+			 * Select a set.
 			 */
 			case "set":
-				for (MetaCardSet mcs : cbm.getAllMetaSets()) {
-					if (mcs.code.equalsIgnoreCase(commands[1])) {
-						// if the set is cached, use that
-						if (setCache.containsKey(mcs.code)) {
-							selectedSet = setCache.get(mcs.code);
+				// first check if the set code is valid
+				for (MetaCardSet set : cbm.getAllMetaSets()) {
+					if (set.code.equalsIgnoreCase(commands[1])) {
+						// if the set is already cached, use that
+						if (setCache.containsKey(set.code)) {
+							selectedSet = setCache.get(set.code);
 						} else {
-							selectedSet = IO.getCardSet(mcs.code);
-							setCache.put(mcs.code, selectedSet);
+							// if not, download it and cache it
+							selectedSet = IO.getCardSet(set.code);
+							setCache.put(set.code, selectedSet);
 						}
-						System.out.println("Selected set: " + mcs.name);
+						System.out.println("Selected set: " + set.name + ".");
+						// undoing is not allowed if the set is changed - it would get tricky
 						lastAction = null;
 						return;
 					}
 				}
-				System.out.println(commands[1] + " does not correspond to any set (use \"sets\" to see all valid set codes)");
+				System.out.println("\"" + commands[1] + "\" does not correspond to any set (use \"sets\" to see all valid set codes).");
 				break;
 				
 			/*
-			 * Print a brief list of the complete cardbase.
+			 * Print a brief list of the whole cardbase.
 			 */
 			case "glance":
 				Card current;
@@ -198,21 +244,23 @@ public class CardbaseCLI {
 				break;
 			
 			/*
-			 * Print a detailed information of a single card or the whole cardbase.
+			 * Print detailed information of a single card or the whole cardbase.
 			 */
 			case "peruse":
+				// if a card is specified, peruse only that
 				if (commands.length > 1) {
 					if (selectedSet != null) {
 						Card card = cbm.getCard(selectedSet.code, commands[1]);
 						if (card != null) {
 							printPerusal(card);
 						} else {
-							System.out.println("Card not in cardbase");
+							System.out.println("Card not in cardbase.");
 						}
 					} else {
-						System.out.println("Please select a set before perusing a specific card");
+						System.out.println("Please select a set before perusing a specific card.");
 					}
 				} else {
+					// peruse all cards in cardbase
 					for (Iterator<Card> i = cbm.cardIterator(); i.hasNext();) {
 						printPerusal(i.next());
 					}
@@ -224,39 +272,40 @@ public class CardbaseCLI {
 			 */
 			case "undo":
 				if (lastAction != null) {
-					if (lastAction == LastAction.ADD) {
+					if (lastAction == Action.ADD) {
 						remove(lastAction.card, lastAction.count);
-					} else if (lastAction ==  LastAction.REMOVE) {
+					} else if (lastAction ==  Action.REMOVE) {
 						add(lastAction.card, lastAction.count);
 					}
+					// can only undo once
 					lastAction = null;
 				} else {
-					System.out.println("Nothing to undo");
+					System.out.println("Nothing to undo.");
 				}
 				break;
 				
 			/*
-			 * Remove one or more cards
+			 * Remove one or more of a card.
 			 */
 			case "remove":
 				if (selectedSet != null) {
 					if (commands.length > 1) {
-						Card remove = selectedSet.getCardByNumber(commands[1]);
-						if (remove != null) {
+						Card cardToRemove = selectedSet.getCardByNumber(commands[1]);
+						if (cardToRemove != null) {
 							Integer count = 1;
 							if (commands.length > 2 && commands[2].matches("[0-9]+")) {
 								count = Integer.valueOf(commands[2]);
 								if (count <= 0) {
-									System.out.println("Can't remove " + count + " cards");
+									System.out.println("Can't remove " + count + " cards.");
 									return;
 								}
 							}
-							remove(remove, count);
+							remove(cardToRemove, count);
 						} else {
-							System.out.println(commands[1] + " does not correspond to a card in " + selectedSet.name);
+							System.out.println(commands[1] + " does not correspond to a card in " + selectedSet.name + ".");
 						}
 					} else {
-						System.out.println("Please specify a card number to remove");
+						System.out.println("Please specify a card number to remove.");
 					}
 				} else {
 					System.out.println("Select a set before removing cards.");
@@ -264,27 +313,28 @@ public class CardbaseCLI {
 				break;
 				
 			/*
-			 * Add one or more cards
+			 * Add one or more of a card.
 			 */
 			default:
 				if (selectedSet != null) {
+					// a blank line after adding a card repeats the addition unlimitedly
 					if (commands.length == 1 && commands[0].isEmpty()) {
-						if (lastAction == LastAction.ADD)
+						if (lastAction == Action.ADD)
 							add(lastAction.card, lastAction.count);
 					} else {
-						Card newCard = selectedSet.getCardByNumber(commands[0]);
-						if (newCard != null) {
+						Card cardToAdd = selectedSet.getCardByNumber(commands[0]);
+						if (cardToAdd != null) {
 							Integer count = 1;
 							if (commands.length > 1 && commands[1].matches("[0-9]+")) {
 								count = Integer.valueOf(commands[1]);
 								if (count <= 0) {
-									System.out.println("Can't add " + count + " cards");
+									System.out.println("Can't add " + count + " cards.");
 									return;
 								}
 							}
-							add(newCard, count);
+							add(cardToAdd, count);
 						} else {
-							System.out.println(commands[0] + " does not correspond to a card in " + selectedSet.name);
+							System.out.println(commands[0] + " does not correspond to a card in " + selectedSet.name + ".");
 						}
 					}
 				} else {
@@ -295,31 +345,61 @@ public class CardbaseCLI {
 		}
 	}
 	
+	/**
+	 * Add the specified count of the specified card
+	 * to the cardbase.
+	 * 
+	 * @param card the card to add.
+	 * @param count the number of times to add it.
+	 */
 	private static void add(Card card, Integer count) {
+		// MTG JSON does not contain this information, but it is useful for sorting
 		card.setCode = selectedSet.code;
 		cbm.addCard(card, count);
-		System.out.println("Added " + count + "x " + card.name);
+		System.out.println("Added " + count + "x " + card.name + ".");
 		savePrompt = true;
-		lastAction = LastAction.ADD;
+		lastAction = Action.ADD;
 		lastAction.set(card, count);
 	}
 	
+	/**
+	 * Remove the specified count of the specified card
+	 * from the cardbase.
+	 * 
+	 * @param card the card to remove.
+	 * @param count the number of times to remove it.
+	 */
 	private static void remove(Card card, Integer count) {
 		cbm.removeCard(card, count);
-		System.out.println("Removed " + count + "x " + card.name);
+		System.out.println("Removed " + count + "x " + card.name + ".");
 		savePrompt = true;
-		lastAction = LastAction.REMOVE;
+		lastAction = Action.REMOVE;
 		lastAction.set(card, count);
 	}
 	
+	/**
+	 * Make return a string that is guaranteed to be a legal file name.
+	 * 
+	 * @param name the file name candidate to sanitise.
+	 * @return the sanitised name.
+	 */
 	private static String sanitiseFileName(String name) {
+		// POSIX-compliant valid filename characters
 		name = name.replaceAll("[^-_.A-Za-z0-9]", "");
+		// extension is not indispensable, but good practice
 		if (!name.endsWith(".cb")) {
 			name = name.concat(".cb");
 		}
 		return name;
 	}
 
+	/**
+	 * Prints a perusal of the specified card. A perusal contains more
+	 * information than a glance, but not every single field the card has
+	 * as that would be too verbose while adding little value.
+	 * 
+	 * @param card the card to peruse.
+	 */
 	private static void printPerusal(Card card) {
 		printGlance(card);
 		if (card.type != null) System.out.println("\t" + card.type);
@@ -335,6 +415,12 @@ public class CardbaseCLI {
 		if (card.artist != null) System.out.println("\tIllus. " + card.artist);
 	}
 	
+	/**
+	 * Prints a glance of the specified card. A glance contains simply
+	 * the card count, name, set code and set number. 
+	 * 
+	 * @param card the card to glance.
+	 */
 	private static void printGlance(Card card) {
 		System.out.println(String.format("%1$-4d %2$s (%3$s, %4$s)", card.count, card.name, card.setCode, card.number));
 	}

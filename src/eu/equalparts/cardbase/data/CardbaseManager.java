@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.query.IO;
 
-public class CardBaseManager {
+public class CardbaseManager {
 	
 	private ArrayList<MetaCardSet> metaSets;
 	public Cardbase cardBase;
@@ -20,7 +20,7 @@ public class CardBaseManager {
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	public CardBaseManager(File cardBaseFile) throws JsonParseException, JsonMappingException, IOException {
+	public CardbaseManager(File cardBaseFile) throws JsonParseException, JsonMappingException, IOException {
 		metaSets = IO.getAllMetaSets();
 		cardBase = IO.readCardBase(cardBaseFile);
 	}
@@ -31,7 +31,7 @@ public class CardBaseManager {
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	public CardBaseManager() throws JsonParseException, JsonMappingException, IOException {
+	public CardbaseManager() throws JsonParseException, JsonMappingException, IOException {
 		metaSets = IO.getAllMetaSets();
 		cardBase = new Cardbase();
 	}

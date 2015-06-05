@@ -24,15 +24,21 @@
 	<!-- External libraries classpath, we don't need sources and javadoc -->
 	<path id="classpath">
 		<fileset dir="${basedir}/">
+			<include name="${res.dir}/*" />
+			
 			<include name="${lib.dir}/*.jar" />
 			<exclude name="${lib.dir}/*sources.jar"/>
 			<exclude name="${lib.dir}/*javadoc.jar"/>
 		</fileset>
 	</path>
 	
-	<!-- Compile project including external libraries -->
+	<!-- Compile project including external libraries and copy resource files across as well -->
 	<target name="compile" depends="init" description="compile the source">
 		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${bin.dir}" classpathref="classpath" />
+		
+		<copy todir="${bin.dir}">
+		   <fileset dir="${res.dir}" excludes=""/>
+		</copy>
 	</target>
 	
 	<!-- Create the jar and declare the ext libraries in manifest.mf file -->
@@ -43,7 +49,6 @@
 		<jar jarfile="${dist.dir}/${jar.name}.jar" basedir="${bin.dir}">
 			
 			<zipgroupfileset dir="${lib.dir}" includes="*.jar" excludes="*sources.jar, *javadoc.jar" />
-			<fileset dir="${res.dir}" includes="**" excludes="" />
 			
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}" />
