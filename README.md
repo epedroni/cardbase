@@ -23,8 +23,8 @@ Once a set is selected, simply type the card's set number and it will be added t
 
 For example, to add 3 M15 edition Shivan Dragons, do:
 
-> set m15
-> 281 3
+    > set m15
+    > 281 3
 
 Alternatively, pressing return immediately after adding a card repeats that action. If return was pressed one more time after the example above, three more Shivan Dragons would be added. This can be repeated indefinitely, but only works with card additions.
 
@@ -35,8 +35,8 @@ To remove cards, first choose a set and then type "remove" followed by the card'
 
 For example, to remove 2 of your 3 M15 Shivan Dragons, do:
 
-> set m15
-> remove 281 2
+    > set m15
+    > remove 281 2
 
 Note that it is only necessary to choose the set if it wasn't already selected.
 
