@@ -59,7 +59,6 @@ public class Test {
 		for (CardSet set : sets.values()) {
 			for (Card card : set.cards) {
 				card.setCode = set.code;
-				card.setName = set.name;
 				// System.out.println(set.getName() + ": " + card.getName());
 
 				allCards.add(card);

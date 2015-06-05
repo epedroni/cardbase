@@ -2,6 +2,7 @@ package eu.equalparts.cardbase.query;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -21,21 +22,56 @@ public class IO {
 	public static final String BASE_URL = "http://mtgjson.com/json/";
 	public static final String SETS_URL = BASE_URL + "SetList.json";
 	
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper mapper = createMapper();
 
-	public static CardSet getCardSet(String setId) {
-		return new CardSet();
+	private static ObjectMapper createMapper() {
+		ObjectMapper om = new ObjectMapper();
+		om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		return om;
 	}
 	
-	public static ArrayList<MetaCardSet> getAllMetaSets() throws JsonParseException, JsonMappingException, IOException {
-		//mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);		
+	/**
+	 * @param code
+	 * @return the actual cardset (containing cards).
+	 * @throws IOException 
+	 * @throws MalformedURLException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public static CardSet getCardSet(String code) throws JsonParseException, JsonMappingException, MalformedURLException, IOException {
+		return mapper.readValue(new URL(BASE_URL + code + ".json"), CardSet.class);
+	}
+	
+	/**
+	 * @return a list of metadata for every available set.
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	public static ArrayList<MetaCardSet> getAllMetaSets() throws JsonParseException, JsonMappingException, IOException {	
 		return mapper.readValue(new URL(SETS_URL), new TypeReference<ArrayList<MetaCardSet>>() {});
 	}
 	
+	/**
+	 * @param file
+	 * @return a CardBase object equivalent to the given file.
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	public static CardBase readCardBase(File file) throws JsonParseException, JsonMappingException, IOException {
 		return mapper.readValue(file, CardBase.class);
 	}
 	
+	/**
+	 * Writes the provided CardBase to the provided file in JSON format.
+	 * 
+	 * @param file
+	 * @param cardBase
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	public static void writeCardBase(File file, CardBase cardBase) throws JsonGenerationException, JsonMappingException, IOException {
 		mapper.writeValue(file, cardBase);
 	}

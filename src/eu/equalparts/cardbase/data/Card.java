@@ -28,8 +28,8 @@ public class Card {
 	public String border;
 	public String watermark;
 
-	// Not part of JSON, will be set later
+	// Not part of upstream JSON
 	public String setCode;
-	public String setName;
+	public Integer count;
 
 }
