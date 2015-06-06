@@ -11,35 +11,35 @@ public class FullCardSet extends CardSet {
 	private ArrayList<Card> cards;
 
 	/**
-	 * @return the border
+	 * @return the set's border type.
 	 */
 	public String getBorder() {
 		return border;
 	}
 
 	/**
-	 * @return the type
+	 * @return the type of the set.
 	 */
 	public String getType() {
 		return type;
 	}
 
 	/**
-	 * @return the block
+	 * @return the set's block.
 	 */
 	public String getBlock() {
 		return block;
 	}
 
 	/**
-	 * @return the gathererCode
+	 * @return the set's Gatherer code.
 	 */
 	public String getGathererCode() {
 		return gathererCode;
 	}
 
 	/**
-	 * @return the cards
+	 * @return a full list of the set's cards.
 	 */
 	public ArrayList<Card> getCards() {
 		return cards;
@@ -49,7 +49,7 @@ public class FullCardSet extends CardSet {
 	 * Searches for a card by number (the one shown on the card itself).
 	 * 
 	 * @param number the number of the card to search.
-	 * @return the card, or null if no card is found with that number.
+	 * @return the requested {@code Card}, or null if no card is found with that number.
 	 */
 	public Card getCardByNumber(String number) {
 		for (Card card : cards) {

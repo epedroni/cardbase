@@ -1,122 +1,93 @@
 package eu.equalparts.cardbase.data;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import eu.equalparts.cardbase.io.IO;
+import eu.equalparts.cardbase.utils.IO;
 
+/**
+ * Provides a variety of utility methods to interact with the loaded cardbase.
+ * 
+ * @author Eduardo Pedroni
+ */
 public class CardbaseManager {
 
-	private ArrayList<CardSet> cardSets;
-
 	/**
-	 * A cache of CardSets to avoid querying the server many times for the same information.
-	 */
-	private HashMap<String, FullCardSet> cardSetCache = new HashMap<String, FullCardSet>();
-	/**
-	 * 
+	 * The cardbase being managed.
 	 */
 	private Cardbase cardbase;
 	
+	/**
+	 * Creates an empty cardbase.
+	 * 
+	 */
+	public CardbaseManager() {
+		cardbase = new Cardbase();
+	}
 	
 	/**
-	 * Parse a cardbase file and create an associated Cardbase object.
+	 * Initialises the cardbase with the contents of a file.
 	 *
-	 * @param cardbaseFile
+	 * @param cardbaseFile the cardbase JSON to load.
 	 * 
-	 * @throws JsonParseException if underlying input contains invalid content of type JsonParser supports (JSON for default case).
-	 * @throws JsonMappingException if the input JSON structure does not match structure expected for result type (or has other mismatch issues).
+	 * @throws JsonParseException if the specified file does not contain valid JSON.
+	 * @throws JsonMappingException if the specified file structure does not match that of {@code Cardbase}.
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public CardbaseManager(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
-		cardSets = IO.getCardSetList();
-		cardbase = IO.readCardbase(cardbaseFile);
+		cardbase = IO.jsonMapper.readValue(cardbaseFile, Cardbase.class);
 	}
 
 	/**
-	 * Create an empty Cardbase.
+	 * Writes the provided {@code Cardbase} to the provided file in JSON format.
 	 * 
-	 * @throws JsonParseException if underlying input contains invalid content of type JsonParser supports (JSON for default case).
-	 * @throws JsonMappingException if the input JSON structure does not match structure expected for result type (or has other mismatch issues).
+	 * @param file the file to which to write the {@code Cardbase}.
+	 * @param cardbase the {@code Cardbase} to write out.
+	 * 
+	 * @throws JsonGenerationException if the data structure given does not generate valid JSON.
+	 * @throws JsonMappingException if the data structure given does not generate valid JSON as well?
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public CardbaseManager() throws JsonParseException, JsonMappingException, IOException {
-		cardSets = IO.getCardSetList();
-		cardbase = new Cardbase();
-	}
-
-	public ArrayList<CardSet> getCardSetList() {
-		return cardSets;
-	}
-
 	public void writeCardbase(File outputFile) throws JsonGenerationException, JsonMappingException, IOException {
-		IO.writeCardbase(outputFile, cardbase);
-	}
-	
-	/**
-	 * Returns the specified set in the form of a {@code FullCardSet} object. 
-	 * 
-	 * @param code the code of the set to be returned.
-	 * @return the requested {@code FullCardSet} or null if no set matches the given code.
-	 * 
-	 * @throws JsonParseException if the upstream JSON is not formatted correctly.
-	 * @throws JsonMappingException if the upstream JSON does not map to {@code FullCardSet}.
-	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
-	 */
-	public FullCardSet getFullCardSet(String code) throws JsonParseException, JsonMappingException, IOException {
-		FullCardSet requestedSet = null;
-		for (CardSet cardSet : cardSets) {
-			if (cardSet.getCode().equalsIgnoreCase(code)) {
-				// if the set is cached, no need to fetch
-				if (cardSetCache.containsKey(cardSet.getCode())) {
-					requestedSet = cardSetCache.get(cardSet.getCode());
-				} 
-				// not cached; fetch, cache and return it
-				else {
-					requestedSet = IO.getFullCardSet(cardSet.getCode());
-					cardSetCache.put(cardSet.getCode(), requestedSet);
-				}
-				return requestedSet;
-			}
-		}
-		// not found
-		return null;
+		IO.jsonMapper.writeValue(outputFile, cardbase);
 	}
 
 	/**
-	 * Add a specific amount of a card to the cardbase.
+	 * Adds a specific amount of a card to the cardbase.
 	 * If the card is not already in the cardbase, it is added.
 	 * If it is already present, the count is simply updated.
 	 * 
-	 * 
-	 * @param newCard
-	 * @param count
+	 * @param cardToAdd the card to be added.
+	 * @param count the amount of the card to be added.
 	 */
-	public void addCard(Card newCard, Integer count) {
-		Card card = cardbase.getCardByNumber(newCard.setCode, newCard.number);
+	public void addCard(Card cardToAdd, Integer count) {
+		Card card = cardbase.getCardByNumber(cardToAdd.setCode, cardToAdd.number);
 		if (card != null) {
 			card.count += count;
 		} else {
-			newCard.count = count;
-			cardbase.cards.add(newCard);
+			cardToAdd.count = count;
+			cardbase.cards.add(cardToAdd);
 		}
 	}
 
 	/**
-	 * Remove a specific amount of a card from the cardbase.
+	 * Removes a specific amount of a card from the cardbase.
 	 * If the card is not present in the cardbase, nothing happens.
-	 * If the card is present in the card, the specified amount is removed.
+	 * If the card is present in the cardbase, the specified amount is removed.
 	 * If that amount is equal to or exceeds the count already in the cardbase,
-	 * the card entry is removed altogether. 
+	 * the card entry is removed altogether.
+	 * <br><br>
+	 * In any case, the value returned is the actual number of cards removed.
+	 * For example, if 5 Shivan Dragons are in the cardbase and the method is
+	 * called to remove 10 Shivan Dragons, the {@code Card} representing the
+	 * Shivan Dragon is removed from the cardbase, and the value returned is 5.
 	 * 
-	 * @param cardToRemove
-	 * @param count
+	 * @param cardToRemove the card to be removed.
+	 * @param count the amount of the card to be removed.
 	 * @return the number of cards actually removed.
 	 */
 	public Integer removeCard(Card cardToRemove, Integer count) {
@@ -135,21 +106,21 @@ public class CardbaseManager {
 	}
 
 	/**
-	 * @return an iterator to the cards in the cardbase.
+	 * @return an iterator to the {@code Card}s in the cardbase.
 	 */
 	public Iterator<Card> cardIterator() {
 		return cardbase.cards.iterator();
 	}
 
 	/**
-	 * Return a card from the cardBase by setCode and number.
-	 * If no such card is in the cardbase, return null.
+	 * Returns a card from the cardbase by set code and number.
+	 * If no such card is in the cardbase, returns null.
 	 * 
-	 * @param code
-	 * @param string
-	 * @return
+	 * @param setCode the set to which the requested card belongs.
+	 * @param number the requested card's set number.
+	 * @return the requested {@code Card} or null if no card is found.
 	 */
-	public Card getCard(String code, String number) {
-		return cardbase.getCardByNumber(code, number);
+	public Card getCard(String setCode, String number) {
+		return cardbase.getCardByNumber(setCode, number);
 	}
 }

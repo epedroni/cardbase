@@ -17,6 +17,7 @@ import eu.equalparts.cardbase.data.Card;
 import eu.equalparts.cardbase.data.CardbaseManager;
 import eu.equalparts.cardbase.data.FullCardSet;
 import eu.equalparts.cardbase.data.CardSet;
+import eu.equalparts.cardbase.utils.MTGUniverse;
 
 /**
  * This provides a lightweight CLI for interacting with cardbase files. 
@@ -24,18 +25,16 @@ import eu.equalparts.cardbase.data.CardSet;
  * @author Eduardo Pedroni
  */
 public class CardbaseCLI {
-
+	
 	/**
 	 * Enum type to store actions.
 	 * 
 	 * @author Eduardo Pedroni
 	 */
 	private enum Action {
-
 		ADD, REMOVE;
 		public Card card;
 		public Integer count;
-
 		/**
 		 * Sets both fields at once.
 		 * 
@@ -49,6 +48,10 @@ public class CardbaseCLI {
 	}
 
 	/**
+	 * Location of the help file.
+	 */
+	private static final String HELP_FILE_PATH = "/help";
+	/**
 	 * The last action performed by the user.
 	 */
 	private Action lastAction = null;
@@ -61,13 +64,18 @@ public class CardbaseCLI {
 	 */
 	private CardbaseManager cardbaseManager;
 	/**
-	 * Printed to the console when the user enter the help command.
+	 * Printed to the console when the user enters the help command.
 	 */
 	private String help = "Not available, check project page on GitHub.";
 	/**
 	 * The cardbase file off which we are currently working, if any.
 	 */
 	private File cardbaseFile = null;
+	/**
+	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
+	 * information to be printed to the console.
+	 */
+	private boolean debug = false;
 	/**
 	 * Save flag is raised when cards are added or removed and causes a prompt to be shown
 	 * if the user tries to exit with unsaved changed.
@@ -84,19 +92,7 @@ public class CardbaseCLI {
 	 * @param args the first argument is the cardbase file. Further arguments are ignored.
 	 */
 	public static void main(String... args) {
-		try {
-			new CardbaseCLI(args).startInterface();
-		} catch (JsonParseException e) {
-			System.out.println("Error: poorly formatted cardbase, check the syntax and try again.");
-			// although the problem could also be with the upstream CardSetList json.
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			System.out.println("Error: unexpected fields found in cardbase, it may be from an old version?");
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("Error: something went wrong reading a file, abort...");
-			e.printStackTrace();
-		}
+		new CardbaseCLI(args).startInterface();
 	}
 
 	/**
@@ -105,19 +101,37 @@ public class CardbaseCLI {
 	 * on the constructed object.
 	 * 
 	 * @param args a list of arguments. Only the first argument is used, as a cardbase JSON.
-	 * @throws JsonParseException the file specified does not comply to JSON standards.
-	 * @throws JsonMappingException the file specified cannot be mapped to a {@code Cardbase} object.
-	 * @throws IOException something went wrong with the low-level I/O. 
 	 */
-	private CardbaseCLI(String... args) throws JsonParseException, JsonMappingException, IOException {
+	private CardbaseCLI(String... args) {
 		System.out.println("Welcome to Cardbase CLI!");
+
+		// set debug flag if we are debugging
+		if (System.getenv("CB_DEBUG") != null) {
+			System.out.println("Debug mode is on.");
+			debug = true;
+		}
 
 		// make the CardbaseManager
 		if (args.length > 0) {
 			File cardbaseFile = new File(args[0]);
 			if (cardbaseFile.exists() && cardbaseFile.isFile() && cardbaseFile.canRead()) {
 				System.out.println("Loading cardbase from \"" + args[0] + "\".");
-				cardbaseManager = new CardbaseManager(cardbaseFile);
+				try {
+					cardbaseManager = new CardbaseManager(cardbaseFile);
+				} catch (JsonParseException e) {
+					System.out.println("Error: poorly formatted cardbase, check the syntax and try again.");
+					// although the problem could also be with the upstream CardSetList json.
+					if (debug) e.printStackTrace();
+					System.exit(1);
+				} catch (JsonMappingException e) {
+					System.out.println("Error: unexpected fields found in cardbase, it may be from an old version?");
+					if (debug) e.printStackTrace();
+					System.exit(1);
+				} catch (IOException e) {
+					System.out.println("Error: something went wrong reading cardbase file, abort...");
+					if (debug) e.printStackTrace();
+					System.exit(1);
+				}
 			} else {
 				System.out.println(args[0] + " appears to be invalid.");
 				System.exit(0);
@@ -128,7 +142,7 @@ public class CardbaseCLI {
 		}
 
 		// load help information
-		InputStream is = CardbaseCLI.class.getResourceAsStream("/help");
+		InputStream is = CardbaseCLI.class.getResourceAsStream(HELP_FILE_PATH);
 		if (is != null) {
 			help = new Scanner(is).useDelimiter("\\Z").next();
 		} else {
@@ -178,7 +192,7 @@ public class CardbaseCLI {
 			}
 		} catch (IOException e) {
 			System.out.println("Error: something went wrong with stdin, exiting...");
-			e.printStackTrace();
+			if (debug) e.printStackTrace();
 		}
 	}
 
@@ -217,10 +231,10 @@ public class CardbaseCLI {
 					savePrompt = false;
 				} catch (JsonGenerationException | JsonMappingException e) {
 					System.out.println("Error: something terrible happened to the internal cardbase data structure. Oops.");
-					e.printStackTrace();
+					if (debug) e.printStackTrace();
 				} catch (IOException e) {
 					System.out.println("Error: lost contact with the output file, try again?");
-					e.printStackTrace();
+					if (debug) e.printStackTrace();
 				}
 			}
 		} else {
@@ -244,8 +258,8 @@ public class CardbaseCLI {
 	 * Print a list of valid set codes.
 	 */
 	public void sets() {
-		for (CardSet set : cardbaseManager.getCardSetList()) {
-			// CardSet has an overridden toString().
+		for (CardSet set : MTGUniverse.getCardSetList()) {
+			// CardSet has an overridden toString()
 			System.out.println(set);
 		}
 	}
@@ -258,7 +272,7 @@ public class CardbaseCLI {
 	public void set(String[] args) {
 		if (args.length > 0) {
 			try {
-				selectedSet = cardbaseManager.getFullCardSet(args[0]);
+				selectedSet = MTGUniverse.getFullCardSet(args[0]);
 				// if the set code is invalid, null is returned
 				if (selectedSet != null) {
 					System.out.println("Selected set: " + selectedSet.getName() + ".");
@@ -269,16 +283,13 @@ public class CardbaseCLI {
 				}
 			} catch (JsonParseException e) {
 				System.out.println("Error: JSON fetched from upstream was not formatted properly.");
-				e.printStackTrace();
-				return;
+				if (debug) e.printStackTrace();
 			} catch (JsonMappingException e) {
 				System.out.println("Error: JSON fetched from upstream does not match the data structure used internally.");
-				e.printStackTrace();
-				return;
+				if (debug) e.printStackTrace();
 			} catch (IOException e) {
 				System.out.println("Error: JSON could not be fetched from upstream.");
-				e.printStackTrace();
-				return;
+				if (debug) e.printStackTrace();
 			}
 		} else {
 			System.out.println("Please enter a set code (use \"sets\" to see all valid set codes).");
@@ -442,7 +453,7 @@ public class CardbaseCLI {
 		} else {
 			System.out.println(card.name + " is not in the cardbase.");
 		}
-		
+
 	}
 
 	/**

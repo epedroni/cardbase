@@ -8,9 +8,9 @@ public class Cardbase {
 	public ArrayList<Deck> decks = new ArrayList<>();
 	
 	/**
-	 * @param setCode
-	 * @param number 
-	 * @return the card if found, else null.
+	 * @param setCode the set to which the requested card belongs.
+	 * @param number the requested card's set number.
+	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	public Card getCardByNumber(String setCode, String number) {
 		for (Card card : cards) {
