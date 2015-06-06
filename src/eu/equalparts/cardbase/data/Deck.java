@@ -9,7 +9,4 @@ public class Deck {
 	 */
 	public HashMap<Integer, Integer> cards;
 	
-	public Deck() {
-		
-	}
 }

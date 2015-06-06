@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase.query;
+package eu.equalparts.cardbase.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.equalparts.cardbase.data.Card;
 import eu.equalparts.cardbase.data.FullCardSet;
 import eu.equalparts.cardbase.data.Cardbase;
 import eu.equalparts.cardbase.data.CardSet;
@@ -67,8 +68,13 @@ public class IO {
 	 * @throws JsonMappingException if the input JSON structure does not match structure expected for result type (or has other mismatch issues).
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public static FullCardSet getCardSet(String setCode) throws JsonParseException, JsonMappingException, IOException {
-		return mapper.readValue(new URL(BASE_URL + setCode + ".json"), FullCardSet.class);
+	public static FullCardSet getFullCardSet(String setCode) throws JsonParseException, JsonMappingException, IOException {
+		FullCardSet fullCardSet = mapper.readValue(new URL(BASE_URL + setCode + ".json"), FullCardSet.class);
+		// MTG JSON does not include set code in the card information, but it is useful for sorting
+		for (Card card : fullCardSet.getCards()) {
+			card.setCode = setCode;
+		}
+		return fullCardSet;
 	}
 	
 	/**
