@@ -11,33 +11,37 @@ import eu.equalparts.cardbase.query.IO;
 
 public class CardbaseManager {
 	
-	private ArrayList<MetaCardSet> metaSets;
-	public Cardbase cardBase;
+	private ArrayList<CardSet> cardSets;
+	public Cardbase cardbase;
 
 	/**
-	 * Parse a cardbase file and create an associated CardBase object.
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * Parse a cardbase file and create an associated Cardbase object.
+	 *
+	 * @param cardbaseFile
+	 * 
+	 * @throws JsonParseException if underlying input contains invalid content of type JsonParser supports (JSON for default case).
+	 * @throws JsonMappingException if the input JSON structure does not match structure expected for result type (or has other mismatch issues).
+	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public CardbaseManager(File cardBaseFile) throws JsonParseException, JsonMappingException, IOException {
-		metaSets = IO.getAllMetaSets();
-		cardBase = IO.readCardBase(cardBaseFile);
+	public CardbaseManager(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
+		cardSets = IO.getCardSetList();
+		cardbase = IO.readCardbase(cardbaseFile);
 	}
 
 	/**
-	 * Create an empty CardBase.
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * Create an empty Cardbase.
+	 * 
+	 * @throws JsonParseException if underlying input contains invalid content of type JsonParser supports (JSON for default case).
+	 * @throws JsonMappingException if the input JSON structure does not match structure expected for result type (or has other mismatch issues).
+	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public CardbaseManager() throws JsonParseException, JsonMappingException, IOException {
-		metaSets = IO.getAllMetaSets();
-		cardBase = new Cardbase();
+		cardSets = IO.getCardSetList();
+		cardbase = new Cardbase();
 	}
 	
-	public ArrayList<MetaCardSet> getAllMetaSets() {
-		return metaSets;
+	public ArrayList<CardSet> getCardSetList() {
+		return cardSets;
 	}
 	
 	/**
@@ -50,12 +54,12 @@ public class CardbaseManager {
 	 * @param count
 	 */
 	public void addCard(Card newCard, Integer count) {
-		Card card = cardBase.getCardByNumber(newCard.setCode, newCard.number);
+		Card card = cardbase.getCardByNumber(newCard.setCode, newCard.number);
 		if (card != null) {
 			card.count += count;
 		} else {
 			newCard.count = count;
-			cardBase.cards.add(newCard);
+			cardbase.cards.add(newCard);
 		}
 	}
 
@@ -70,10 +74,10 @@ public class CardbaseManager {
 	 * @param count
 	 */
 	public void removeCard(Card remove, Integer count) {
-		Card card = cardBase.getCardByNumber(remove.setCode, remove.number);
+		Card card = cardbase.getCardByNumber(remove.setCode, remove.number);
 		if (card != null) {
 			if (card.count <= count) {
-				cardBase.cards.remove(card);
+				cardbase.cards.remove(card);
 			} else {
 				card.count -= count;
 			}
@@ -84,7 +88,7 @@ public class CardbaseManager {
 	 * @return an iterator to the cards in the cardbase.
 	 */
 	public Iterator<Card> cardIterator() {
-		return cardBase.cards.iterator();
+		return cardbase.cards.iterator();
 	}
 
 	/**
@@ -96,6 +100,6 @@ public class CardbaseManager {
 	 * @return
 	 */
 	public Card getCard(String code, String number) {
-		return cardBase.getCardByNumber(code, number);
+		return cardbase.getCardByNumber(code, number);
 	}
 }

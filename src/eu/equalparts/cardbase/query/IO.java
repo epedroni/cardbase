@@ -2,7 +2,6 @@ package eu.equalparts.cardbase.query;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -13,67 +12,102 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.data.CardSet;
+import eu.equalparts.cardbase.data.FullCardSet;
 import eu.equalparts.cardbase.data.Cardbase;
-import eu.equalparts.cardbase.data.MetaCardSet;
+import eu.equalparts.cardbase.data.CardSet;
 
+/**
+ * Class responsible for all I/O operations, such as fetching content from remote servers, reading from
+ * and writing to files.
+ * <br>
+ * All relevant methods here are static, this class should not be instantiated.
+ * 
+ * @author Eduardo Pedroni
+ */
 public class IO {
 	
-	public static final String BASE_URL = "http://mtgjson.com/json/";
-	public static final String SETS_URL = BASE_URL + "SetList.json";
-	
+	/**
+	 * The base URL from where the information is fetched.
+	 */
+	private static final String BASE_URL = "http://mtgjson.com/json/";
+	/**
+	 * The URL where the complete list of sets is fetched.
+	 */
+	private static final String SETS_URL = BASE_URL + "SetList.json";
+	/**
+	 * The Jackson ObjectMapper which parses fetched JSON files.
+	 */
 	private static final ObjectMapper mapper = createMapper();
 
+	/**
+	 * Private constructor, this class is not to be instantiated.
+	 */
+	private IO() {}
+	
+	/**
+	 * Instantiate and configure Jackson mapper statically. 
+	 * 
+	 * @return the {@code ObjectMapper}, ready to use.
+	 */
 	private static ObjectMapper createMapper() {
-		ObjectMapper om = new ObjectMapper();
-		om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		return om;
+		ObjectMapper objectMapper = new ObjectMapper();
+		// TODO decide what to do about this
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		return objectMapper;
+	}
+
+	/**
+	 * Fetches a complete set by code, where the code is a short string determined by WotC.
+	 * The full list of valid codes can be acquired with {@code IO.getCardSetList()}.
+	 * 
+	 * @param setCode the code of the set to be fetched.
+	 * @return the complete specified set in a {@code FullCardSet} object.
+	 * 
+	 * @throws JsonParseException if underlying input contains invalid content of type JsonParser supports (JSON for default case).
+	 * @throws JsonMappingException if the input JSON structure does not match structure expected for result type (or has other mismatch issues).
+	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
+	 */
+	public static FullCardSet getCardSet(String setCode) throws JsonParseException, JsonMappingException, IOException {
+		return mapper.readValue(new URL(BASE_URL + setCode + ".json"), FullCardSet.class);
 	}
 	
 	/**
-	 * @param code
-	 * @return the actual cardset (containing cards).
-	 * @throws IOException 
-	 * @throws MalformedURLException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @return a list of all card sets in the form of {@code CardSet} objects.
+	 * 
+	 * @throws JsonParseException if underlying input contains invalid content of type JsonParser supports (JSON for default case).
+	 * @throws JsonMappingException if the input JSON structure does not match structure expected for result type (or has other mismatch issues).
+	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public static CardSet getCardSet(String code) throws JsonParseException, JsonMappingException, MalformedURLException, IOException {
-		return mapper.readValue(new URL(BASE_URL + code + ".json"), CardSet.class);
+	public static ArrayList<CardSet> getCardSetList() throws JsonParseException, JsonMappingException, IOException {
+		return mapper.readValue(new URL(SETS_URL), new TypeReference<ArrayList<CardSet>>() {});
 	}
 	
 	/**
-	 * @return a list of metadata for every available set.
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
+	 * Attemps to the read the specified file into a {@code Cardbase.} Exceptions are thrown as outlined below.
+	 * 
+	 * @param file the file to read.
+	 * @return a {@code Cardbase} object equivalent to the given file.
+	 * 
+	 * @throws JsonParseException if underlying input contains invalid content of type JsonParser supports (JSON for default case).
+	 * @throws JsonMappingException if the input JSON structure does not match structure expected for result type (or has other mismatch issues).
+	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public static ArrayList<MetaCardSet> getAllMetaSets() throws JsonParseException, JsonMappingException, IOException {	
-		return mapper.readValue(new URL(SETS_URL), new TypeReference<ArrayList<MetaCardSet>>() {});
-	}
-	
-	/**
-	 * @param file
-	 * @return a CardBase object equivalent to the given file.
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 */
-	public static Cardbase readCardBase(File file) throws JsonParseException, JsonMappingException, IOException {
+	public static Cardbase readCardbase(File file) throws JsonParseException, JsonMappingException, IOException {
 		return mapper.readValue(file, Cardbase.class);
 	}
 	
 	/**
-	 * Writes the provided CardBase to the provided file in JSON format.
+	 * Writes the provided {@code Cardbase} to the provided file in JSON format.
 	 * 
-	 * @param file
-	 * @param cardBase
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws IOException
+	 * @param file the file to which to write the {@code Cardbase}.
+	 * @param cardbase the {@code Cardbase} to write out.
+	 * 
+	 * @throws JsonGenerationException if the data structure given does not generate valid JSON.
+	 * @throws JsonMappingException if the data structure given does not generate valid JSON as well?
+	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public static void writeCardBase(File file, Cardbase cardBase) throws JsonGenerationException, JsonMappingException, IOException {
-		mapper.writeValue(file, cardBase);
+	public static void writeCardbase(File file, Cardbase cardbase) throws JsonGenerationException, JsonMappingException, IOException {
+		mapper.writeValue(file, cardbase);
 	}
 	
 }
