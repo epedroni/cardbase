@@ -1,32 +1,42 @@
-package eu.equalparts.cardbase.data;
+package eu.equalparts.cardbase;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import eu.equalparts.cardbase.utils.IO;
+import eu.equalparts.cardbase.comparators.CardComparator;
+import eu.equalparts.cardbase.data.Card;
+import eu.equalparts.cardbase.utils.JSON;
 
 /**
  * Provides a variety of utility methods to interact with the loaded cardbase.
  * 
  * @author Eduardo Pedroni
  */
-public class CardbaseManager {
-
+public class Cardbase {
+	
 	/**
-	 * The cardbase being managed.
+	 * The cards in the cardbase.
 	 */
-	private Cardbase cardbase;
+	private List<Card> cards;
+	/**
+	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
+	 * information to be printed to the console.
+	 */
+	public static final boolean DEBUG = System.getenv("CB_DEBUG") != null; 
 	
 	/**
 	 * Creates an empty cardbase.
-	 * 
 	 */
-	public CardbaseManager() {
-		cardbase = new Cardbase();
+	public Cardbase() {
+		cards = new ArrayList<Card>();
 	}
 	
 	/**
@@ -38,8 +48,8 @@ public class CardbaseManager {
 	 * @throws JsonMappingException if the specified file structure does not match that of {@code Cardbase}.
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public CardbaseManager(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
-		cardbase = IO.jsonMapper.readValue(cardbaseFile, Cardbase.class);
+	public Cardbase(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
+		cards = JSON.mapper.readValue(cardbaseFile, new TypeReference<ArrayList<Card>>() {});
 	}
 
 	/**
@@ -53,7 +63,7 @@ public class CardbaseManager {
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public void writeCardbase(File outputFile) throws JsonGenerationException, JsonMappingException, IOException {
-		IO.jsonMapper.writeValue(outputFile, cardbase);
+		JSON.mapper.writeValue(outputFile, cards);
 	}
 
 	/**
@@ -65,12 +75,12 @@ public class CardbaseManager {
 	 * @param count the amount of the card to be added.
 	 */
 	public void addCard(Card cardToAdd, Integer count) {
-		Card card = cardbase.getCardByNumber(cardToAdd.setCode, cardToAdd.number);
+		Card card = getCard(cardToAdd.setCode, cardToAdd.number);
 		if (card != null) {
 			card.count += count;
 		} else {
 			cardToAdd.count = count;
-			cardbase.cards.add(cardToAdd);
+			cards.add(cardToAdd);
 		}
 	}
 
@@ -91,11 +101,11 @@ public class CardbaseManager {
 	 * @return the number of cards actually removed.
 	 */
 	public Integer removeCard(Card cardToRemove, Integer count) {
-		Card card = cardbase.getCardByNumber(cardToRemove.setCode, cardToRemove.number);
+		Card card = getCard(cardToRemove.setCode, cardToRemove.number);
 		Integer removed = 0;
 		if (card != null) {
 			if (card.count <= count) {
-				cardbase.cards.remove(card);
+				cards.remove(card);
 				removed = card.count;
 			} else {
 				card.count -= count;
@@ -106,10 +116,33 @@ public class CardbaseManager {
 	}
 
 	/**
-	 * @return an iterator to the {@code Card}s in the cardbase.
+	 * This method is intended to allow iteration directly on the list of cards,
+	 * while at the same time retaining control over the insert and remove procedures.
+	 * The returned {@code List} is a read-only; trying to modify its structure will
+	 * result in a {@code UnsupportedOperationException}.
+	 * 
+	 * @return an unmodifiable list of all the cards in the cardbase.
 	 */
-	public Iterator<Card> cardIterator() {
-		return cardbase.cards.iterator();
+	public List<Card> getCards() {
+		return Collections.unmodifiableList(cards);
+	}
+	
+	/**
+	 * Sorts the cardbase by the specified field. The field must be specified exactly
+	 * as it is defined in {@code Card}, case-sensitive. It must also be comparable to
+	 * itself, as {@code String} and {@code Integer} are.
+	 * 
+	 * @param fieldName the declared name of the field to be used for sorting.
+	 * @return true if the sort was successful, false if no such field was found.
+	 */
+	public boolean sortBy(String fieldName) {
+		for (Field field : Card.class.getDeclaredFields()) {
+			if (field.getName().equals(fieldName)) {
+				cards.sort(new CardComparator(field));
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -121,6 +154,11 @@ public class CardbaseManager {
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	public Card getCard(String setCode, String number) {
-		return cardbase.getCardByNumber(setCode, number);
+		for (Card card : cards) {
+			if (card.setCode.equals(setCode) && card.number.equals(number))
+				return card;
+		}
+		
+		return null;
 	}
 }

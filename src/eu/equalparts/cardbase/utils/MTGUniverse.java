@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.data.Card;
-import eu.equalparts.cardbase.data.CardSet;
+import eu.equalparts.cardbase.data.CardSetInformation;
 import eu.equalparts.cardbase.data.FullCardSet;
 
 /**
@@ -37,7 +37,7 @@ public final class MTGUniverse {
 	/**
 	 * A cache of CardSets to avoid querying the server many times for the same information.
 	 */
-	private static ArrayList<CardSet> cardSets;
+	private static ArrayList<CardSetInformation> cardSets;
 
 	/**
 	 * A cache of {@code FullCardSets} to avoid querying the server many times for the same information.
@@ -76,6 +76,9 @@ public final class MTGUniverse {
 	/**
 	 * Returns the specified set in the form of a {@code FullCardSet} object. If the specified
 	 * set code does not correspond to a set, this returns null.
+	 * <br>
+	 * This method takes care of case differences in set code names.
+	 * 
 	 * 
 	 * @param setCode the code of the set to be returned.
 	 * @return the requested {@code FullCardSet} or null if no set matches the given code.
@@ -94,7 +97,7 @@ public final class MTGUniverse {
 			} 
 			// not cached; fetch, cache and return it
 			else {
-				requestedSet = IO.jsonMapper.readValue(new URL(BASE_URL + validCode + ".json"), FullCardSet.class);
+				requestedSet = JSON.mapper.readValue(new URL(BASE_URL + validCode + ".json"), FullCardSet.class);
 				// MTG JSON does not include set code in the card information, but it is useful for sorting
 				for (Card card : requestedSet.getCards()) {
 					card.setCode = validCode;
@@ -108,17 +111,17 @@ public final class MTGUniverse {
 	/**
 	 * @return a list of all card sets in the form of {@code CardSet} objects.
 	 */
-	public static ArrayList<CardSet> getCardSetList() {
+	public static ArrayList<CardSetInformation> getCardSetList() {
 		// if the list isn't cached, fetch and cache it
 		if (cardSets == null) {
 			try {
-				cardSets = IO.jsonMapper.readValue(new URL(BASE_URL + "SetList.json"), new TypeReference<ArrayList<CardSet>>() {});
+				cardSets = JSON.mapper.readValue(new URL(BASE_URL + "SetList.json"), new TypeReference<ArrayList<CardSetInformation>>() {});
 			} catch (Exception e) {
 				System.out.println("Error: could not fetch/parse set code list from upstream, loading fallback json...");
 				e.printStackTrace();
 				
 				try {
-					cardSets = IO.jsonMapper.readValue(MTGUniverse.class.getResourceAsStream(FALLBACK_LIST_PATH), new TypeReference<ArrayList<CardSet>>() {});
+					cardSets = JSON.mapper.readValue(MTGUniverse.class.getResourceAsStream(FALLBACK_LIST_PATH), new TypeReference<ArrayList<CardSetInformation>>() {});
 				} catch (Exception f) {
 					System.out.println("Error: could not parse fallback set code list, aborting...");
 					f.printStackTrace();
@@ -142,7 +145,7 @@ public final class MTGUniverse {
 	 * @return the valid form of the set code if any, null otherwise.
 	 */
 	public static String validateSetCode(String setCode) {
-		for (CardSet cardSet : getCardSetList()) {
+		for (CardSetInformation cardSet : getCardSetList()) {
 			if (cardSet.getCode().equalsIgnoreCase(setCode)) {
 				return cardSet.getCode();
 			}

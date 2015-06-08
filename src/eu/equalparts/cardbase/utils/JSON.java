@@ -9,17 +9,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Eduardo Pedroni
  */
-public final class IO {
+public final class JSON {
 	
 	/**
 	 * The Jackson {@code ObjectMapper} which parses fetched JSON files.
 	 */
-	public static final ObjectMapper jsonMapper = createMapper();
+	public static final ObjectMapper mapper = createMapper();
 
 	/**
 	 * Private constructor, this class is not to be instantiated.
 	 */
-	private IO() {}
+	private JSON() {}
 	
 	/**
 	 * Instantiate and configure Jackson mapper statically. 

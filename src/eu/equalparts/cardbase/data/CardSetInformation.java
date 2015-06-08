@@ -1,6 +1,6 @@
 package eu.equalparts.cardbase.data;
 
-public class CardSet {
+public class CardSetInformation {
 
 	private String name;
 	private String code;

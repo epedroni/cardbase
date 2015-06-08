@@ -1,15 +1,39 @@
 package eu.equalparts.cardbase.data;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class FullCardSet extends CardSet {
+public class FullCardSet {
 	
+	private String name;
+	private String code;
+	private String releaseDate;
 	private String border;
 	private String type;
 	private String block;
 	private String gathererCode;
-	private ArrayList<Card> cards;
+	private List<Card> cards;
 
+	/**
+	 * @return the set's name.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return the set code.
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @return the set's release date.
+	 */
+	public String getReleaseDate() {
+		return releaseDate;
+	}
+	
 	/**
 	 * @return the set's border type.
 	 */
@@ -41,7 +65,7 @@ public class FullCardSet extends CardSet {
 	/**
 	 * @return a full list of the set's cards.
 	 */
-	public ArrayList<Card> getCards() {
+	public List<Card> getCards() {
 		return cards;
 	}
 

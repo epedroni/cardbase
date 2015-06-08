@@ -6,17 +6,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.data.Card;
-import eu.equalparts.cardbase.data.CardbaseManager;
 import eu.equalparts.cardbase.data.FullCardSet;
-import eu.equalparts.cardbase.data.CardSet;
+import eu.equalparts.cardbase.data.CardSetInformation;
 import eu.equalparts.cardbase.utils.MTGUniverse;
 
 /**
@@ -60,9 +59,9 @@ public class CardbaseCLI {
 	 */
 	private FullCardSet selectedSet = null;
 	/**
-	 * The manager object which allows interaction with cardbase data structure.
+	 * The actual cardbase being interfaced with.
 	 */
-	private CardbaseManager cardbaseManager;
+	private Cardbase cardbase;
 	/**
 	 * Printed to the console when the user enters the help command.
 	 */
@@ -71,11 +70,6 @@ public class CardbaseCLI {
 	 * The cardbase file off which we are currently working, if any.
 	 */
 	private File cardbaseFile = null;
-	/**
-	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
-	 * information to be printed to the console.
-	 */
-	private boolean debug = false;
 	/**
 	 * Save flag is raised when cards are added or removed and causes a prompt to be shown
 	 * if the user tries to exit with unsaved changed.
@@ -106,10 +100,7 @@ public class CardbaseCLI {
 		System.out.println("Welcome to Cardbase CLI!");
 
 		// set debug flag if we are debugging
-		if (System.getenv("CB_DEBUG") != null) {
-			System.out.println("Debug mode is on.");
-			debug = true;
-		}
+		if (Cardbase.DEBUG) System.out.println("Debug mode is on.");
 
 		// make the CardbaseManager
 		if (args.length > 0) {
@@ -117,19 +108,19 @@ public class CardbaseCLI {
 			if (cardbaseFile.exists() && cardbaseFile.isFile() && cardbaseFile.canRead()) {
 				System.out.println("Loading cardbase from \"" + args[0] + "\".");
 				try {
-					cardbaseManager = new CardbaseManager(cardbaseFile);
+					cardbase = new Cardbase(cardbaseFile);
 				} catch (JsonParseException e) {
 					System.out.println("Error: poorly formatted cardbase, check the syntax and try again.");
 					// although the problem could also be with the upstream CardSetList json.
-					if (debug) e.printStackTrace();
+					if (Cardbase.DEBUG) e.printStackTrace();
 					System.exit(1);
 				} catch (JsonMappingException e) {
 					System.out.println("Error: unexpected fields found in cardbase, it may be from an old version?");
-					if (debug) e.printStackTrace();
+					if (Cardbase.DEBUG) e.printStackTrace();
 					System.exit(1);
 				} catch (IOException e) {
 					System.out.println("Error: something went wrong reading cardbase file, abort...");
-					if (debug) e.printStackTrace();
+					if (Cardbase.DEBUG) e.printStackTrace();
 					System.exit(1);
 				}
 			} else {
@@ -138,7 +129,7 @@ public class CardbaseCLI {
 			}
 		} else {
 			System.out.println("No cardbase file was provided, creating a clean cardbase.");
-			cardbaseManager = new CardbaseManager();
+			cardbase = new Cardbase();
 		}
 
 		// load help information
@@ -162,7 +153,7 @@ public class CardbaseCLI {
 				// print prompt
 				System.out.print(selectedSet == null ? "> " : selectedSet.getCode() + " > ");
 				// condition input and interpret
-				String[] raw = consoleReader.readLine().trim().toLowerCase().split("[ \t]+");
+				String[] raw = consoleReader.readLine().trim().split("[ \t]+");
 				String command = raw[0];
 				String[] args = Arrays.copyOfRange(raw, 1, raw.length);
 
@@ -186,13 +177,15 @@ public class CardbaseCLI {
 				} else if (command.equalsIgnoreCase("remove") 
 						|| command.equalsIgnoreCase("rm")) {
 					remove(args);
+				} else if (command.equalsIgnoreCase("sort")) {
+					sort(args);
 				} else {
 					add(command, args);
 				}
 			}
 		} catch (IOException e) {
 			System.out.println("Error: something went wrong with stdin, exiting...");
-			if (debug) e.printStackTrace();
+			if (Cardbase.DEBUG) e.printStackTrace();
 		}
 	}
 
@@ -223,7 +216,7 @@ public class CardbaseCLI {
 			} else {
 				// handle these exceptions locally - they don't necessarily mean the program should exit
 				try {
-					cardbaseManager.writeCardbase(outputFile);
+					cardbase.writeCardbase(outputFile);
 					// we are now working off outputFile, which may or may not be the same as cardbaseFile at this point
 					cardbaseFile = outputFile;
 					System.out.println("Cardbase was saved to \"" + outputFile.getAbsolutePath() + "\". "
@@ -231,10 +224,10 @@ public class CardbaseCLI {
 					savePrompt = false;
 				} catch (JsonGenerationException | JsonMappingException e) {
 					System.out.println("Error: something terrible happened to the internal cardbase data structure. Oops.");
-					if (debug) e.printStackTrace();
+					if (Cardbase.DEBUG) e.printStackTrace();
 				} catch (IOException e) {
 					System.out.println("Error: lost contact with the output file, try again?");
-					if (debug) e.printStackTrace();
+					if (Cardbase.DEBUG) e.printStackTrace();
 				}
 			}
 		} else {
@@ -258,7 +251,7 @@ public class CardbaseCLI {
 	 * Print a list of valid set codes.
 	 */
 	public void sets() {
-		for (CardSet set : MTGUniverse.getCardSetList()) {
+		for (CardSetInformation set : MTGUniverse.getCardSetList()) {
 			// CardSet has an overridden toString()
 			System.out.println(set);
 		}
@@ -283,13 +276,13 @@ public class CardbaseCLI {
 				}
 			} catch (JsonParseException e) {
 				System.out.println("Error: JSON fetched from upstream was not formatted properly.");
-				if (debug) e.printStackTrace();
+				if (Cardbase.DEBUG) e.printStackTrace();
 			} catch (JsonMappingException e) {
 				System.out.println("Error: JSON fetched from upstream does not match the data structure used internally.");
-				if (debug) e.printStackTrace();
+				if (Cardbase.DEBUG) e.printStackTrace();
 			} catch (IOException e) {
 				System.out.println("Error: JSON could not be fetched from upstream.");
-				if (debug) e.printStackTrace();
+				if (Cardbase.DEBUG) e.printStackTrace();
 			}
 		} else {
 			System.out.println("Please enter a set code (use \"sets\" to see all valid set codes).");
@@ -300,12 +293,10 @@ public class CardbaseCLI {
 	 * Print a brief list of the whole cardbase.
 	 */
 	public void glance() {
-		Card current;
 		int total = 0;
-		for (Iterator<Card> i = cardbaseManager.cardIterator(); i.hasNext();) {
-			current = i.next();
-			printGlance(current);
-			total += current.count;
+		for (Card card : cardbase.getCards()) {
+			printGlance(card);
+			total += card.count;
 		}
 		System.out.println("Total: " + total);
 	}
@@ -319,7 +310,7 @@ public class CardbaseCLI {
 		// if a card is specified, peruse only that
 		if (args.length > 0) {
 			if (selectedSet != null) {
-				Card card = cardbaseManager.getCard(selectedSet.getCode(), args[0]);
+				Card card = cardbase.getCard(selectedSet.getCode(), args[0]);
 				if (card != null) {
 					printPerusal(card);
 				} else {
@@ -330,12 +321,10 @@ public class CardbaseCLI {
 			}
 		} else {
 			// peruse all cards in cardbase
-			Card current;
 			int total = 0;
-			for (Iterator<Card> i = cardbaseManager.cardIterator(); i.hasNext();) {
-				current = i.next();
-				printPerusal(current);
-				total += current.count;
+			for (Card card : cardbase.getCards()) {
+				printPerusal(card);
+				total += card.count;
 			}
 			System.out.println("Total: " + total);
 		}
@@ -420,6 +409,24 @@ public class CardbaseCLI {
 			System.out.println("Select a set before adding cards.");
 		}
 	}
+	
+	/**
+	 * Sort the cardbase by a specified parameter.
+	 * 
+	 * @param args the ordering to sort by.
+	 */
+	public void sort(String[] args) {
+		if (args.length > 0) {
+			String fieldName = args[0];
+			if (cardbase.sortBy(fieldName)) {
+				System.out.println("Cardbase sorted by " + fieldName);
+			} else {
+				System.out.println("Unknown field: " + fieldName);
+			}
+		} else {
+			System.out.println("Please enter the field to use for sorting.");
+		}
+	}
 
 	/**
 	 * Add the specified count of the specified card
@@ -429,7 +436,7 @@ public class CardbaseCLI {
 	 * @param count the number of times to add it.
 	 */
 	private void addCard(Card card, Integer count) {
-		cardbaseManager.addCard(card, count);
+		cardbase.addCard(card, count);
 		System.out.println("Added " + count + "x " + card.name + ".");
 		savePrompt = true;
 		lastAction = Action.ADD;
@@ -444,7 +451,7 @@ public class CardbaseCLI {
 	 * @param count the number of times to remove it.
 	 */
 	private void removeCard(Card card, Integer count) {
-		Integer removed = cardbaseManager.removeCard(card, count); 
+		Integer removed = cardbase.removeCard(card, count); 
 		if (removed > 0) {
 			System.out.println("Removed " + removed + "x " + card.name + ".");
 			savePrompt = true;
