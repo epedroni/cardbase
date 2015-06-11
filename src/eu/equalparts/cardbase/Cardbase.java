@@ -1,7 +1,6 @@
 package eu.equalparts.cardbase;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +10,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import eu.equalparts.cardbase.comparators.CardComparator;
+import eu.equalparts.cardbase.comparators.CardComparators;
 import eu.equalparts.cardbase.data.Card;
 import eu.equalparts.cardbase.utils.JSON;
 
@@ -119,7 +118,7 @@ public class Cardbase {
 	 * This method is intended to allow iteration directly on the list of cards,
 	 * while at the same time retaining control over the insert and remove procedures.
 	 * The returned {@code List} is a read-only; trying to modify its structure will
-	 * result in a {@code UnsupportedOperationException}.
+	 * result in an {@code UnsupportedOperationException}.
 	 * 
 	 * @return an unmodifiable list of all the cards in the cardbase.
 	 */
@@ -127,22 +126,8 @@ public class Cardbase {
 		return Collections.unmodifiableList(cards);
 	}
 	
-	/**
-	 * Sorts the cardbase by the specified field. The field must be specified exactly
-	 * as it is defined in {@code Card}, case-sensitive. It must also be comparable to
-	 * itself, as {@code String} and {@code Integer} are.
-	 * 
-	 * @param fieldName the declared name of the field to be used for sorting.
-	 * @return true if the sort was successful, false if no such field was found.
-	 */
-	public boolean sortBy(String fieldName) {
-		for (Field field : Card.class.getDeclaredFields()) {
-			if (field.getName().equals(fieldName)) {
-				cards.sort(new CardComparator(field));
-				return true;
-			}
-		}
-		return false;
+	public void sortByName() {
+		cards.sort(new CardComparators.NameComparator());
 	}
 
 	/**
@@ -160,5 +145,9 @@ public class Cardbase {
 		}
 		
 		return null;
+	}
+	
+	private String makeHash(String setCode, String number) {
+		return setCode + number;
 	}
 }

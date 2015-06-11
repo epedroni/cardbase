@@ -416,16 +416,7 @@ public class CardbaseCLI {
 	 * @param args the ordering to sort by.
 	 */
 	public void sort(String[] args) {
-		if (args.length > 0) {
-			String fieldName = args[0];
-			if (cardbase.sortBy(fieldName)) {
-				System.out.println("Cardbase sorted by " + fieldName);
-			} else {
-				System.out.println("Unknown field: " + fieldName);
-			}
-		} else {
-			System.out.println("Please enter the field to use for sorting.");
-		}
+		cardbase.sortByName();
 	}
 
 	/**

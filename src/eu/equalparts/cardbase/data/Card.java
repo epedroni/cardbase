@@ -4,8 +4,8 @@ import java.util.List;
 
 public class Card {
 	
-	public String layout = "";
 	public String name = "";
+	public String layout = "";
 	public List<String> names;
 	public String manaCost = "";
 	public Integer cmc = 0;
