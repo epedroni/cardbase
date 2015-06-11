@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import eu.equalparts.cardbase.data.Card;
 import eu.equalparts.cardbase.data.CardSetInformation;
@@ -97,11 +100,7 @@ public final class MTGUniverse {
 			} 
 			// not cached; fetch, cache and return it
 			else {
-				requestedSet = JSON.mapper.readValue(new URL(BASE_URL + validCode + ".json"), FullCardSet.class);
-				// MTG JSON does not include set code in the card information, but it is useful for sorting
-				for (Card card : requestedSet.getCards()) {
-					card.setCode = validCode;
-				}
+				requestedSet = parseFullSet(JSON.mapper.readValue(new URL(BASE_URL + validCode + ".json"), JsonNode.class));
 				cardSetCache.put(validCode, requestedSet);
 			}
 		}
@@ -151,5 +150,74 @@ public final class MTGUniverse {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * This method is necessary to adapt the list of cards in the json to
+	 * the map format used in cardbase.
+	 * 
+	 * @param jsonTree the tree-representation of the json to be parsed.
+	 * @return the parsed full card set.
+	 * 
+	 * @throws JsonMappingException if the upstream JSON does not map to {@code FullCardSet}.
+	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
+	 */
+	private static FullCardSet parseFullSet(JsonNode jsonTree) throws JsonMappingException, IOException {
+		
+		FullCardSet fcs = new FullCardSet();
+		
+		/*
+		 * These fields are critical, if any of them is not present an exception is thrown.
+		 */
+		if (jsonTree.hasNonNull("name")) {
+			fcs.setName(jsonTree.get("name").asText());
+		} else {
+			throw new JsonMappingException("Field \"name\" not found.");
+		}
+		
+		String setCode;
+		if (jsonTree.hasNonNull("code")) {
+			setCode = jsonTree.get("code").asText();
+			fcs.setCode(setCode);
+		} else {
+			throw new JsonMappingException("Field \"code\" not found.");
+		}
+		
+		if (jsonTree.hasNonNull("releaseDate")) {
+			fcs.setReleaseDate(jsonTree.get("releaseDate").asText());
+		} else {
+			throw new JsonMappingException("Field \"releaseDate\" not found.");
+		}
+		
+		/*
+		 * These fields are optional and are set to null if not present.
+		 */
+		fcs.setGathererCode(jsonTree.hasNonNull("gathererCode") ? jsonTree.get("gathererCode").asText() : null);
+		fcs.setBorder(jsonTree.hasNonNull("border") ? jsonTree.get("border").asText() : null);	
+		fcs.setType(jsonTree.hasNonNull("type") ? jsonTree.get("type").asText() : null);
+		fcs.setMagicCardsInfoCode(jsonTree.hasNonNull("magicCardsInfoCode") ? jsonTree.get("magicCardsInfoCode").asText() : null);
+		fcs.setBlock(jsonTree.hasNonNull("block") ? jsonTree.get("block").asText() : null);
+		
+		/*
+		 * This is a critical field which must be present, if not an exception is thrown.
+		 */
+		if (jsonTree.hasNonNull("cards")) {
+			// attempt to card list as POJO
+			List<Card> rawList = jsonTree.get("cards").traverse(JSON.mapper).readValueAs(new TypeReference<List<Card>>() {});
+			
+			// generate the map
+			Map<String, Card> cardMap = new HashMap<String, Card>();
+			for (Card card : rawList) {
+				// add set code for convenience
+				card.setCode = setCode;
+				cardMap.put(card.number, card);
+			}
+			fcs.setCards(cardMap);
+		} else {
+			throw new JsonMappingException("Field \"cards\" not found.");
+		}
+		
+		return fcs;
+		
 	}
 }

@@ -1,16 +1,16 @@
 package eu.equalparts.cardbase;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import eu.equalparts.cardbase.comparators.CardComparators;
 import eu.equalparts.cardbase.data.Card;
 import eu.equalparts.cardbase.utils.JSON;
 
@@ -22,9 +22,10 @@ import eu.equalparts.cardbase.utils.JSON;
 public class Cardbase {
 	
 	/**
-	 * The cards in the cardbase.
+	 * The cards in the cardbase, set in key-value pairs where the key is the card hash,
+	 * generated using {makeHash()}.
 	 */
-	private List<Card> cards;
+	private Map<String, Card> cards;
 	/**
 	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
 	 * information to be printed to the console.
@@ -35,7 +36,7 @@ public class Cardbase {
 	 * Creates an empty cardbase.
 	 */
 	public Cardbase() {
-		cards = new ArrayList<Card>();
+		cards = new HashMap<String, Card>();
 	}
 	
 	/**
@@ -48,7 +49,7 @@ public class Cardbase {
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public Cardbase(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
-		cards = JSON.mapper.readValue(cardbaseFile, new TypeReference<ArrayList<Card>>() {});
+		cards = JSON.mapper.readValue(cardbaseFile, new TypeReference<Map<String, Card>>() {});
 	}
 
 	/**
@@ -79,7 +80,7 @@ public class Cardbase {
 			card.count += count;
 		} else {
 			cardToAdd.count = count;
-			cards.add(cardToAdd);
+			cards.put(makeHash(cardToAdd), cardToAdd);
 		}
 	}
 
@@ -104,13 +105,13 @@ public class Cardbase {
 		Integer removed = 0;
 		if (card != null) {
 			if (card.count <= count) {
-				cards.remove(card);
+				cards.remove(makeHash(card));
 				removed = card.count;
 			} else {
 				card.count -= count;
 				removed = count;
 			}
-		} 
+		}
 		return removed;
 	}
 
@@ -122,32 +123,41 @@ public class Cardbase {
 	 * 
 	 * @return an unmodifiable list of all the cards in the cardbase.
 	 */
-	public List<Card> getCards() {
-		return Collections.unmodifiableList(cards);
+	public Collection<Card> getCards() {
+		return Collections.unmodifiableCollection(cards.values());
 	}
 	
-	public void sortByName() {
-		cards.sort(new CardComparators.NameComparator());
-	}
-
 	/**
 	 * Returns a card from the cardbase by set code and number.
 	 * If no such card is in the cardbase, returns null.
 	 * 
 	 * @param setCode the set to which the requested card belongs.
 	 * @param number the requested card's set number.
+	 * 
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	public Card getCard(String setCode, String number) {
-		for (Card card : cards) {
-			if (card.setCode.equals(setCode) && card.number.equals(number))
-				return card;
-		}
-		
-		return null;
+		return cards.get(makeHash(setCode, number));
 	}
 	
+	/**
+	 * Generate the hash used as a key in the storage map.
+	 * 
+	 * @param setCode the card's set code.
+	 * @param number the card's set number.
+	 * @return the generated hash.
+	 */
 	private String makeHash(String setCode, String number) {
 		return setCode + number;
+	}
+	
+	/**
+	 * Generate the hash used as a key in the storage map.
+	 * 
+	 * @param the {@code Card} whose hash is desired.
+	 * @return the generated hash.
+	 */
+	private String makeHash(Card card) {
+		return card.setCode + card.number;
 	}
 }

@@ -177,8 +177,6 @@ public class CardbaseCLI {
 				} else if (command.equalsIgnoreCase("remove") 
 						|| command.equalsIgnoreCase("rm")) {
 					remove(args);
-				} else if (command.equalsIgnoreCase("sort")) {
-					sort(args);
 				} else {
 					add(command, args);
 				}
@@ -410,15 +408,6 @@ public class CardbaseCLI {
 		}
 	}
 	
-	/**
-	 * Sort the cardbase by a specified parameter.
-	 * 
-	 * @param args the ordering to sort by.
-	 */
-	public void sort(String[] args) {
-		cardbase.sortByName();
-	}
-
 	/**
 	 * Add the specified count of the specified card
 	 * to the cardbase.
