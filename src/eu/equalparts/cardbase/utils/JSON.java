@@ -28,7 +28,7 @@ public final class JSON {
 	 */
 	private static ObjectMapper createMapper() {
 		ObjectMapper objectMapper = new ObjectMapper();
-		// TODO decide what to do about this
+		// classes don't necessarily use all json fields
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		return objectMapper;
 	}

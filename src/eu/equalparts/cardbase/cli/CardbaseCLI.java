@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase.standalone;
+package eu.equalparts.cardbase.cli;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -151,7 +151,7 @@ public class CardbaseCLI {
 			// the main loop
 			while (!exit) {
 				// print prompt
-				System.out.print(selectedSet == null ? "> " : selectedSet.getCode() + " > ");
+				System.out.print(selectedSet == null ? "> " : selectedSet.code + " > ");
 				// condition input and interpret
 				String[] raw = consoleReader.readLine().trim().split("[ \t]+");
 				String command = raw[0];
@@ -266,7 +266,7 @@ public class CardbaseCLI {
 				selectedSet = MTGUniverse.getFullCardSet(args[0]);
 				// if the set code is invalid, null is returned
 				if (selectedSet != null) {
-					System.out.println("Selected set: " + selectedSet.getName() + ".");
+					System.out.println("Selected set: " + selectedSet.name + ".");
 					// undoing is not allowed if the set is changed - it would get tricky
 					lastAction = null;
 				} else {
@@ -308,7 +308,7 @@ public class CardbaseCLI {
 		// if a card is specified, peruse only that
 		if (args.length > 0) {
 			if (selectedSet != null) {
-				Card card = cardbase.getCard(selectedSet.getCode(), args[0]);
+				Card card = cardbase.getCard(selectedSet.code, args[0]);
 				if (card != null) {
 					printPerusal(card);
 				} else {
@@ -365,7 +365,7 @@ public class CardbaseCLI {
 					}
 					removeCard(cardToRemove, count);
 				} else {
-					System.out.println(args[0] + " does not correspond to a card in " + selectedSet.getName() + ".");
+					System.out.println(args[0] + " does not correspond to a card in " + selectedSet.name + ".");
 				}
 			} else {
 				System.out.println("Please specify a card number to remove.");
@@ -400,7 +400,7 @@ public class CardbaseCLI {
 					}
 					addCard(cardToAdd, count);
 				} else {
-					System.out.println(number + " does not correspond to a card in " + selectedSet.getName() + ".");
+					System.out.println(number + " does not correspond to a card in " + selectedSet.name + ".");
 				}
 			}
 		} else {

@@ -32,7 +32,7 @@ public final class MTGUniverse {
 	/**
 	 * The base URL from where the information is fetched.
 	 */
-	private static final String BASE_URL = "http://mtgjson.com/json/";
+	private static final String BASE_DATA_URL = "http://mtgjson.com/json/";
 	/**
 	 * If the upstream set code list can't be loaded, this is loaded instead.
 	 */
@@ -100,7 +100,7 @@ public final class MTGUniverse {
 			} 
 			// not cached; fetch, cache and return it
 			else {
-				requestedSet = parseFullSet(JSON.mapper.readValue(new URL(BASE_URL + validCode + ".json"), JsonNode.class));
+				requestedSet = parseFullSet(JSON.mapper.readValue(new URL(BASE_DATA_URL + validCode + ".json"), JsonNode.class));
 				cardSetCache.put(validCode, requestedSet);
 			}
 		}
@@ -114,7 +114,7 @@ public final class MTGUniverse {
 		// if the list isn't cached, fetch and cache it
 		if (cardSets == null) {
 			try {
-				cardSets = JSON.mapper.readValue(new URL(BASE_URL + "SetList.json"), new TypeReference<ArrayList<CardSetInformation>>() {});
+				cardSets = JSON.mapper.readValue(new URL(BASE_DATA_URL + "SetList.json"), new TypeReference<ArrayList<CardSetInformation>>() {});
 			} catch (Exception e) {
 				System.out.println("Error: could not fetch/parse set code list from upstream, loading fallback json...");
 				e.printStackTrace();
@@ -170,7 +170,7 @@ public final class MTGUniverse {
 		 * These fields are critical, if any of them is not present an exception is thrown.
 		 */
 		if (jsonTree.hasNonNull("name")) {
-			fcs.setName(jsonTree.get("name").asText());
+			fcs.name = jsonTree.get("name").asText();
 		} else {
 			throw new JsonMappingException("Field \"name\" not found.");
 		}
@@ -178,44 +178,48 @@ public final class MTGUniverse {
 		String setCode;
 		if (jsonTree.hasNonNull("code")) {
 			setCode = jsonTree.get("code").asText();
-			fcs.setCode(setCode);
+			fcs.code = setCode;
 		} else {
 			throw new JsonMappingException("Field \"code\" not found.");
 		}
 		
+		String imageCode;
+		if (jsonTree.hasNonNull("magicCardsInfoCode")) {
+			imageCode = jsonTree.get("magicCardsInfoCode").asText();
+			fcs.magicCardsInfoCode = imageCode;
+		} else {
+			throw new JsonMappingException("Field \"magicCardsInfoCode\" not found.");
+		}
+		
 		if (jsonTree.hasNonNull("releaseDate")) {
-			fcs.setReleaseDate(jsonTree.get("releaseDate").asText());
+			fcs.releaseDate = jsonTree.get("releaseDate").asText();
 		} else {
 			throw new JsonMappingException("Field \"releaseDate\" not found.");
 		}
 		
-		/*
-		 * These fields are optional and are set to null if not present.
-		 */
-		fcs.setGathererCode(jsonTree.hasNonNull("gathererCode") ? jsonTree.get("gathererCode").asText() : null);
-		fcs.setBorder(jsonTree.hasNonNull("border") ? jsonTree.get("border").asText() : null);	
-		fcs.setType(jsonTree.hasNonNull("type") ? jsonTree.get("type").asText() : null);
-		fcs.setMagicCardsInfoCode(jsonTree.hasNonNull("magicCardsInfoCode") ? jsonTree.get("magicCardsInfoCode").asText() : null);
-		fcs.setBlock(jsonTree.hasNonNull("block") ? jsonTree.get("block").asText() : null);
-		
-		/*
-		 * This is a critical field which must be present, if not an exception is thrown.
-		 */
 		if (jsonTree.hasNonNull("cards")) {
-			// attempt to card list as POJO
+			// attempt to read card list as a POJO using the standard mapper
 			List<Card> rawList = jsonTree.get("cards").traverse(JSON.mapper).readValueAs(new TypeReference<List<Card>>() {});
-			
 			// generate the map
 			Map<String, Card> cardMap = new HashMap<String, Card>();
 			for (Card card : rawList) {
 				// add set code for convenience
 				card.setCode = setCode;
+				card.imageCode = imageCode;
 				cardMap.put(card.number, card);
 			}
-			fcs.setCards(cardMap);
+			fcs.cards = cardMap;
 		} else {
 			throw new JsonMappingException("Field \"cards\" not found.");
 		}
+		
+		/*
+		 * These fields are optional and are set to null if not present.
+		 */
+		fcs.gathererCode = jsonTree.hasNonNull("gathererCode") ? jsonTree.get("gathererCode").asText() : null;
+		fcs.border = jsonTree.hasNonNull("border") ? jsonTree.get("border").asText() : null;	
+		fcs.type = jsonTree.hasNonNull("type") ? jsonTree.get("type").asText() : null;
+		fcs.block = jsonTree.hasNonNull("block") ? jsonTree.get("block").asText() : null;
 		
 		return fcs;
 		
