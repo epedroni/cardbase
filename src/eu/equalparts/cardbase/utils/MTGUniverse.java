@@ -21,9 +21,9 @@ import eu.equalparts.cardbase.data.FullCardSet;
  * MTG universe. This class has a series of utility functions that
  * query remote databases to acquire card information.
  * <br>
- * Conversely, {@code CardbaseManager}'s methods are used solely to
+ * Conversely, {@code Cardbase}'s methods are used solely to
  * acquire information regarding the loaded cardbase, which will
- * most likely contain only a subset of the MTG universe.
+ * most likely contain only a subset of the MTG universe of cards.
  * 
  * @author Eduardo Pedroni
  */

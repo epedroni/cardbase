@@ -1,14 +1,14 @@
 package eu.equalparts.cardbase.gui;
 
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
-import eu.equalparts.cardbase.data.Card;
-import eu.equalparts.cardbase.utils.MTGUniverse;
+import java.awt.Button;
+import java.awt.Frame;
+import java.awt.Panel;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
-public class CardbaseGUI extends Application {
+
+@SuppressWarnings("serial")
+public class CardbaseGUI extends Panel {
 
 	/**
 	 * Run the GUI.
@@ -16,21 +16,64 @@ public class CardbaseGUI extends Application {
 	 * @param args arguments passed down to {@code Application.launch()}.
 	 */
 	public static void main(String... args) {
-		launch(args);
+		Frame f = new Frame("Test");
+		
+		CardbaseGUI c = new CardbaseGUI();
+		
+		f.add(c);
+		f.pack();
+		
+		f.addWindowListener(new WindowListener() {
+			@Override
+			public void windowOpened(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowIconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+			
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowActivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		f.setVisible(true);
 	}
 	
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		Card card = MTGUniverse.getCard("M15", "281");
-		ImageView test = new ImageView(CardImageView.makeUrl(card));
-		
-		Pane parent = new Pane();
-		
-		parent.getChildren().add(test);
-		
-		primaryStage.setScene(new Scene(parent));
-		
-		primaryStage.setTitle("Cardbase");
-		primaryStage.show();
+	
+	public void init() {
+		add(new Button("one"));
+		add(new Button("two"));
 	}
+	
+	
 }
