@@ -59,3 +59,9 @@ Peruse optionally accepts a card number as an argument. If present, only that ca
 ### Committing Changes and Exiting
 
 Any changes made on this tool must be manually written to the file. If you make a mistake, simply exit and your cardbase will not be modified. To write changes, use the "write" command. To save to a new file, type "write" followed by the file name (no spaces allowed). To exit, simply type "exit".
+
+## Building
+
+The Ant build script can be found under /build. The default target "deploy" compiles and packs all necessary binaries into a single executable jar, /dist/cardbase.jar. 
+
+Linux users can execute "shebang" to create a concatenation of the shebang defined in /build/header (by default #!/usr/bin/java -jar) and the deployed jar, saved as the executable /dist/cardbase. 
