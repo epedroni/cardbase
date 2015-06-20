@@ -8,7 +8,7 @@
 	<property name="dist.dir" location="dist" />
 	<property name="lib.dir" value="lib" />
 	<property name="res.dir" value="res" />
-	<property name="main-class" value="eu.equalparts.cardbase.standalone.CardbaseCLI" />
+	<property name="main-class" value="eu.equalparts.cardbase.cli.CardbaseCLI" />
 	
 	<!-- Clean up temporary directories -->
 	<target name="clean" description="clean up">
@@ -70,8 +70,5 @@
 	
 	<!-- Produce a standalone, runnable jar -->
 	<target name="deploy" depends="clean, compile, jar" />
-	
-	<!-- Deploy, add header and set permission to run on Linux -->
-	<target name="cli" depends="deploy, shebang" />
 	
 </project>

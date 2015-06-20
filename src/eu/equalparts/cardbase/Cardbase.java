@@ -34,6 +34,11 @@ public class Cardbase {
 	public static final boolean DEBUG = System.getenv("CB_DEBUG") != null; 
 	
 	/**
+	 * Used in the hash generation.
+	 */
+	private static final String HASH_DIVIDER = "~";
+	
+	/**
 	 * Creates an empty cardbase.
 	 */
 	public Cardbase() {
@@ -134,11 +139,24 @@ public class Cardbase {
 	 * 
 	 * @param setCode the set to which the requested card belongs.
 	 * @param number the requested card's set number.
-	 * 
+	 * key
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	public Card getCard(String setCode, String number) {
 		return cards.get(makeHash(setCode, number));
+	}
+	
+	/**
+	 * Returns a card from the cardbase by hash. The card's hash
+	 * can be generated using {@code Cardbase.makeHash()}.
+	 * If no such card is in the cardbase, returns null.
+	 * 
+	 * @param hash the Cardbase hash of the requested card.
+	 * 
+	 * @return the requested {@code Card} or null if no card is found.
+	 */
+	public Card getCardFromHash(String hash) {
+		return cards.get(hash);
 	}
 	
 	/**
@@ -148,8 +166,8 @@ public class Cardbase {
 	 * @param number the card's set number.
 	 * @return the generated hash.
 	 */
-	private String makeHash(String setCode, String number) {
-		return setCode + number;
+	public static String makeHash(String setCode, String number) {
+		return setCode + HASH_DIVIDER + number;
 	}
 	
 	/**
@@ -158,7 +176,7 @@ public class Cardbase {
 	 * @param the {@code Card} whose hash is desired.
 	 * @return the generated hash.
 	 */
-	private String makeHash(Card card) {
-		return card.setCode + card.number;
+	public static String makeHash(Card card) {
+		return card.setCode + HASH_DIVIDER + card.number;
 	}
 }
