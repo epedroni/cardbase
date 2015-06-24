@@ -2,9 +2,11 @@ package eu.equalparts.cardbase;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -12,11 +14,12 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import eu.equalparts.cardbase.comparator.CardComparator;
 import eu.equalparts.cardbase.data.Card;
 import eu.equalparts.cardbase.utils.JSON;
 
 /**
- * Provides a variety of utility methods to interact with the loaded cardbase.
+ * Provides a variety of utility methods to interact with an optionally loaded cardbase.
  * 
  * @author Eduardo Pedroni
  */
@@ -32,7 +35,6 @@ public class Cardbase {
 	 * information to be printed to the console.
 	 */
 	public static final boolean DEBUG = System.getenv("CB_DEBUG") != null; 
-	
 	/**
 	 * Used in the hash generation.
 	 */
@@ -134,12 +136,22 @@ public class Cardbase {
 	}
 	
 	/**
+	 * @param field the name of the field by which to sort.
+	 * @return an unmodifiable collection representing the cardbase sorted in the required order.
+	 * @throws NoSuchFieldException if the field provided is invalid.
+	 */
+	public Collection<Card> sort(String field) throws NoSuchFieldException {
+		List<Card> sortedCards = new ArrayList<Card>(cards.values());
+		sortedCards.sort(new CardComparator(Card.class.getDeclaredField(field)));
+		return Collections.unmodifiableCollection(sortedCards);
+	}
+	
+	/**
 	 * Returns a card from the cardbase by set code and number.
 	 * If no such card is in the cardbase, returns null.
 	 * 
 	 * @param setCode the set to which the requested card belongs.
 	 * @param number the requested card's set number.
-	 * key
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	public Card getCard(String setCode, String number) {
@@ -152,7 +164,6 @@ public class Cardbase {
 	 * If no such card is in the cardbase, returns null.
 	 * 
 	 * @param hash the Cardbase hash of the requested card.
-	 * 
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	public Card getCardFromHash(String hash) {

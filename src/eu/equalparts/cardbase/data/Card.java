@@ -1,9 +1,12 @@
 package eu.equalparts.cardbase.data;
 
+import eu.equalparts.cardbase.comparator.SpecialFields.ManaCost;
+
 public class Card {
 	
 	public String name;
 	public String layout;
+	@ManaCost
 	public String manaCost;
 	public Integer cmc;
 	public String type;

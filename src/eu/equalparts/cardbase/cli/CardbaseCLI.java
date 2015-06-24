@@ -96,15 +96,15 @@ public class CardbaseCLI {
 	 * 
 	 * @param args a list of arguments. Only the first argument is used, as a cardbase JSON.
 	 */
-	private CardbaseCLI(String... args) {
+	public CardbaseCLI(String... args) {
 		System.out.println("Welcome to Cardbase CLI!");
 
 		// set debug flag if we are debugging
 		if (Cardbase.DEBUG) System.out.println("Debug mode is on.");
 
-		// make the CardbaseManager
-		if (args.length > 0) {
-			File cardbaseFile = new File(args[0]);
+		// make the Cardbase
+		if (args != null && args.length > 0) {
+			cardbaseFile = new File(args[0]);
 			if (cardbaseFile.exists() && cardbaseFile.isFile() && cardbaseFile.canRead()) {
 				System.out.println("Loading cardbase from \"" + args[0] + "\".");
 				try {
@@ -124,7 +124,7 @@ public class CardbaseCLI {
 					System.exit(1);
 				}
 			} else {
-				System.out.println(args[0] + " appears to be invalid.");
+				System.out.println(args[0] + " appears to be an invalid path.");
 				System.exit(0);
 			}
 		} else {
@@ -202,7 +202,7 @@ public class CardbaseCLI {
 	public void write(String[] args) {
 		File outputFile;
 		// user-provided file overrides everything else
-		if (args.length > 0) {
+		if (args != null && args.length > 0) {
 			outputFile = new File(sanitiseFileName(args[0]));
 		} else {
 			outputFile = cardbaseFile;
@@ -261,7 +261,7 @@ public class CardbaseCLI {
 	 * @param args the code of the chosen set.
 	 */
 	public void set(String[] args) {
-		if (args.length > 0) {
+		if (args != null && args.length > 0) {
 			try {
 				selectedSet = MTGUniverse.getFullCardSet(args[0]);
 				// if the set code is invalid, null is returned
@@ -306,7 +306,7 @@ public class CardbaseCLI {
 	 */
 	public void peruse(String[] args) {
 		// if a card is specified, peruse only that
-		if (args.length > 0) {
+		if (args != null && args.length > 0) {
 			if (selectedSet != null) {
 				Card card = cardbase.getCard(selectedSet.code, args[0]);
 				if (card != null) {
@@ -352,7 +352,7 @@ public class CardbaseCLI {
 	 */
 	public void remove(String[] args) {
 		if (selectedSet != null) {
-			if (args.length > 0) {
+			if (args != null && args.length > 0) {
 				Card cardToRemove = selectedSet.getCardByNumber(args[0]);
 				if (cardToRemove != null) {
 					Integer count = 1;
@@ -391,7 +391,7 @@ public class CardbaseCLI {
 				Card cardToAdd = selectedSet.getCardByNumber(number);
 				if (cardToAdd != null) {
 					Integer count = 1;
-					if (args.length > 0 && args[0].matches("[0-9]+")) {
+					if (args != null && args.length > 0 && args[0].matches("[0-9]+")) {
 						count = Integer.valueOf(args[0]);
 						if (count <= 0) {
 							System.out.println("Can't add " + count + " cards.");
