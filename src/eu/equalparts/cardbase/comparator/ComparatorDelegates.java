@@ -1,39 +1,59 @@
 package eu.equalparts.cardbase.comparator;
 
 
-abstract class ComparatorDelegates {
+final class ComparatorDelegates {
 
 	private ComparatorDelegates() {}
-	
-	public static Integer compareManaCost(Comparable<String> field1, Comparable<String> field2) {
-		// avoid casting syntax nightmare
-		String mc1 = (String) field1, mc2 = (String) field2;
+
+	/*
+	 * Delegates
+	 */
+	public static Integer compareDirtyNumber(Comparable<String> field1, Comparable<String> field2) {
+		// this assumes that the format is uninterrupted numbers and letters
+		String number1 = ((String) field1).replaceAll("[^0-9]+", "");
+		String number2 = ((String) field2).replaceAll("[^0-9]+", "");
 		
-		// first by number of colours
-		int mc1count = 0, mc2count = 0;
-		if (mc1.contains("W")) mc1count++;
-		if (mc1.contains("U")) mc1count++;
-		if (mc1.contains("B")) mc1count++;
-		if (mc1.contains("R")) mc1count++;
-		if (mc1.contains("G")) mc1count++;
+		Integer int1 = number1.matches("[0-9]+") ? Integer.parseInt(number1) : null;
+		Integer int2 = number2.matches("[0-9]+") ? Integer.parseInt(number2) : null;
 		
-		if (mc2.contains("W")) mc2count++;
-		if (mc2.contains("U")) mc2count++;
-		if (mc2.contains("B")) mc2count++;
-		if (mc2.contains("R")) mc2count++;
-		if (mc2.contains("G")) mc2count++;
+		if (int1 == null) {
+			if (int2 != null) {
+				// field1 has no numbers but field2 does, field1 is less by default
+				// if neither have numbers, letters will be looked at below
+				return -1;
+			}
+		} else if (int2 == null) {
+			// field2 has no numbers but field1 does, field1 is more by default
+			return 1;
+		} else {
+			// both have numbers, perform comparison if not identical
+			// if identical, look at letters below
+			if (int1 != int2)
+				return int1.compareTo(int2);
+		}
+		// compare by letters
+		String letter1 = number1.replaceAll("[0-9]+", "");
+		String letter2 = number2.replaceAll("[0-9]+", "");
+		return letter1.compareTo(letter2);
+	}
+
+	public static Integer compareRarity(Comparable<String> field1, Comparable<String> field2) {
+		// assign numerical values based on the different possibilities and compare those instead
+		Integer value1 = getRarityValue((String) field1);
+		Integer value2 = getRarityValue((String) field2);
 		
-		if (mc1count != mc2count)
-			return (mc1count < mc2count) ? -1 : ((mc1count == mc2count) ? 0 : 1);
-		
-		// next by colour wheel
-		
-		return 0;
+		return value1.compareTo(value2);
 	}
 	
+	/*
+	 * Internally used utility functions
+	 */
+	private static int getRarityValue(String rarityString) {
+		return rarityString.equalsIgnoreCase("Common") ? 0 :
+			   rarityString.equalsIgnoreCase("Uncommon") ? 1 :
+			   rarityString.equalsIgnoreCase("Rare") ? 2 :
+			   rarityString.equalsIgnoreCase("Mythic Rare") ? 3 : 
+			   rarityString.equalsIgnoreCase("Basic Land") ? 4 : 
+			   rarityString.equalsIgnoreCase("Special") ? 5 : 6;
+	}
 }
-/*
- * first by number of colours
- * next by colour wheel: white > blue > black > red > green
- * next by cmc
- */

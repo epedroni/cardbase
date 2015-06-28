@@ -3,7 +3,7 @@
    
 	<property name="jar.name" value="cardbase" />
 	<property name="src.dir" location="src" />
-	<property name="bin.dir" location="bin" />
+	<property name="bin.dir" location="tmpbin" />
 	<property name="build.dir" location="build" />
 	<property name="dist.dir" location="dist" />
 	<property name="lib.dir" value="lib" />
@@ -55,6 +55,7 @@
 				<attribute name="Class-Path" value="${classpath.name}" />
 			</manifest>
 		</jar>
+		<delete dir="${bin.dir}" />
 	</target>
 	
 	<!-- Concatenate a the jar to a pre-set header and chmod 755 it -->

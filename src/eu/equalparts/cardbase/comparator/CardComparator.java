@@ -1,5 +1,6 @@
 package eu.equalparts.cardbase.comparator;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -7,6 +8,8 @@ import java.util.Comparator;
 import java.util.function.BiFunction;
 
 import eu.equalparts.cardbase.Cardbase;
+import eu.equalparts.cardbase.comparator.SpecialFields.DirtyNumber;
+import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;
 import eu.equalparts.cardbase.data.Card;
 
 /**
@@ -35,9 +38,11 @@ public class CardComparator implements Comparator<Card> {
 	 * The field being compared.
 	 */
 	private Field fieldToCompare;
+	/**
+	 * The comparison delegate to use for the specified field.
+	 */
+	private BiFunction<Comparable, Comparable, Integer> selectedComparisonDelegate = this::defaultComparison;
 	
-	private BiFunction<Comparable, Comparable, Integer> comparisonDelegate = this::defaultComparison;
-
 	/**
 	 * Creates a new comparator for the specified field only. This class
 	 * will only be constructed successfully if the field comes from
@@ -55,12 +60,14 @@ public class CardComparator implements Comparator<Card> {
 			this.fieldToCompare = fieldToCompare;
 			
 			// if annotated with a special comparator, set the comparison delegate here
-			this.comparisonDelegate = ComparatorDelegates::compareManaCost;
-			
+			for (Annotation annotation : fieldToCompare.getAnnotations()) {
+				if (annotation.annotationType() == DirtyNumber.class) {
+					this.selectedComparisonDelegate = ComparatorDelegates::compareDirtyNumber;
+				} else if (annotation.annotationType() == Rarity.class) {
+					this.selectedComparisonDelegate = ComparatorDelegates::compareRarity;
+				}
+			}
 		} else {
-			System.out.println(fieldToCompare.isAccessible());
-			System.out.println(fieldToCompare.getDeclaringClass().equals(Card.class));
-			System.out.println(isSelfComparable(fieldToCompare.getType()));
 			throw new IllegalArgumentException("The field provided is not valid.");
 		}
 	}
@@ -75,9 +82,21 @@ public class CardComparator implements Comparator<Card> {
 			Comparable field1 = (Comparable) fieldToCompare.get(o1);
 			Comparable field2 = (Comparable) fieldToCompare.get(o2);
 			
-			return comparisonDelegate.apply(field1, field2);
+			// if either or both fields' values are null, skip delegation altogether since delegates are not required to deal with null values
+			if (field1 == null) {
+				if (field2 == null) {
+					return 0;
+				} else {
+					return -1;
+				}
+			} else if (field2 == null) {
+				return 1;
+			} else {
+				return selectedComparisonDelegate.apply(field1, field2);
+			}
+			
 		} catch (IllegalArgumentException e) {
-			System.out.println("Error: class Card does not define field" + fieldToCompare.getName() + ".");
+			System.out.println("Error: class Card does not define field \"" + fieldToCompare.getName() + "\".");
 			if (Cardbase.DEBUG) e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			System.out.println("Error: field " + fieldToCompare.getName() + " in Card is not visible.");

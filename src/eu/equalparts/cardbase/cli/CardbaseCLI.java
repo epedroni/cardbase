@@ -51,6 +51,10 @@ public class CardbaseCLI {
 	 */
 	private static final String HELP_FILE_PATH = "/help";
 	/**
+	 * Program version.
+	 */
+	private static final String VERSION = "1.0";
+	/**
 	 * The last action performed by the user.
 	 */
 	private Action lastAction = null;
@@ -162,6 +166,8 @@ public class CardbaseCLI {
 				} else if (command.equalsIgnoreCase("write")
 						|| command.equalsIgnoreCase("save")) {
 					write(args);
+				} else if (command.equalsIgnoreCase("version")) {
+					version();
 				} else if (command.equalsIgnoreCase("exit")) {
 					exit();
 				} else if (command.equalsIgnoreCase("sets")) {
@@ -233,6 +239,13 @@ public class CardbaseCLI {
 		}
 	}
 
+	/**
+	 * Print program version.
+	 */
+	public void version() {
+		System.out.println("Cardbase v" + VERSION);
+	}
+	
 	/**
 	 * Exit procedure.
 	 */
