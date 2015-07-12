@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.comparator.CardComparator;
 import eu.equalparts.cardbase.data.Card;
+import eu.equalparts.cardbase.data.ReferenceDeck;
+import eu.equalparts.cardbase.data.StandaloneDeck;
 import eu.equalparts.cardbase.utils.JSON;
 
 /**
@@ -31,6 +33,10 @@ public class Cardbase {
 	 */
 	private Map<String, Card> cards;
 	/**
+	 * The decks which have been saved along with this collection of cards.
+	 */
+	private Map<String, ReferenceDeck> decks;
+	/**
 	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
 	 * information to be printed to the console.
 	 */
@@ -39,13 +45,6 @@ public class Cardbase {
 	 * Used in the hash generation.
 	 */
 	private static final String HASH_DIVIDER = "~";
-	
-	/**
-	 * Creates an empty cardbase.
-	 */
-	public Cardbase() {
-		cards = new HashMap<String, Card>();
-	}
 	
 	/**
 	 * Initialises the cardbase with the contents of a file.
@@ -59,6 +58,14 @@ public class Cardbase {
 	public Cardbase(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
 		cards = JSON.mapper.readValue(cardbaseFile, new TypeReference<Map<String, Card>>() {});
 	}
+	
+	/**
+	 * Initialises a clean cardbase.
+	 */
+	public Cardbase() {
+		cards = new HashMap<String, Card>();
+		decks = new HashMap<String, ReferenceDeck>();
+	}
 
 	/**
 	 * Writes the provided {@code Cardbase} to the provided file in JSON format.
@@ -70,7 +77,7 @@ public class Cardbase {
 	 * @throws JsonMappingException if the data structure given does not generate valid JSON as well?
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public void writeCardbase(File outputFile) throws JsonGenerationException, JsonMappingException, IOException {
+	public void writeCollection(File outputFile) throws JsonGenerationException, JsonMappingException, IOException {
 		JSON.mapper.writeValue(outputFile, cards);
 	}
 
@@ -166,7 +173,7 @@ public class Cardbase {
 	 * @param hash the Cardbase hash of the requested card.
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
-	public Card getCardFromHash(String hash) {
+	public Card getCardByHash(String hash) {
 		return cards.get(hash);
 	}
 	
@@ -189,5 +196,66 @@ public class Cardbase {
 	 */
 	public static String makeHash(Card card) {
 		return card.setCode + HASH_DIVIDER + card.number;
+	}
+	
+	public Map<String, ReferenceDeck> getDecks() {
+		return Collections.unmodifiableMap(decks);
+	}
+	
+	public List<Card> getMissingCards(StandaloneDeck deckToCheck) {
+		List<Card> missingCards = new ArrayList<Card>();
+		for (Card card : deckToCheck.cards) {
+			String hash = makeHash(card);
+			if (cards.containsKey(hash)) {
+				if (cards.get(hash).count < card.count) {
+					Card missingCard = card.clone();
+					missingCard.count = card.count - cards.get(hash).count;
+					missingCards.add(missingCard);
+				}
+			} else {
+				missingCards.add(card);
+			}
+		}
+		return missingCards;
+	}
+	
+	public void addStandaloneDeck(StandaloneDeck deckToAdd) {
+		List<Card> missingCards = getMissingCards(deckToAdd);
+		if (missingCards.size() <= 0) {
+			decks.put(deckToAdd.name, new ReferenceDeck(deckToAdd));
+		} else {
+			throw new IllegalArgumentException("The cardbase is missing cards to add this deck.");
+		}
+	}
+	
+	public StandaloneDeck exportDeck(String deckName) {
+		ReferenceDeck referenceDeck = decks.get(deckName);
+		
+		if (referenceDeck != null) {
+			StandaloneDeck standaloneDeck = new StandaloneDeck();
+			
+			standaloneDeck.name = referenceDeck.name;
+			standaloneDeck.plains = referenceDeck.plains;
+			standaloneDeck.islands = referenceDeck.islands;
+			standaloneDeck.swamps = referenceDeck.swamps;
+			standaloneDeck.mountains = referenceDeck.mountains;
+			standaloneDeck.forests = referenceDeck.forests;
+			
+			for (String cardHash : referenceDeck.cardReferences.keySet()) {
+				Card card = getCardByHash(cardHash);
+				if (card != null) {
+					// must clone otherwise the original count is affected too
+					card = card.clone();
+					card.count = referenceDeck.cardReferences.get(cardHash);
+					standaloneDeck.cards.add(card);
+				} else {
+					throw new IllegalArgumentException("Deck refers to card not in cardbase: " + cardHash);
+				}
+			}
+
+			return standaloneDeck;
+		} else {
+			throw new IllegalArgumentException("The specified deck does not exist.");
+		}
 	}
 }

@@ -1,12 +1,12 @@
 package eu.equalparts.cardbase.data;
 
-import java.util.HashMap;
+public abstract class Deck {
 
-public class Deck {
-
-	/**
-	 * Cards stored in key-value pairs of [multiverse ID, amount].
-	 */
-	public HashMap<Integer, Integer> cards;
+	public String name = "Unnamed Deck";
+	public int plains = 0,
+			islands = 0,
+			swamps = 0,
+			mountains = 0,
+			forests = 0;
 	
 }

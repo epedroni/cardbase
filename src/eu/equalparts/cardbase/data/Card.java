@@ -32,4 +32,32 @@ public class Card {
 	public String imageCode;
 	public Integer count;
 	
+	@Override
+	public Card clone() {
+		Card clone = new Card();
+		
+		clone.name = this.name;
+		clone.layout = this.layout;
+		clone.manaCost = this.manaCost;
+		clone.cmc = this.cmc;
+		clone.type = this.type;
+		clone.rarity = this.rarity;
+		clone.text = this.text;
+		clone.flavor = this.flavor;
+		clone.artist = this.artist;
+		clone.number = this.number;
+		clone.power = this.power;
+		clone.toughness = this.toughness;
+		clone.loyalty = this.loyalty;
+		clone.multiverseid = this.multiverseid;
+		clone.imageName = this.imageName;
+		clone.border = this.border;
+		clone.watermark = this.watermark;
+		clone.setCode = this.setCode;
+		clone.imageCode = this.imageCode;
+		clone.count = this.count;
+		
+		return clone;
+	}
+	
 }

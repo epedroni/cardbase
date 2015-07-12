@@ -220,7 +220,7 @@ public class CardbaseCLI {
 			} else {
 				// handle these exceptions locally - they don't necessarily mean the program should exit
 				try {
-					cardbase.writeCardbase(outputFile);
+					cardbase.writeCollection(outputFile);
 					// we are now working off outputFile, which may or may not be the same as cardbaseFile at this point
 					cardbaseFile = outputFile;
 					System.out.println("Cardbase was saved to \"" + outputFile.getAbsolutePath() + "\". "
