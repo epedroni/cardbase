@@ -29,10 +29,6 @@ import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CardComparator implements Comparator<Card> {
-
-	public enum Order {
-		NATURAL, REVERSE;
-	}
 	
 	/**
 	 * The field being compared.

@@ -33,17 +33,6 @@ public class CardbaseCLI {
 	private enum Action {
 		ADD, REMOVE;
 		public Card card;
-		public Integer count;
-		/**
-		 * Sets both fields at once.
-		 * 
-		 * @param card the card last modified.
-		 * @param count the amount that was added or removed.
-		 */
-		public void set(Card card, Integer count) {
-			this.card = card;
-			this.count = count;
-		}
 	}
 
 	/**
@@ -347,9 +336,9 @@ public class CardbaseCLI {
 	public void undo() {
 		if (lastAction != null) {
 			if (lastAction == Action.ADD) {
-				removeCard(lastAction.card, lastAction.count);
+				removeCard(lastAction.card);
 			} else if (lastAction ==  Action.REMOVE) {
-				addCard(lastAction.card, lastAction.count);
+				addCard(lastAction.card);
 			}
 			// can only undo once
 			lastAction = null;
@@ -376,7 +365,8 @@ public class CardbaseCLI {
 							return;
 						}
 					}
-					removeCard(cardToRemove, count);
+					cardToRemove.count = count;
+					removeCard(cardToRemove);
 				} else {
 					System.out.println(args[0] + " does not correspond to a card in " + selectedSet.name + ".");
 				}
@@ -399,7 +389,7 @@ public class CardbaseCLI {
 			// a blank line after adding a card repeats the addition unlimitedly
 			if (number.isEmpty()) {
 				if (lastAction == Action.ADD)
-					addCard(lastAction.card, lastAction.count);
+					addCard(lastAction.card);
 			} else {
 				Card cardToAdd = selectedSet.getCardByNumber(number);
 				if (cardToAdd != null) {
@@ -411,7 +401,8 @@ public class CardbaseCLI {
 							return;
 						}
 					}
-					addCard(cardToAdd, count);
+					cardToAdd.count = count;
+					addCard(cardToAdd);
 				} else {
 					System.out.println(number + " does not correspond to a card in " + selectedSet.name + ".");
 				}
@@ -425,31 +416,31 @@ public class CardbaseCLI {
 	 * Add the specified count of the specified card
 	 * to the cardbase.
 	 * 
-	 * @param card the card to add.
-	 * @param count the number of times to add it.
+	 * @param card the card to add, set this object's 
+	 * count field to determine the count to add.
 	 */
-	private void addCard(Card card, Integer count) {
-		cardbase.addCard(card, count);
-		System.out.println("Added " + count + "x " + card.name + ".");
+	private void addCard(Card card) {
+		cardbase.addCard(card);
+		System.out.println("Added " + card.count + "x " + card.name + ".");
 		savePrompt = true;
 		lastAction = Action.ADD;
-		lastAction.set(card, count);
+		lastAction.card = card;
 	}
 
 	/**
 	 * Remove the specified count of the specified card
 	 * from the cardbase.
 	 * 
-	 * @param card the card to remove.
-	 * @param count the number of times to remove it.
+	 * @param card the card to remove, set this object's count field
+	 * to determine how many of the card to remove.
 	 */
-	private void removeCard(Card card, Integer count) {
-		Integer removed = cardbase.removeCard(card, count); 
+	private void removeCard(Card card) {
+		Integer removed = cardbase.removeCard(card); 
 		if (removed > 0) {
 			System.out.println("Removed " + removed + "x " + card.name + ".");
 			savePrompt = true;
 			lastAction = Action.REMOVE;
-			lastAction.set(card, removed);
+			lastAction.card = card;
 		} else {
 			System.out.println(card.name + " is not in the cardbase.");
 		}

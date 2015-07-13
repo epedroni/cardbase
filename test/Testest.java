@@ -1,12 +1,10 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.decks.StandaloneDeck;
 import eu.equalparts.cardbase.utils.JSON;

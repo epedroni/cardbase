@@ -83,15 +83,15 @@ public class Cardbase {
 	 * If the card is not already in the cardbase, it is added.
 	 * If it is already present, the count is simply updated.
 	 * 
-	 * @param cardToAdd the card to be added.
-	 * @param count the amount of the card to be added.
+	 * @param cardToAdd the card to be added. The count value
+	 * of this object is added to the existing count if the card
+	 * already exists.
 	 */
-	public void addCard(Card cardToAdd, Integer count) {
+	public void addCard(Card cardToAdd) {
 		Card card = getCard(cardToAdd.setCode, cardToAdd.number);
 		if (card != null) {
-			card.count += count;
+			card.count += cardToAdd.count;
 		} else {
-			cardToAdd.count = count;
 			cards.put(UID.makeHash(cardToAdd), cardToAdd);
 		}
 	}
@@ -112,16 +112,16 @@ public class Cardbase {
 	 * @param count the amount of the card to be removed.
 	 * @return the number of cards actually removed.
 	 */
-	public Integer removeCard(Card cardToRemove, Integer count) {
+	public Integer removeCard(Card cardToRemove) {
 		Card card = getCard(cardToRemove.setCode, cardToRemove.number);
 		Integer removed = 0;
 		if (card != null) {
-			if (card.count <= count) {
+			if (card.count <= cardToRemove.count) {
 				cards.remove(UID.makeHash(card));
 				removed = card.count;
 			} else {
-				card.count -= count;
-				removed = count;
+				card.count -= cardToRemove.count;
+				removed = cardToRemove.count;
 			}
 		}
 		return removed;

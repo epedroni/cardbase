@@ -40,7 +40,7 @@ public class CardbaseSortTest {
 	public void setUp() throws Exception {
 		cardbase = new Cardbase();
 		for (Card card : testCards) {
-			cardbase.addCard(card, 1);
+			cardbase.addCard(card);
 		}
 	}
 
@@ -304,21 +304,93 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void test_sortByImageName() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("number");
+		Collection<Card> sortedCards = cardbase.sort("imageName");
 		int i = 0;
 		String[] names = {
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
+				"callow jushi",
+				"coerced confession",
+				"disrupting shoal",
+				"khalni hydra",
+				"nightmare",
+				"shivan dragon",
+				"sorin markov",
+				"ugin's construct",
 		};
 		for (Card card : sortedCards) {
 			assertTrue(card.imageName + " should have been " + names[i] + ", i = " + i, card.imageName.equals(names[i]));
 			i++;
 		}
 	}
+	
+	@Test
+	public void test_sortByWatermark() throws Exception {
+		Collection<Card> sortedCards = cardbase.sort("watermark");
+		int i = 0;
+		String[] watermarks = {
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"Dimir",
+		};
+		for (Card card : sortedCards) {
+			String watermark = card.watermark != null ? card.watermark : "";
+			assertTrue(watermark + " should have been " + watermarks[i] + ", i = " + i, watermark.equals(watermarks[i]));
+			i++;
+		}
+	}
+	
+	@Test
+	public void test_sortBySetCode() throws Exception {
+		Collection<Card> sortedCards = cardbase.sort("setCode");
+		int i = 0;
+		String[] sets = {
+				"BOK",
+				"BOK",
+				"FRF",
+				"GTC",
+				"M12",
+				"M15",
+				"M15",
+				"ROE",
+		};
+		for (Card card : sortedCards) {
+			assertTrue(card.setCode + " should have been " + sets[i] + ", i = " + i, card.setCode.equals(sets[i]));
+			i++;
+		}
+	}
+	
+	public void test_sortByImageCode() throws Exception {
+		Collection<Card> sortedCards = cardbase.sort("imageCode");
+		int i = 0;
+		String[] codes = {
+				"bok",
+				"bok",
+				"frf",
+				"gtc",
+				"m12",
+				"m15",
+				"m15",
+				"roe",
+		};
+		for (Card card : sortedCards) {
+			assertTrue(card.imageCode + " should have been " + codes[i] + ", i = " + i, card.imageCode.equals(codes[i]));
+			i++;
+		}
+	}
+	
+	@Test
+	public void test_sortByCount() throws Exception {
+		Collection<Card> sortedCards = cardbase.sort("count");
+		int i = 0;
+		Integer[] counts = {1, 1, 1, 1, 2, 3, 8, 15 };
+		for (Card card : sortedCards) {
+			assertTrue(card.count + " should have been " + counts[i] + ", i = " + i, card.count.equals(counts[i]));
+			i++;
+		}
+	}
+	
 }

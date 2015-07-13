@@ -24,7 +24,6 @@ public class Card {
 	public Integer loyalty;
 	public Integer multiverseid;
 	public String imageName;
-	public String border;
 	public String watermark;
 
 	// Not part of upstream JSON
@@ -51,7 +50,6 @@ public class Card {
 		clone.loyalty = this.loyalty;
 		clone.multiverseid = this.multiverseid;
 		clone.imageName = this.imageName;
-		clone.border = this.border;
 		clone.watermark = this.watermark;
 		clone.setCode = this.setCode;
 		clone.imageCode = this.imageCode;
