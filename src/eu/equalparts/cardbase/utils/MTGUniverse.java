@@ -12,9 +12,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import eu.equalparts.cardbase.data.Card;
-import eu.equalparts.cardbase.data.CardSetInformation;
-import eu.equalparts.cardbase.data.FullCardSet;
+import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.cards.CardSetInformation;
+import eu.equalparts.cardbase.cards.FullCardSet;
 
 /**
  * Access point to the complete set of cards that exist in the

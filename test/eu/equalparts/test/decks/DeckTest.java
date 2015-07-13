@@ -7,11 +7,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import eu.equalparts.cardbase.Cardbase;
-import eu.equalparts.cardbase.data.Card;
-import eu.equalparts.cardbase.data.ReferenceDeck;
-import eu.equalparts.cardbase.data.StandaloneDeck;
+import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.decks.ReferenceDeck;
+import eu.equalparts.cardbase.decks.StandaloneDeck;
 import eu.equalparts.cardbase.utils.JSON;
+import eu.equalparts.cardbase.utils.UID;
 
 public class DeckTest {
 	
@@ -40,13 +40,10 @@ public class DeckTest {
 				referenceDeck.swamps == standaloneDeck.swamps &&
 				referenceDeck.mountains == standaloneDeck.mountains &&
 				referenceDeck.forests == standaloneDeck.forests;
-		
 		assertTrue("Metadata was not correctly set.", condition);
 		assertEquals("Wrong number of cards.", referenceDeck.cardReferences.size(), standaloneDeck.cards.size());
-		
 		for (Card card : standaloneDeck.cards) {
-			System.out.println("Checking card: " + card.name);
-			Integer count = referenceDeck.cardReferences.get(Cardbase.makeHash(card));
+			Integer count = referenceDeck.cardReferences.get(UID.makeHash(card));
 			assertNotNull("Reference missing in deck.", count);
 			assertEquals("Card count is wrong.", card.count, count);
 		}

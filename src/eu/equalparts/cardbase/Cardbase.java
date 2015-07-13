@@ -14,11 +14,12 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.comparator.CardComparator;
-import eu.equalparts.cardbase.data.Card;
-import eu.equalparts.cardbase.data.ReferenceDeck;
-import eu.equalparts.cardbase.data.StandaloneDeck;
+import eu.equalparts.cardbase.decks.ReferenceDeck;
+import eu.equalparts.cardbase.decks.StandaloneDeck;
 import eu.equalparts.cardbase.utils.JSON;
+import eu.equalparts.cardbase.utils.UID;
 
 /**
  * Provides a variety of utility methods to interact with an optionally loaded cardbase.
@@ -40,11 +41,7 @@ public class Cardbase {
 	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
 	 * information to be printed to the console.
 	 */
-	public static final boolean DEBUG = System.getenv("CB_DEBUG") != null; 
-	/**
-	 * Used in the hash generation.
-	 */
-	private static final String HASH_DIVIDER = "~";
+	public static final boolean DEBUG = System.getenv("CB_DEBUG") != null;
 	
 	/**
 	 * Initialises the cardbase with the contents of a file.
@@ -95,7 +92,7 @@ public class Cardbase {
 			card.count += count;
 		} else {
 			cardToAdd.count = count;
-			cards.put(makeHash(cardToAdd), cardToAdd);
+			cards.put(UID.makeHash(cardToAdd), cardToAdd);
 		}
 	}
 
@@ -120,7 +117,7 @@ public class Cardbase {
 		Integer removed = 0;
 		if (card != null) {
 			if (card.count <= count) {
-				cards.remove(makeHash(card));
+				cards.remove(UID.makeHash(card));
 				removed = card.count;
 			} else {
 				card.count -= count;
@@ -162,7 +159,7 @@ public class Cardbase {
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	public Card getCard(String setCode, String number) {
-		return cards.get(makeHash(setCode, number));
+		return cards.get(UID.makeHash(setCode, number));
 	}
 	
 	/**
@@ -177,27 +174,6 @@ public class Cardbase {
 		return cards.get(hash);
 	}
 	
-	/**
-	 * Generate the hash used as a key in the storage map.
-	 * 
-	 * @param setCode the card's set code.
-	 * @param number the card's set number.
-	 * @return the generated hash.
-	 */
-	public static String makeHash(String setCode, String number) {
-		return setCode + HASH_DIVIDER + number;
-	}
-	
-	/**
-	 * Generate the hash used as a key in the storage map.
-	 * 
-	 * @param the {@code Card} whose hash is desired.
-	 * @return the generated hash.
-	 */
-	public static String makeHash(Card card) {
-		return card.setCode + HASH_DIVIDER + card.number;
-	}
-	
 	public Map<String, ReferenceDeck> getDecks() {
 		return Collections.unmodifiableMap(decks);
 	}
@@ -205,7 +181,7 @@ public class Cardbase {
 	public List<Card> getMissingCards(StandaloneDeck deckToCheck) {
 		List<Card> missingCards = new ArrayList<Card>();
 		for (Card card : deckToCheck.cards) {
-			String hash = makeHash(card);
+			String hash = UID.makeHash(card);
 			if (cards.containsKey(hash)) {
 				if (cards.get(hash).count < card.count) {
 					Card missingCard = card.clone();

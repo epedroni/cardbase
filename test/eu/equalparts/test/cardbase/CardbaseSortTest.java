@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import eu.equalparts.cardbase.Cardbase;
-import eu.equalparts.cardbase.data.Card;
+import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.utils.JSON;
 
 /**

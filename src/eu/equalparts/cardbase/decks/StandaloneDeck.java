@@ -1,7 +1,9 @@
-package eu.equalparts.cardbase.data;
+package eu.equalparts.cardbase.decks;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import eu.equalparts.cardbase.cards.Card;
 
 public class StandaloneDeck extends Deck {
 	

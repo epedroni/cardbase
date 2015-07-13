@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase.data;
+package eu.equalparts.cardbase.cards;
 
 import eu.equalparts.cardbase.comparator.SpecialFields.DirtyNumber;
 import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;

@@ -1,9 +1,10 @@
-package eu.equalparts.cardbase.data;
+package eu.equalparts.cardbase.decks;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.equalparts.cardbase.Cardbase;
+import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.utils.UID;
 
 public class ReferenceDeck extends Deck {
 
@@ -22,7 +23,7 @@ public class ReferenceDeck extends Deck {
 		this.forests = deck.forests;
 		
 		for (Card card : deck.cards) {
-			cardReferences.put(Cardbase.makeHash(card), card.count);
+			cardReferences.put(UID.makeHash(card), card.count);
 		}
 	}
 	

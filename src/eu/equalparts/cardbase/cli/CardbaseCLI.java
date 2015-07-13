@@ -13,9 +13,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.Cardbase;
-import eu.equalparts.cardbase.data.Card;
-import eu.equalparts.cardbase.data.FullCardSet;
-import eu.equalparts.cardbase.data.CardSetInformation;
+import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.cards.CardSetInformation;
+import eu.equalparts.cardbase.cards.FullCardSet;
 import eu.equalparts.cardbase.utils.MTGUniverse;
 
 /**

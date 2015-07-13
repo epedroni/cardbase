@@ -8,9 +8,9 @@ import java.util.Comparator;
 import java.util.function.BiFunction;
 
 import eu.equalparts.cardbase.Cardbase;
+import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.comparator.SpecialFields.DirtyNumber;
 import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;
-import eu.equalparts.cardbase.data.Card;
 
 /**
  * I'm new to this reflection business, so bear with me.
