@@ -1,3 +1,4 @@
 * test deck stuff
 * do cardbase deck tests
-* do CLI tests ASAP
+* do cardbase add/remove tests ASAP
+* add sorting to CLI
