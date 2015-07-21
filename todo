@@ -1,4 +1,8 @@
-* test deck stuff
-* do cardbase deck tests
-* do cardbase add/remove tests ASAP
-* add sorting to CLI
+Test:
+ * construction
+ * saving
+ * add card
+ * remove card
+ * get card
+ * get cards
+ * sorting

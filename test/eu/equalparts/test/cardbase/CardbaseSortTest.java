@@ -45,7 +45,7 @@ public class CardbaseSortTest {
 	}
 
 	@Test
-	public void test_sortByName() throws Exception {
+	public void sortByName() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("name");
 		int i = 0;
 		String[] names = {
@@ -65,7 +65,7 @@ public class CardbaseSortTest {
 	}
 
 	@Test
-	public void test_sortByLayout() throws Exception {
+	public void sortByLayout() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("layout");
 		int i = 0;
 		String[] layouts = {
@@ -85,7 +85,7 @@ public class CardbaseSortTest {
 	}
 
 	@Test
-	public void test_sortByManaCost() throws Exception {
+	public void sortByManaCost() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("manaCost");
 		int i = 0;
 		String[] costs = {
@@ -105,7 +105,7 @@ public class CardbaseSortTest {
 	}
 
 	@Test
-	public void test_sortByCMC() throws Exception {
+	public void sortByCMC() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("cmc");
 		int i = 0;
 		Integer[] cmcs = {2, 3, 4, 5, 6, 6, 6, 8};
@@ -116,7 +116,7 @@ public class CardbaseSortTest {
 	}
 
 	@Test
-	public void test_sortByType() throws Exception {
+	public void sortByType() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("type");
 		int i = 0;
 		String[] types = {
@@ -136,7 +136,7 @@ public class CardbaseSortTest {
 	}
 
 	@Test
-	public void test_sortByRarity() throws Exception {
+	public void sortByRarity() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("rarity");
 		int i = 0;
 		String[] rarities = {
@@ -156,7 +156,7 @@ public class CardbaseSortTest {
 	}
 
 	@Test
-	public void test_sortByText() throws Exception {
+	public void sortByText() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("text");
 		int i = 0;
 		String[] texts = {
@@ -176,7 +176,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByFlavor() throws Exception {
+	public void sortByFlavor() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("flavor");
 		int i = 0;
 		String[] flavors = {
@@ -197,7 +197,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByArtist() throws Exception {
+	public void sortByArtist() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("artist");
 		int i = 0;
 		String[] artists = {
@@ -217,7 +217,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByNumber() throws Exception {
+	public void sortByNumber() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("number");
 		int i = 0;
 		String[] numbers = {
@@ -237,7 +237,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByPower() throws Exception {
+	public void sortByPower() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("power");
 		int i = 0;
 		String[] powers = {
@@ -258,7 +258,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByToughness() throws Exception {
+	public void sortByToughness() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("power");
 		int i = 0;
 		String[] toughnesses = {
@@ -279,7 +279,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByLoyalty() throws Exception {
+	public void sortByLoyalty() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("loyalty");
 		int i = 0;
 		Integer[] loyalties = {0, 0, 0, 0, 0, 0, 0, 4};
@@ -291,7 +291,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByMultiverseID() throws Exception {
+	public void sortByMultiverseID() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("multiverseid");
 		int i = 0;
 		Integer[] ids = {74128, 74489, 193551, 238330, 366408, 383168, 383172, 391949 };
@@ -303,7 +303,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByImageName() throws Exception {
+	public void sortByImageName() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("imageName");
 		int i = 0;
 		String[] names = {
@@ -323,7 +323,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByWatermark() throws Exception {
+	public void sortByWatermark() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("watermark");
 		int i = 0;
 		String[] watermarks = {
@@ -344,7 +344,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortBySetCode() throws Exception {
+	public void sortBySetCode() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("setCode");
 		int i = 0;
 		String[] sets = {
@@ -363,7 +363,7 @@ public class CardbaseSortTest {
 		}
 	}
 	
-	public void test_sortByImageCode() throws Exception {
+	public void sortByImageCode() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("imageCode");
 		int i = 0;
 		String[] codes = {
@@ -383,7 +383,7 @@ public class CardbaseSortTest {
 	}
 	
 	@Test
-	public void test_sortByCount() throws Exception {
+	public void sortByCount() throws Exception {
 		Collection<Card> sortedCards = cardbase.sort("count");
 		int i = 0;
 		Integer[] counts = {1, 1, 1, 1, 2, 3, 8, 15 };

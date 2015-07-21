@@ -420,8 +420,8 @@ public class CardbaseCLI {
 	 * count field to determine the count to add.
 	 */
 	private void addCard(Card card) {
-		cardbase.addCard(card);
 		System.out.println("Added " + card.count + "x " + card.name + ".");
+		cardbase.addCard(card);
 		savePrompt = true;
 		lastAction = Action.ADD;
 		lastAction.card = card;
