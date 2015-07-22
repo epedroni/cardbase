@@ -1,6 +1,8 @@
 Cardbase:
- * get card(s)
  * decks
  
 CardbaseCLI:
- * everything
+ * construction
+ * user input sanity
+ * command methods
+ * 

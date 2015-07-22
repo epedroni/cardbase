@@ -134,6 +134,16 @@ public class CardbaseCLI {
 		}
 
 	}
+	
+	/**
+	 * Properly sanitise user input.
+	 * 
+	 * @param input the raw input from the user.
+	 * @return an array of strings, where the first element is the command and subsequent elements are the arguments.
+	 */
+	public String[] sanitiseInput(String input) {
+		return input.trim().split("[ \t]+");
+	}
 
 	/**
 	 * Read stdin for user input, sanitise and interpret any commands entered.
@@ -146,9 +156,9 @@ public class CardbaseCLI {
 				// print prompt
 				System.out.print(selectedSet == null ? "> " : selectedSet.code + " > ");
 				// condition input and interpret
-				String[] raw = consoleReader.readLine().trim().split("[ \t]+");
-				String command = raw[0];
-				String[] args = Arrays.copyOfRange(raw, 1, raw.length);
+				String[] input = sanitiseInput(consoleReader.readLine());
+				String command = input[0];
+				String[] args = Arrays.copyOfRange(input, 1, input.length);
 
 				if (command.equalsIgnoreCase("help")) {
 					help();

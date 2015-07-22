@@ -25,7 +25,10 @@ public class CardbaseCLITest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+	
+	/***********************************************************************************
+	 * Constructor tests, happy path
+	 ***********************************************************************************/
 	@Test
 	public void test() {
 		fail("Not yet implemented");
