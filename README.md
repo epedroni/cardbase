@@ -2,12 +2,6 @@
 
 The primary purpose of cardbase is to create a digital representation of your own MTG collection. A cardbase file (.cb) is simply a JSON file containing a list of card objects and associated unique keys. The card data structure used is derived from that used in [MTG JSON](http://mtgjson.com/), and in fact that is where most of the data comes from right now.
 
-To-do list:
-* Build basic GUI to visualise the cards
-* Basic deck building - decks can be built and stored
-* Statistical deck analysis - cost distribution, etc
-
-
 ## Command Line Interface (CLI) - cardbasecli
 
 ### Loading a Cardbase

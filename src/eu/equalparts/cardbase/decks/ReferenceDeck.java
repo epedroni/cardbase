@@ -4,11 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.utils.UID;
 
 public class ReferenceDeck extends Deck {
 
-	public Map<String, Integer> cardReferences = new HashMap<String, Integer>();
+	public Map<Integer, Integer> cardReferences = new HashMap<Integer, Integer>();
 	
 	public ReferenceDeck() {
 		
@@ -23,7 +22,7 @@ public class ReferenceDeck extends Deck {
 		this.forests = deck.forests;
 		
 		for (Card card : deck.cards) {
-			cardReferences.put(UID.makeHash(card), card.count);
+			cardReferences.put(card.hashCode(), card.count);
 		}
 	}
 	

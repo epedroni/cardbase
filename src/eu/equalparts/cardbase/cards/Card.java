@@ -57,5 +57,39 @@ public class Card {
 		
 		return clone;
 	}
+
+	public static int makeHash(String setCode, String number) {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((number == null) ? 0 : number.hashCode());
+		result = prime * result + ((setCode == null) ? 0 : setCode.hashCode());
+		return result;
+	}
 	
+	@Override
+	public int hashCode() {
+		return makeHash(setCode, number);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Card other = (Card) obj;
+		if (number == null) {
+			if (other.number != null)
+				return false;
+		} else if (!number.equals(other.number))
+			return false;
+		if (setCode == null) {
+			if (other.setCode != null)
+				return false;
+		} else if (!setCode.equals(other.setCode))
+			return false;
+		return true;
+	}
 }

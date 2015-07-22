@@ -11,10 +11,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.utils.JSON;
 
 /**
  * Tests the sorting functionality.
@@ -29,7 +29,8 @@ public class CardbaseSortTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		testCards = JSON.mapper.readValue(CardbaseSortTest.class.getResourceAsStream("testcards.json"), new TypeReference<List<Card>>() {});
+		ObjectMapper mapper = new ObjectMapper();
+		testCards = mapper.readValue(CardbaseSortTest.class.getResourceAsStream("testcards.json"), new TypeReference<List<Card>>() {});
 	}
 
 	@AfterClass

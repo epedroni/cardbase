@@ -1,8 +1,6 @@
-Test:
- * construction
- * saving
- * add card
- * remove card
- * get card
- * get cards
- * sorting
+Cardbase:
+ * get card(s)
+ * decks
+ 
+CardbaseCLI:
+ * everything

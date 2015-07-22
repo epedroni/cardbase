@@ -19,7 +19,6 @@ import eu.equalparts.cardbase.comparator.CardComparator;
 import eu.equalparts.cardbase.decks.ReferenceDeck;
 import eu.equalparts.cardbase.decks.StandaloneDeck;
 import eu.equalparts.cardbase.utils.JSON;
-import eu.equalparts.cardbase.utils.UID;
 
 /**
  * Provides a variety of utility methods to interact with an optionally loaded cardbase.
@@ -32,7 +31,7 @@ public class Cardbase {
 	 * The cards in the cardbase, set in key-value pairs where the key is the card hash,
 	 * generated using {makeHash()}.
 	 */
-	private Map<String, Card> cards;
+	private Map<Integer, Card> cards;
 	/**
 	 * The decks which have been saved along with this collection of cards.
 	 */
@@ -53,14 +52,14 @@ public class Cardbase {
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public Cardbase(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
-		cards = JSON.mapper.readValue(cardbaseFile, new TypeReference<Map<String, Card>>() {});
+		cards = JSON.mapper.readValue(cardbaseFile, new TypeReference<Map<Integer, Card>>() {});
 	}
 	
 	/**
 	 * Initialises a clean cardbase.
 	 */
 	public Cardbase() {
-		cards = new HashMap<String, Card>();
+		cards = new HashMap<Integer, Card>();
 		decks = new HashMap<String, ReferenceDeck>();
 	}
 
@@ -88,11 +87,11 @@ public class Cardbase {
 	 * already exists.
 	 */
 	public void addCard(Card cardToAdd) {
-		Card card = getCard(cardToAdd.setCode, cardToAdd.number);
+		Card card = getCardByHash(cardToAdd.hashCode());
 		if (card != null) {
 			card.count += cardToAdd.count;
 		} else {
-			cards.put(UID.makeHash(cardToAdd), cardToAdd);
+			cards.put(cardToAdd.hashCode(), cardToAdd);
 		}
 	}
 
@@ -113,11 +112,11 @@ public class Cardbase {
 	 * @return the number of cards actually removed.
 	 */
 	public Integer removeCard(Card cardToRemove) {
-		Card card = getCard(cardToRemove.setCode, cardToRemove.number);
+		Card card = getCardByHash(cardToRemove.hashCode());
 		Integer removed = 0;
 		if (card != null) {
 			if (card.count <= cardToRemove.count) {
-				cards.remove(UID.makeHash(card));
+				cards.remove(card.hashCode());
 				removed = card.count;
 			} else {
 				card.count -= cardToRemove.count;
@@ -127,6 +126,30 @@ public class Cardbase {
 		return removed;
 	}
 
+//	/**
+//	 * Returns a card from the cardbase by set code and number.
+//	 * If no such card is in the cardbase, returns null.
+//	 * 
+//	 * @param setCode the set to which the requested card belongs.
+//	 * @param number the requested card's set number.
+//	 * @return the requested {@code Card} or null if no card is found.
+//	 */
+	public Card getCard(String setCode, String number) {
+		return cards.get(Card.makeHash(setCode, number));
+	}
+	
+	/**
+	 * Returns a card from the cardbase by hash. The card's hash
+	 * can be generated using {@code Cardbase.makeHash()}.
+	 * If no such card is in the cardbase, returns null.
+	 * 
+	 * @param hash the Cardbase hash of the requested card.
+	 * @return the requested {@code Card} or null if no card is found.
+	 */
+	protected Card getCardByHash(Integer hash) {
+		return cards.get(hash);
+	}
+	
 	/**
 	 * This method is intended to allow iteration directly on the list of cards,
 	 * while at the same time retaining control over the insert and remove procedures.
@@ -150,30 +173,6 @@ public class Cardbase {
 		return Collections.unmodifiableCollection(sortedCards);
 	}
 	
-	/**
-	 * Returns a card from the cardbase by set code and number.
-	 * If no such card is in the cardbase, returns null.
-	 * 
-	 * @param setCode the set to which the requested card belongs.
-	 * @param number the requested card's set number.
-	 * @return the requested {@code Card} or null if no card is found.
-	 */
-	public Card getCard(String setCode, String number) {
-		return cards.get(UID.makeHash(setCode, number));
-	}
-	
-	/**
-	 * Returns a card from the cardbase by hash. The card's hash
-	 * can be generated using {@code Cardbase.makeHash()}.
-	 * If no such card is in the cardbase, returns null.
-	 * 
-	 * @param hash the Cardbase hash of the requested card.
-	 * @return the requested {@code Card} or null if no card is found.
-	 */
-	public Card getCardByHash(String hash) {
-		return cards.get(hash);
-	}
-	
 	public Map<String, ReferenceDeck> getDecks() {
 		return Collections.unmodifiableMap(decks);
 	}
@@ -181,7 +180,7 @@ public class Cardbase {
 	public List<Card> getMissingCards(StandaloneDeck deckToCheck) {
 		List<Card> missingCards = new ArrayList<Card>();
 		for (Card card : deckToCheck.cards) {
-			String hash = UID.makeHash(card);
+			Integer hash = card.hashCode();
 			if (cards.containsKey(hash)) {
 				if (cards.get(hash).count < card.count) {
 					Card missingCard = card.clone();
@@ -217,7 +216,7 @@ public class Cardbase {
 			standaloneDeck.mountains = referenceDeck.mountains;
 			standaloneDeck.forests = referenceDeck.forests;
 			
-			for (String cardHash : referenceDeck.cardReferences.keySet()) {
+			for (Integer cardHash : referenceDeck.cardReferences.keySet()) {
 				Card card = getCardByHash(cardHash);
 				if (card != null) {
 					// must clone otherwise the original count is affected too

@@ -8,9 +8,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.equalparts.cardbase.decks.StandaloneDeck;
 import eu.equalparts.cardbase.decks.Statistics;
-import eu.equalparts.cardbase.utils.JSON;
 
 public class StatisticsTest {
 
@@ -18,7 +19,8 @@ public class StatisticsTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		testDeck = JSON.mapper.readValue(StatisticsTest.class.getResourceAsStream("deck.cbd"), StandaloneDeck.class);
+		ObjectMapper mapper = new ObjectMapper();
+		testDeck = mapper.readValue(StatisticsTest.class.getResourceAsStream("deck.cbd"), StandaloneDeck.class);
 	}
 
 	@AfterClass

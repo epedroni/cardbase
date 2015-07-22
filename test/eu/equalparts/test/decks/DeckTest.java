@@ -7,11 +7,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.decks.ReferenceDeck;
 import eu.equalparts.cardbase.decks.StandaloneDeck;
-import eu.equalparts.cardbase.utils.JSON;
-import eu.equalparts.cardbase.utils.UID;
 
 public class DeckTest {
 	
@@ -30,7 +30,8 @@ public class DeckTest {
 
 	@Test
 	public void test_createReferenceDeckFromStandaloneDeck() throws Exception {
-		StandaloneDeck standaloneDeck = JSON.mapper.readValue(getClass().getResourceAsStream("deck.cbd"), StandaloneDeck.class);
+		ObjectMapper mapper = new ObjectMapper();
+		StandaloneDeck standaloneDeck = mapper.readValue(getClass().getResourceAsStream("deck.cbd"), StandaloneDeck.class);
 		
 		ReferenceDeck referenceDeck = new ReferenceDeck(standaloneDeck);
 		
@@ -43,7 +44,7 @@ public class DeckTest {
 		assertTrue("Metadata was not correctly set.", condition);
 		assertEquals("Wrong number of cards.", referenceDeck.cardReferences.size(), standaloneDeck.cards.size());
 		for (Card card : standaloneDeck.cards) {
-			Integer count = referenceDeck.cardReferences.get(UID.makeHash(card));
+			Integer count = referenceDeck.cardReferences.get(card.hashCode());
 			assertNotNull("Reference missing in deck.", count);
 			assertEquals("Card count is wrong.", card.count, count);
 		}

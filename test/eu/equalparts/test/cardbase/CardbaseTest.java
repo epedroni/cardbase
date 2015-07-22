@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -13,11 +15,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.utils.JSON;
 
 /**
  * TODO deck functionality needs to be built into these.
@@ -35,7 +38,8 @@ public class CardbaseTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		shivanDragon = JSON.mapper.readValue(CardbaseTest.class.getResourceAsStream("shivandragon.json"), Card.class);
+		ObjectMapper mapper = new ObjectMapper();
+		shivanDragon = mapper.readValue(CardbaseTest.class.getResourceAsStream("shivandragon.json"), Card.class);
 	}
 
 	@AfterClass
@@ -53,7 +57,6 @@ public class CardbaseTest {
 	@Test
 	public void cleanCardbaseIsInitialised() throws Exception {
 		assertEquals("Card collection is not empty.", 0, cardbase.getCards().size());
-		assertEquals("Deck collection is not empty.", 0, cardbase.getDecks().size());
 	}
 	
 	@Test
@@ -89,6 +92,12 @@ public class CardbaseTest {
 	/*
 	 * Edge cases
 	 */
+	@Test
+	public void loadFileIsNull() throws Exception {
+		exception.expect(NullPointerException.class);
+		cardbase = new Cardbase(null);
+	}
+	
 	@Test
 	public void loadFileDoesNotExist() throws Exception {
 		exception.expect(IOException.class);
@@ -165,6 +174,12 @@ public class CardbaseTest {
 		}
 	}
 	
+	@Test
+	public void saveFileIsNull() throws Exception {
+		exception.expect(NullPointerException.class);
+		cardbase = new Cardbase(null);
+	}
+	
 	/***********************************************************************************
 	 * Adding card tests, happy path
 	 ***********************************************************************************/
@@ -190,8 +205,17 @@ public class CardbaseTest {
 		assertEquals("Card count was not updated correctly.", new Integer(3), addedCard.count);
 	}
 	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void cardAddedIsNull() throws Exception {
+		exception.expect(NullPointerException.class);
+		cardbase.addCard(null);
+	}
+	
 	/***********************************************************************************
-	 * Adding card tests, happy path
+	 * Removing card tests, happy path
 	 ***********************************************************************************/
 	@Test
 	public void cardRemoveCountIsLessThanCardCount() throws Exception {
@@ -232,5 +256,56 @@ public class CardbaseTest {
 		Card removedCard = cardbase.getCard("M15", "281");
 		assertNull("Card was not removed from cardbase.", removedCard);
 		assertEquals("Cardbase reports wrong removed count.", 3, removed);
+	}
+	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void removedCardIsNull() throws Exception {
+		exception.expect(NullPointerException.class);
+		cardbase.removeCard(null);
+	}
+	
+	@Test
+	public void removedCardIsNotInCardbase() throws Exception {
+		int removed = cardbase.removeCard(shivanDragon);
+		
+		assertEquals("Removed count should be 0.", 0, removed);
+	}
+
+	/***********************************************************************************
+	 * Card getter tests, happy path
+	 ***********************************************************************************/
+	@Test
+	public void correctCardIsReturnedByGetter() throws Exception {
+		cardbase.addCard(shivanDragon.clone());
+		
+		Card card = cardbase.getCard("M15", "281");
+		
+		for (Field field : Card.class.getFields()) {
+			assertEquals("Field " + field.getName(), field.get(shivanDragon), field.get(card));
+		}
+	}
+	
+	@Test
+	public void correctCardCollectionIsReturnedByGetter() throws Exception {
+		cardbase = new Cardbase(new File(getClass().getResource("testbase.cb").toURI()));
+		Map<Integer, Card> cards = new ObjectMapper().readValue(getClass().getResourceAsStream("testbase.cb"), new TypeReference<Map<Integer, Card>>() {});
+		
+		assertTrue("Not all cards were returned by the getter.", cardbase.getCards().containsAll(cards.values()));
+	}
+	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void getCardIsNotInCardbase() throws Exception {
+		assertNull("Method should have returned null", cardbase.getCard("M15", "281"));
+	}
+	
+	@Test
+	public void cardCollectionWhenCardbaseIsEmpty() throws Exception {
+		assertEquals("Returned collection size should have been 0.", 0, cardbase.getCards().size());
 	}
 }
