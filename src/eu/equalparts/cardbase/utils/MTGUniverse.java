@@ -98,7 +98,7 @@ public final class MTGUniverse {
 			if (cardSetCache.containsKey(validCode)) {
 				requestedSet = cardSetCache.get(validCode);
 			} 
-			// not cached; fetch, cache and return it
+			// not cached; fetch and cache
 			else {
 				requestedSet = parseFullSet(JSON.mapper.readValue(new URL(BASE_DATA_URL + validCode + ".json"), JsonNode.class));
 				cardSetCache.put(validCode, requestedSet);
@@ -217,7 +217,7 @@ public final class MTGUniverse {
 		 * These fields are optional and are set to null if not present.
 		 */
 		fcs.gathererCode = jsonTree.hasNonNull("gathererCode") ? jsonTree.get("gathererCode").asText() : null;
-		fcs.border = jsonTree.hasNonNull("border") ? jsonTree.get("border").asText() : null;	
+		fcs.border = jsonTree.hasNonNull("border") ? jsonTree.get("border").asText() : null;
 		fcs.type = jsonTree.hasNonNull("type") ? jsonTree.get("type").asText() : null;
 		fcs.block = jsonTree.hasNonNull("block") ? jsonTree.get("block").asText() : null;
 		

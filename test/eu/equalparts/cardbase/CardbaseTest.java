@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.testutils.TestFile;
+import eu.equalparts.cardbase.testutils.TestUtils;
 
 /**
  * TODO deck functionality needs to be built into these.
@@ -39,7 +41,7 @@ public class CardbaseTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		testCard = mapper.readValue(CardbaseTest.class.getResourceAsStream("shivandragon.json"), Card.class);
+		testCard = mapper.readValue(CardbaseTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
 	}
 
 	@AfterClass
@@ -61,7 +63,7 @@ public class CardbaseTest {
 	
 	@Test
 	public void fileCardbaseIsInitialised() throws Exception {
-		uut = new Cardbase(new File(getClass().getResource("testbase.cb").toURI()));
+		uut = new Cardbase(new File(getClass().getResource("/testbase.cb").toURI()));
 		
 		assertEquals("Card collection contains the wrong number of card entries.", 6, uut.getCards().size());
 		
@@ -107,40 +109,21 @@ public class CardbaseTest {
 	@Test
 	public void loadFileHasWrongStructure() throws Exception {
 		exception.expect(JsonMappingException.class);
-		uut = new Cardbase(new File(getClass().getResource("testcards.json").toURI()));
+		uut = new Cardbase(new File(getClass().getResource("/testcards.json").toURI()));
 	}
 	
 	@Test
 	public void loadFileIsNotJson() throws Exception {
 		exception.expect(JsonParseException.class);
-		uut = new Cardbase(new File(getClass().getResource("notjson.txt").toURI()));
+		uut = new Cardbase(new File(getClass().getResource("/notjson.txt").toURI()));
 	}
 	
 	/***********************************************************************************
 	 * Saving cardbase tests, happy path
 	 ***********************************************************************************/
-	private boolean validateSaveFile(File testFile) throws IOException {
-		if (!testFile.exists()) {
-			if (testFile.createNewFile()) {
-				if (testFile.canWrite()) {
-					return true;
-				} else {
-					fail("Cannot write to testsave.cb, aborting...");
-				}
-			} else {
-				fail("testsave.cb could not be created, aborting...");
-			}
-		} else {
-			fail("testsave.cb already exists, aborting...");
-		}
-		return false;
-	}
-	
 	@Test
 	public void cardbaseIsSaved() throws Exception {
-		File testFile = new File("savetest.cb");
-		validateSaveFile(testFile);
-		try {
+		try (TestFile testFile = TestUtils.createValidTestFile("savetest.cb")) {
 			uut.writeCollection(testFile);
 			uut = new Cardbase(testFile);
 			assertEquals("Cardbase should contain no cards.", 0, uut.getCards().size());
@@ -153,8 +136,6 @@ public class CardbaseTest {
 			Card card = uut.getCard("M15", "281");
 			assertNotNull("Cardbase should contain a Shivan Dragon.", card);
 			assertEquals("Cardbase should contain only one Shivan Dragon", new Integer(1), card.count);
-		} finally {
-			testFile.delete();
 		}
 	}
 	
@@ -163,14 +144,10 @@ public class CardbaseTest {
 	 */
 	@Test
 	public void saveFileCannotBeWrittenTo() throws Exception {
-		File testFile = new File("savetest.cb");
-		validateSaveFile(testFile);
-		testFile.setWritable(false);
-		try {
+		try (TestFile testFile = TestUtils.createValidTestFile("savetest.cb")) {
+			testFile.setWritable(false);
 			exception.expect(IOException.class);
 			uut.writeCollection(testFile);
-		} finally {
-			testFile.delete();
 		}
 	}
 	
@@ -290,8 +267,8 @@ public class CardbaseTest {
 	
 	@Test
 	public void correctCardCollectionIsReturnedByGetter() throws Exception {
-		uut = new Cardbase(new File(getClass().getResource("testbase.cb").toURI()));
-		Map<Integer, Card> cards = new ObjectMapper().readValue(getClass().getResourceAsStream("testbase.cb"), new TypeReference<Map<Integer, Card>>() {});
+		uut = new Cardbase(new File(getClass().getResource("/testbase.cb").toURI()));
+		Map<Integer, Card> cards = new ObjectMapper().readValue(getClass().getResourceAsStream("/testbase.cb"), new TypeReference<Map<Integer, Card>>() {});
 		
 		assertTrue("Not all cards were returned by the getter.", uut.getCards().containsAll(cards.values()));
 	}

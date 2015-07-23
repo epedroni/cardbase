@@ -23,14 +23,14 @@ import eu.equalparts.cardbase.utils.MTGUniverse;
  * 
  * @author Eduardo Pedroni
  */
-public class CardbaseCLI {
+public final class CardbaseCLI {
 	
 	/**
 	 * Enum type to store actions.
 	 * 
 	 * @author Eduardo Pedroni
 	 */
-	private enum Action {
+	enum Action {
 		ADD, REMOVE;
 		public Card card;
 	}
@@ -38,19 +38,19 @@ public class CardbaseCLI {
 	/**
 	 * Location of the help file.
 	 */
-	private static final String HELP_FILE_PATH = "/help";
+	static final String HELP_FILE_PATH = "/help";
 	/**
 	 * Program version.
 	 */
-	private static final String VERSION = "1.0";
+	static final String VERSION = "1.0";
 	/**
 	 * The last action performed by the user.
 	 */
-	private Action lastAction = null;
+	Action lastAction = null;
 	/**
 	 * The currently selected set, from which new cards are added.
 	 */
-	private FullCardSet selectedSet = null;
+	FullCardSet selectedSet = null;
 	/**
 	 * The actual cardbase being interfaced with.
 	 */
@@ -58,20 +58,20 @@ public class CardbaseCLI {
 	/**
 	 * Printed to the console when the user enters the help command.
 	 */
-	private String help = "Not available, check project page on GitHub.";
+	String help = "Not available, check project page on GitHub.";
 	/**
 	 * The cardbase file off which we are currently working, if any.
 	 */
-	private File cardbaseFile = null;
+	File cardbaseFile = null;
 	/**
 	 * Save flag is raised when cards are added or removed and causes a prompt to be shown
 	 * if the user tries to exit with unsaved changed.
 	 */
-	private boolean savePrompt = false;
+	boolean savePrompt = false;
 	/**
 	 * Exit flag, program breaks out of the main loop when true.
 	 */
-	private boolean exit = false;
+	boolean exit = false;
 
 	/**
 	 * Execute the interface.
@@ -89,7 +89,7 @@ public class CardbaseCLI {
 	 * 
 	 * @param args a list of arguments. Only the first argument is used, as a cardbase JSON.
 	 */
-	public CardbaseCLI(String... args) {
+	CardbaseCLI(String... args) {
 		System.out.println("Welcome to Cardbase CLI!");
 
 		// set debug flag if we are debugging
@@ -140,14 +140,15 @@ public class CardbaseCLI {
 	 * @param input the raw input from the user.
 	 * @return an array of strings, where the first element is the command and subsequent elements are the arguments.
 	 */
-	public String[] sanitiseInput(String input) {
+	String[] sanitiseInput(String input) {
 		return input.trim().split("[ \t]+");
+
 	}
 
 	/**
 	 * Read stdin for user input, sanitise and interpret any commands entered.
 	 */
-	private void startInterface() {
+	void startInterface() {
 		BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
 		try {
 			// the main loop
@@ -194,7 +195,7 @@ public class CardbaseCLI {
 	/**
 	 * Print help to console.
 	 */
-	public void help() {
+	void help() {
 		System.out.println(help);
 	}
 
@@ -203,7 +204,7 @@ public class CardbaseCLI {
 	 *
 	 * @param args optionally the file to which to write.
 	 */
-	public void write(String[] args) {
+	void write(String... args) {
 		File outputFile;
 		// user-provided file overrides everything else
 		if (args != null && args.length > 0) {
@@ -240,14 +241,14 @@ public class CardbaseCLI {
 	/**
 	 * Print program version.
 	 */
-	public void version() {
+	void version() {
 		System.out.println("Cardbase v" + VERSION);
 	}
 	
 	/**
 	 * Exit procedure.
 	 */
-	public void exit() {
+	void exit() {
 		if (savePrompt) {
 			System.out.println("Don't forget to save. If you really wish to quit without saving, type \"exit\" again.");
 			savePrompt = false;
@@ -259,7 +260,7 @@ public class CardbaseCLI {
 	/**
 	 * Print a list of valid set codes.
 	 */
-	public void sets() {
+	void sets() {
 		for (CardSetInformation set : MTGUniverse.getCardSetList()) {
 			// CardSet has an overridden toString()
 			System.out.println(set);
@@ -271,7 +272,7 @@ public class CardbaseCLI {
 	 * 
 	 * @param args the code of the chosen set.
 	 */
-	public void set(String[] args) {
+	void set(String... args) {
 		if (args != null && args.length > 0) {
 			try {
 				selectedSet = MTGUniverse.getFullCardSet(args[0]);
@@ -301,7 +302,7 @@ public class CardbaseCLI {
 	/**
 	 * Print a brief list of the whole cardbase.
 	 */
-	public void glance() {
+	void glance() {
 		int total = 0;
 		for (Card card : cardbase.getCards()) {
 			printGlance(card);
@@ -315,7 +316,7 @@ public class CardbaseCLI {
 	 *
 	 * @param args optionally a card within the set (by number) to peruse.
 	 */
-	public void peruse(String[] args) {
+	void peruse(String... args) {
 		// if a card is specified, peruse only that
 		if (args != null && args.length > 0) {
 			if (selectedSet != null) {
@@ -342,7 +343,7 @@ public class CardbaseCLI {
 	/**
 	 * Undo previous action.
 	 */
-	public void undo() {
+	void undo() {
 		if (lastAction != null) {
 			if (lastAction == Action.ADD) {
 				removeCard(lastAction.card);
@@ -361,7 +362,7 @@ public class CardbaseCLI {
 	 *
 	 * @param args the set number of the card to remove and optionally the count to be removed.
 	 */
-	public void remove(String[] args) {
+	void remove(String... args) {
 		if (selectedSet != null) {
 			if (args != null && args.length > 0) {
 				Card cardToRemove = selectedSet.getCardByNumber(args[0]);
@@ -393,7 +394,7 @@ public class CardbaseCLI {
 	 * @param number the number of the card to add.
 	 * @param args optionally the count to add.
 	 */
-	public void add(String number, String[] args) {
+	void add(String number, String... args) {
 		if (selectedSet != null) {
 			// a blank line after adding a card repeats the addition unlimitedly
 			if (number.isEmpty()) {
@@ -428,7 +429,7 @@ public class CardbaseCLI {
 	 * @param card the card to add, set this object's 
 	 * count field to determine the count to add.
 	 */
-	private void addCard(Card card) {
+	void addCard(Card card) {
 		System.out.println("Added " + card.count + "x " + card.name + ".");
 		cardbase.addCard(card);
 		savePrompt = true;
@@ -443,7 +444,7 @@ public class CardbaseCLI {
 	 * @param card the card to remove, set this object's count field
 	 * to determine how many of the card to remove.
 	 */
-	private void removeCard(Card card) {
+	void removeCard(Card card) {
 		Integer removed = cardbase.removeCard(card); 
 		if (removed > 0) {
 			System.out.println("Removed " + removed + "x " + card.name + ".");
@@ -462,7 +463,7 @@ public class CardbaseCLI {
 	 * @param name the file name candidate to sanitise.
 	 * @return the sanitised name.
 	 */
-	private String sanitiseFileName(String name) {
+	String sanitiseFileName(String name) {
 		// POSIX-compliant valid filename characters
 		name = name.replaceAll("[^-_.A-Za-z0-9]", "");
 		// extension is not indispensable, but good practice
@@ -478,7 +479,7 @@ public class CardbaseCLI {
 	 * 
 	 * @param card the card to glance.
 	 */
-	private void printGlance(Card card) {
+	void printGlance(Card card) {
 		System.out.println(String.format("%1$-4d %2$s (%3$s, %4$s)", card.count, card.name, card.setCode, card.number));
 	}
 
@@ -489,7 +490,7 @@ public class CardbaseCLI {
 	 * 
 	 * @param card the card to peruse.
 	 */
-	private void printPerusal(Card card) {
+	void printPerusal(Card card) {
 		printGlance(card);
 		if (card.type != null) System.out.println("\t" + card.type);
 		if (card.manaCost != null) System.out.println("\tCost: " + card.manaCost);

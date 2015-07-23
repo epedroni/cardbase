@@ -1,8 +1,9 @@
+TESTS
+
 Cardbase:
  * decks
  
 CardbaseCLI:
- * construction
  * user input sanity
  * command methods
  * 
