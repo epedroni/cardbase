@@ -1,4 +1,4 @@
-package eu.equalparts.test.cardbase;
+package eu.equalparts.cardbase;
 
 import static org.junit.Assert.assertTrue;
 
@@ -24,7 +24,7 @@ import eu.equalparts.cardbase.cards.Card;
  */
 public class CardbaseSortTest {
 
-	private Cardbase cardbase;
+	private Cardbase uut;
 	private static List<Card> testCards;
 
 	@BeforeClass
@@ -39,15 +39,15 @@ public class CardbaseSortTest {
 
 	@Before
 	public void setUp() throws Exception {
-		cardbase = new Cardbase();
+		uut = new Cardbase();
 		for (Card card : testCards) {
-			cardbase.addCard(card);
+			uut.addCard(card);
 		}
 	}
 
 	@Test
 	public void sortByName() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("name");
+		Collection<Card> sortedCards = uut.sort("name");
 		int i = 0;
 		String[] names = {
 				"Callow Jushi",
@@ -67,7 +67,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByLayout() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("layout");
+		Collection<Card> sortedCards = uut.sort("layout");
 		int i = 0;
 		String[] layouts = {
 				"flip",
@@ -87,7 +87,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByManaCost() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("manaCost");
+		Collection<Card> sortedCards = uut.sort("manaCost");
 		int i = 0;
 		String[] costs = {
 				"{1}{U}{U}",
@@ -107,7 +107,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByCMC() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("cmc");
+		Collection<Card> sortedCards = uut.sort("cmc");
 		int i = 0;
 		Integer[] cmcs = {2, 3, 4, 5, 6, 6, 6, 8};
 		for (Card card : sortedCards) {
@@ -118,7 +118,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByType() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("type");
+		Collection<Card> sortedCards = uut.sort("type");
 		int i = 0;
 		String[] types = {
 				"Artifact Creature — Construct",
@@ -138,7 +138,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByRarity() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("rarity");
+		Collection<Card> sortedCards = uut.sort("rarity");
 		int i = 0;
 		String[] rarities = {
 				"Uncommon",
@@ -158,7 +158,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByText() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("text");
+		Collection<Card> sortedCards = uut.sort("text");
 		int i = 0;
 		String[] texts = {
 				"+2: Sorin Markov deals 2 damage to target creature or player and you gain 2 life.\n−3: Target opponent's life total becomes 10.\n−7: You control target player during that player's next turn.",
@@ -178,7 +178,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByFlavor() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("flavor");
+		Collection<Card> sortedCards = uut.sort("flavor");
 		int i = 0;
 		String[] flavors = {
 				"",
@@ -199,7 +199,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByArtist() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("artist");
+		Collection<Card> sortedCards = uut.sort("artist");
 		int i = 0;
 		String[] artists = {
 				"Donato Giancola",
@@ -219,7 +219,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByNumber() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("number");
+		Collection<Card> sortedCards = uut.sort("number");
 		int i = 0;
 		String[] numbers = {
 				"31a",
@@ -239,7 +239,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByPower() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("power");
+		Collection<Card> sortedCards = uut.sort("power");
 		int i = 0;
 		String[] powers = {
 				"",
@@ -260,7 +260,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByToughness() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("power");
+		Collection<Card> sortedCards = uut.sort("power");
 		int i = 0;
 		String[] toughnesses = {
 				"",
@@ -281,7 +281,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByLoyalty() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("loyalty");
+		Collection<Card> sortedCards = uut.sort("loyalty");
 		int i = 0;
 		Integer[] loyalties = {0, 0, 0, 0, 0, 0, 0, 4};
 		for (Card card : sortedCards) {
@@ -293,7 +293,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByMultiverseID() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("multiverseid");
+		Collection<Card> sortedCards = uut.sort("multiverseid");
 		int i = 0;
 		Integer[] ids = {74128, 74489, 193551, 238330, 366408, 383168, 383172, 391949 };
 		for (Card card : sortedCards) {
@@ -305,7 +305,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByImageName() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("imageName");
+		Collection<Card> sortedCards = uut.sort("imageName");
 		int i = 0;
 		String[] names = {
 				"callow jushi",
@@ -325,7 +325,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByWatermark() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("watermark");
+		Collection<Card> sortedCards = uut.sort("watermark");
 		int i = 0;
 		String[] watermarks = {
 				"",
@@ -346,7 +346,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortBySetCode() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("setCode");
+		Collection<Card> sortedCards = uut.sort("setCode");
 		int i = 0;
 		String[] sets = {
 				"BOK",
@@ -365,7 +365,7 @@ public class CardbaseSortTest {
 	}
 	
 	public void sortByImageCode() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("imageCode");
+		Collection<Card> sortedCards = uut.sort("imageCode");
 		int i = 0;
 		String[] codes = {
 				"bok",
@@ -385,7 +385,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByCount() throws Exception {
-		Collection<Card> sortedCards = cardbase.sort("count");
+		Collection<Card> sortedCards = uut.sort("count");
 		int i = 0;
 		Integer[] counts = {1, 1, 1, 1, 2, 3, 8, 15 };
 		for (Card card : sortedCards) {

@@ -54,7 +54,7 @@ public class CardbaseCLI {
 	/**
 	 * The actual cardbase being interfaced with.
 	 */
-	private Cardbase cardbase;
+	Cardbase cardbase;
 	/**
 	 * Printed to the console when the user enters the help command.
 	 */
@@ -132,7 +132,6 @@ public class CardbaseCLI {
 		} else {
 			System.out.println("Help file was not found, check the project page on GitHub for help instead.");
 		}
-
 	}
 	
 	/**

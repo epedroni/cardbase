@@ -1,4 +1,4 @@
-package eu.equalparts.test.decks;
+package eu.equalparts.cardbase.decks;
 
 import static org.junit.Assert.*;
 
@@ -33,18 +33,18 @@ public class DeckTest {
 		ObjectMapper mapper = new ObjectMapper();
 		StandaloneDeck standaloneDeck = mapper.readValue(getClass().getResourceAsStream("deck.cbd"), StandaloneDeck.class);
 		
-		ReferenceDeck referenceDeck = new ReferenceDeck(standaloneDeck);
+		ReferenceDeck uut = new ReferenceDeck(standaloneDeck);
 		
-		boolean condition = referenceDeck.name == standaloneDeck.name &&
-				referenceDeck.plains == standaloneDeck.plains &&
-				referenceDeck.islands == standaloneDeck.islands &&
-				referenceDeck.swamps == standaloneDeck.swamps &&
-				referenceDeck.mountains == standaloneDeck.mountains &&
-				referenceDeck.forests == standaloneDeck.forests;
+		boolean condition = uut.name == standaloneDeck.name &&
+				uut.plains == standaloneDeck.plains &&
+				uut.islands == standaloneDeck.islands &&
+				uut.swamps == standaloneDeck.swamps &&
+				uut.mountains == standaloneDeck.mountains &&
+				uut.forests == standaloneDeck.forests;
 		assertTrue("Metadata was not correctly set.", condition);
-		assertEquals("Wrong number of cards.", referenceDeck.cardReferences.size(), standaloneDeck.cards.size());
+		assertEquals("Wrong number of cards.", uut.cardReferences.size(), standaloneDeck.cards.size());
 		for (Card card : standaloneDeck.cards) {
-			Integer count = referenceDeck.cardReferences.get(card.hashCode());
+			Integer count = uut.cardReferences.get(card.hashCode());
 			assertNotNull("Reference missing in deck.", count);
 			assertEquals("Card count is wrong.", card.count, count);
 		}
