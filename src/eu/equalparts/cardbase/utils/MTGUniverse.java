@@ -40,8 +40,7 @@ public final class MTGUniverse {
 	/**
 	 * A cache of CardSets to avoid querying the server many times for the same information.
 	 */
-	private static ArrayList<CardSetInformation> cardSets;
-
+	private static List<CardSetInformation> cardSets;
 	/**
 	 * A cache of {@code FullCardSets} to avoid querying the server many times for the same information.
 	 */
@@ -110,13 +109,13 @@ public final class MTGUniverse {
 	/**
 	 * @return a list of all card sets in the form of {@code CardSet} objects.
 	 */
-	public static ArrayList<CardSetInformation> getCardSetList() {
+	public static List<CardSetInformation> getCardSetList() {
 		// if the list isn't cached, fetch and cache it
 		if (cardSets == null) {
 			try {
 				cardSets = JSON.mapper.readValue(new URL(BASE_DATA_URL + "SetList.json"), new TypeReference<ArrayList<CardSetInformation>>() {});
 			} catch (Exception e) {
-				System.out.println("Error: could not fetch/parse set code list from upstream, loading fallback json...");
+				System.out.println("Error: could not fetch or parse set code list from upstream, using fallback json...");
 				e.printStackTrace();
 				
 				try {

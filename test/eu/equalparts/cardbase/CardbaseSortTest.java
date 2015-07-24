@@ -30,7 +30,7 @@ public class CardbaseSortTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		testCards = mapper.readValue(CardbaseSortTest.class.getResourceAsStream("testcards.json"), new TypeReference<List<Card>>() {});
+		testCards = mapper.readValue(CardbaseSortTest.class.getResourceAsStream("/testcards.json"), new TypeReference<List<Card>>() {});
 	}
 
 	@AfterClass

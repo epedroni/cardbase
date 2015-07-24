@@ -4,6 +4,5 @@ Cardbase:
  * decks
  
 CardbaseCLI:
- * user input sanity
  * command methods
  * 

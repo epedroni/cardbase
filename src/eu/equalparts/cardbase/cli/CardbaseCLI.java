@@ -38,7 +38,7 @@ public final class CardbaseCLI {
 	/**
 	 * Location of the help file.
 	 */
-	static final String HELP_FILE_PATH = "/help";
+	static final String HELP_FILE_PATH = "/help_en";
 	/**
 	 * Program version.
 	 */
@@ -79,7 +79,26 @@ public final class CardbaseCLI {
 	 * @param args the first argument is the cardbase file. Further arguments are ignored.
 	 */
 	public static void main(String... args) {
-		new CardbaseCLI(args).startInterface();
+		try {
+			new CardbaseCLI(args).startInterface();
+		} catch (JsonParseException e) {
+			System.out.println("Error: poorly formatted cardbase, check the syntax and try again.");
+			// although the problem could also be with the upstream CardSetList json.
+			if (Cardbase.DEBUG) e.printStackTrace();
+			System.exit(1);
+		} catch (JsonMappingException e) {
+			System.out.println("Error: unexpected fields found in cardbase, it may be from an old version?");
+			if (Cardbase.DEBUG) e.printStackTrace();
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("Error: something went wrong reading cardbase file, abort...");
+			if (Cardbase.DEBUG) e.printStackTrace();
+			System.exit(1);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Error: the provided file is invalid.");
+			if (Cardbase.DEBUG) e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	/**
@@ -88,37 +107,24 @@ public final class CardbaseCLI {
 	 * on the constructed object.
 	 * 
 	 * @param args a list of arguments. Only the first argument is used, as a cardbase JSON.
+	 * @throws IOException if something goes wrong while reading the provided file.
+	 * @throws JsonMappingException if the provided json did not correspond to the expected format.
+	 * @throws JsonParseException if the provided file did not contain valid json.
 	 */
-	CardbaseCLI(String... args) {
+	CardbaseCLI(String... args) throws JsonParseException, JsonMappingException, IOException {
 		System.out.println("Welcome to Cardbase CLI!");
 
 		// set debug flag if we are debugging
 		if (Cardbase.DEBUG) System.out.println("Debug mode is on.");
 
 		// make the Cardbase
-		if (args != null && args.length > 0) {
+		if (args != null && args.length > 0 && !args[0].isEmpty()) {
 			cardbaseFile = new File(args[0]);
 			if (cardbaseFile.exists() && cardbaseFile.isFile() && cardbaseFile.canRead()) {
 				System.out.println("Loading cardbase from \"" + args[0] + "\".");
-				try {
-					cardbase = new Cardbase(cardbaseFile);
-				} catch (JsonParseException e) {
-					System.out.println("Error: poorly formatted cardbase, check the syntax and try again.");
-					// although the problem could also be with the upstream CardSetList json.
-					if (Cardbase.DEBUG) e.printStackTrace();
-					System.exit(1);
-				} catch (JsonMappingException e) {
-					System.out.println("Error: unexpected fields found in cardbase, it may be from an old version?");
-					if (Cardbase.DEBUG) e.printStackTrace();
-					System.exit(1);
-				} catch (IOException e) {
-					System.out.println("Error: something went wrong reading cardbase file, abort...");
-					if (Cardbase.DEBUG) e.printStackTrace();
-					System.exit(1);
-				}
+				cardbase = new Cardbase(cardbaseFile);
 			} else {
-				System.out.println(args[0] + " appears to be an invalid path.");
-				System.exit(0);
+				throw new IllegalArgumentException();
 			}
 		} else {
 			System.out.println("No cardbase file was provided, creating a clean cardbase.");
@@ -465,7 +471,7 @@ public final class CardbaseCLI {
 	 */
 	String sanitiseFileName(String name) {
 		// POSIX-compliant valid filename characters
-		name = name.replaceAll("[^-_.A-Za-z0-9]", "");
+		name = name.replaceAll("[^-_./A-Za-z0-9]", "");
 		// extension is not indispensable, but good practice
 		if (!name.endsWith(".cb")) {
 			name = name.concat(".cb");
