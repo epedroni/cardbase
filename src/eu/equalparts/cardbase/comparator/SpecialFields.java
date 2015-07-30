@@ -4,7 +4,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 
-public class SpecialFields {
+public final class SpecialFields {
+	
+	private SpecialFields() {}
 	
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface DirtyNumber {}

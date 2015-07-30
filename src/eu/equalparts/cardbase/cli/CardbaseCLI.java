@@ -48,6 +48,10 @@ public final class CardbaseCLI {
 	 */
 	Action lastAction = null;
 	/**
+	 * 
+	 */
+	MTGUniverse mtgUniverse = new MTGUniverse();
+	/**
 	 * The currently selected set, from which new cards are added.
 	 */
 	FullCardSet selectedSet = null;
@@ -267,7 +271,7 @@ public final class CardbaseCLI {
 	 * Print a list of valid set codes.
 	 */
 	void sets() {
-		for (CardSetInformation set : MTGUniverse.getCardSetList()) {
+		for (CardSetInformation set : mtgUniverse.getCardSetList()) {
 			// CardSet has an overridden toString()
 			System.out.println(set);
 		}
@@ -281,7 +285,7 @@ public final class CardbaseCLI {
 	void set(String... args) {
 		if (args != null && args.length > 0) {
 			try {
-				selectedSet = MTGUniverse.getFullCardSet(args[0]);
+				selectedSet = mtgUniverse.getFullCardSet(args[0]);
 				// if the set code is invalid, null is returned
 				if (selectedSet != null) {
 					System.out.println("Selected set: " + selectedSet.name + ".");

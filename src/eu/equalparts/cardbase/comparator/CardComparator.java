@@ -37,7 +37,7 @@ public class CardComparator implements Comparator<Card> {
 	/**
 	 * The comparison delegate to use for the specified field.
 	 */
-	private BiFunction<Comparable, Comparable, Integer> selectedComparisonDelegate = this::defaultComparison;
+	private BiFunction<Comparable, Comparable, Integer> comparisonDelegate = (field1, field2) -> field1.compareTo(field2);
 	
 	/**
 	 * Creates a new comparator for the specified field only. This class
@@ -58,9 +58,9 @@ public class CardComparator implements Comparator<Card> {
 			// if annotated with a special comparator, set the comparison delegate here
 			for (Annotation annotation : fieldToCompare.getAnnotations()) {
 				if (annotation.annotationType() == DirtyNumber.class) {
-					this.selectedComparisonDelegate = ComparatorDelegates::compareDirtyNumber;
+					this.comparisonDelegate = ComparatorDelegates::compareDirtyNumber;
 				} else if (annotation.annotationType() == Rarity.class) {
-					this.selectedComparisonDelegate = ComparatorDelegates::compareRarity;
+					this.comparisonDelegate = ComparatorDelegates::compareRarity;
 				}
 			}
 		} else {
@@ -72,7 +72,7 @@ public class CardComparator implements Comparator<Card> {
 	public int compare(Card o1, Card o2) {
 		/*
 		 * we've already checked that the field is self comparable,
-		 * so we are now free to cast to whatever type it is and compare.
+		 * so we are now free to cast to comparable
 		 */
 		try {
 			Comparable field1 = (Comparable) fieldToCompare.get(o1);
@@ -88,7 +88,7 @@ public class CardComparator implements Comparator<Card> {
 			} else if (field2 == null) {
 				return 1;
 			} else {
-				return selectedComparisonDelegate.apply(field1, field2);
+				return comparisonDelegate.apply(field1, field2);
 			}
 			
 		} catch (IllegalArgumentException e) {
@@ -101,20 +101,6 @@ public class CardComparator implements Comparator<Card> {
 		
 		// fallback, this shouldn't happen
 		return 0;
-	}
-	
-	/**
-	 * The standard comparison operation, which uses the field's own {@code compareTo()}
-	 * method.
-	 * 
-	 * @param field1 the first object to be compared.
-     * @param field2 the second object to be compared.
-     * @return a negative integer, zero, or a positive integer as the
-     *         first argument is less than, equal to, or greater than the
-     *         second.
-	 */
-	private int defaultComparison(Comparable field1, Comparable field2) {
-		return field1.compareTo(field2);
 	}
 
 	/**

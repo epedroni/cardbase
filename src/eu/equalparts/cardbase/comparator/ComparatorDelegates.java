@@ -8,6 +8,17 @@ final class ComparatorDelegates {
 	/*
 	 * Delegates
 	 */
+	/**
+	 * Compares two dirty numbers, that is, strings containing a single number
+	 * and, optionally, additional non-numerical characters.
+	 * For instance, when comparing "150a" and "36", this comparator delegate
+	 * first compares 150 with 36 using the standard integer comparison, and
+	 * returns an integer > 1 because 150 > 36.
+	 * 
+	 * @param field1 the first field to compare.
+	 * @param field2 the second field to compare.
+	 * @return a value smaller than, equal to or greater than 0 according to the standard comparison convention.
+	 */
 	public static Integer compareDirtyNumber(Comparable<String> field1, Comparable<String> field2) {
 		// this assumes that the format is uninterrupted numbers and letters
 		String number1 = ((String) field1).replaceAll("[^0-9]+", "");

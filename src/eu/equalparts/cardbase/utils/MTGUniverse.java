@@ -18,7 +18,7 @@ import eu.equalparts.cardbase.cards.FullCardSet;
 
 /**
  * Access point to the complete set of cards that exist in the
- * MTG universe. This class has a series of utility functions that
+ * MTG universe. This class has a series of methods that
  * query remote databases to acquire card information.
  * <br>
  * Conversely, {@code Cardbase}'s methods are used solely to
@@ -32,24 +32,19 @@ public final class MTGUniverse {
 	/**
 	 * The base URL from where the information is fetched.
 	 */
-	private static final String BASE_DATA_URL = "http://mtgjson.com/json/";
+	private final String BASE_DATA_URL = "http://mtgjson.com/json/";
 	/**
 	 * If the upstream set code list can't be loaded, this is loaded instead.
 	 */
-	private static final String FALLBACK_LIST_PATH = "/setlist.json";
+	private final String FALLBACK_LIST_PATH = "/setlist.json";
 	/**
 	 * A cache of CardSets to avoid querying the server many times for the same information.
 	 */
-	private static List<CardSetInformation> cardSets;
+	private List<CardSetInformation> cardSets;
 	/**
 	 * A cache of {@code FullCardSets} to avoid querying the server many times for the same information.
 	 */
-	private static HashMap<String, FullCardSet> cardSetCache = new HashMap<String, FullCardSet>();
-
-	/**
-	 * Private constructor, this class is not to be instantiated.
-	 */
-	private MTGUniverse() {}
+	private HashMap<String, FullCardSet> cardSetCache = new HashMap<String, FullCardSet>();
 	
 	/**
 	 * Returns the specified card in the form of a {@code Card} object. If the specified number does
@@ -64,7 +59,7 @@ public final class MTGUniverse {
 	 * @throws JsonMappingException if the upstream JSON does not map to a local class.
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public static Card getCard(String setCode, String number) throws JsonParseException, JsonMappingException, IOException {
+	public Card getCard(String setCode, String number) throws JsonParseException, JsonMappingException, IOException {
 		Card card = null;
 		FullCardSet fullCardSet = getFullCardSet(setCode);
 		
@@ -89,7 +84,7 @@ public final class MTGUniverse {
 	 * @throws JsonMappingException if the upstream JSON does not map to {@code FullCardSet}.
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public static FullCardSet getFullCardSet(String setCode) throws JsonParseException, JsonMappingException, IOException {
+	public FullCardSet getFullCardSet(String setCode) throws JsonParseException, JsonMappingException, IOException {
 		FullCardSet requestedSet = null;
 		String validCode = validateSetCode(setCode);
 		if (validCode != null) {
@@ -109,7 +104,7 @@ public final class MTGUniverse {
 	/**
 	 * @return a list of all card sets in the form of {@code CardSet} objects.
 	 */
-	public static List<CardSetInformation> getCardSetList() {
+	public List<CardSetInformation> getCardSetList() {
 		// if the list isn't cached, fetch and cache it
 		if (cardSets == null) {
 			try {
@@ -142,7 +137,7 @@ public final class MTGUniverse {
 	 * @param setCode the set code to be validated.
 	 * @return the valid form of the set code if any, null otherwise.
 	 */
-	public static String validateSetCode(String setCode) {
+	public String validateSetCode(String setCode) {
 		for (CardSetInformation cardSet : getCardSetList()) {
 			if (cardSet.getCode().equalsIgnoreCase(setCode)) {
 				return cardSet.getCode();
@@ -161,7 +156,7 @@ public final class MTGUniverse {
 	 * @throws JsonMappingException if the upstream JSON does not map to {@code FullCardSet}.
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	private static FullCardSet parseFullSet(JsonNode jsonTree) throws JsonMappingException, IOException {
+	private FullCardSet parseFullSet(JsonNode jsonTree) throws JsonMappingException, IOException {
 		
 		FullCardSet fcs = new FullCardSet();
 		
@@ -221,6 +216,5 @@ public final class MTGUniverse {
 		fcs.block = jsonTree.hasNonNull("block") ? jsonTree.get("block").asText() : null;
 		
 		return fcs;
-		
 	}
 }
