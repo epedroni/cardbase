@@ -19,6 +19,7 @@ import org.junit.rules.TemporaryFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.utils.MTGUniverse;
 
 public class CardbaseCLITest {
 
@@ -358,30 +359,112 @@ public class CardbaseCLITest {
 	/***********************************************************************************
 	 * sets() tests, happy path
 	 ***********************************************************************************/
-	// mock MTG universe
+	@Test
+	public void correctSetListIsPrinted() throws Exception {
+		uut.mtgUniverse = new MTGUniverse(getClass().getResource("").toString());
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.sets();
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("LEA          : Limited Edition Alpha\n"
+				+ "LEB          : Limited Edition Beta\n"
+				+ "ARN          : Arabian Nights" + EOL, testOutput.toString());
+	}
+	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void fallbackListIsPrintedIfListCannotBeFound() throws Exception {
+		File noListLocation = tempFolder.newFolder();
+		tempFolder.delete();
+		uut.mtgUniverse = new MTGUniverse("file:" + noListLocation.getCanonicalPath() + "/");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.sets();
+		} finally {
+			System.setOut(console);
+		}
+		
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("expectedFallbackList"))) {
+			String expectedOutput = scanner.useDelimiter("\\Z").next();
+			assertEquals(expectedOutput + EOL, testOutput.toString());
+		}
+	}
 	
 	/***********************************************************************************
 	 * set() tests, happy path
 	 ***********************************************************************************/
-	// mock MTG universe
+	@Test
+	public void correctSetIsSelected() throws Exception {
+		uut.mtgUniverse = new MTGUniverse(getClass().getResource("").toString());
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.set("M15");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Selected set: Magic 2015 Core Set." + EOL, testOutput.toString());
+		assertEquals(uut.selectedSet.code, "M15");
+	}
 	
 	/***********************************************************************************
 	 * glance() tests, happy path
 	 ***********************************************************************************/
 	@Test
-	public void glanceIsPrinted() throws Exception {
-		uut.savePrompt = true;
+	public void glanceIsPrintedWithOneCard() throws Exception {
+		Card testCard = new ObjectMapper().readValue(getClass().getResourceAsStream("/shivandragon.json"), Card.class);
+		testCard.count = 1;
+		uut.cardbase.addCard(testCard);
 		
-		uut.exit();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.glance();
+		} finally {
+			System.setOut(console);
+		}
 		
-		assertEquals("Incorrect state for exit flag.", false, uut.exit);
-		assertEquals("Incorrect state for save flag.", false, uut.savePrompt);
-
-		uut.exit();
-		
-		assertEquals("Incorrect state for exit flag.", true, uut.exit);
+		assertEquals("1    Shivan Dragon (M15, 281)\nTotal: 1" + EOL, testOutput.toString());
 	}
 	
+	@Test
+	public void glanceIsPrintedWithZeroCards() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.glance();
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void glanceIsPrintedWithManyCards() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.glance();
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("1    Reverberate (M12, 152)\n"
+				+ "1    Mighty Leap (M12, 26)\n"
+				+ "8    Formless Nurturing (FRF, 129)\n"
+				+ "1    Feral Krushok (FRF, 128)\n"
+				+ "1    Destructor Dragon (FRF, 127)\n"
+				+ "2    Siege Mastodon (M12, 34)\n"
+				+ "Total: 14" + EOL, testOutput.toString());
+	}
 	/***********************************************************************************
 	 * peruse() tests, happy path
 	 ***********************************************************************************/

@@ -32,11 +32,11 @@ public final class MTGUniverse {
 	/**
 	 * The base URL from where the information is fetched.
 	 */
-	private final String BASE_DATA_URL = "http://mtgjson.com/json/";
+	private String BASE_DATA_URL = "http://mtgjson.com/json/";
 	/**
 	 * If the upstream set code list can't be loaded, this is loaded instead.
 	 */
-	private final String FALLBACK_LIST_PATH = "/setlist.json";
+	private final String FALLBACK_LIST_PATH = "/fallbackSetList.json";
 	/**
 	 * A cache of CardSets to avoid querying the server many times for the same information.
 	 */
@@ -45,6 +45,12 @@ public final class MTGUniverse {
 	 * A cache of {@code FullCardSets} to avoid querying the server many times for the same information.
 	 */
 	private HashMap<String, FullCardSet> cardSetCache = new HashMap<String, FullCardSet>();
+	
+	public MTGUniverse() {}
+	
+	public MTGUniverse(String dataLocation) {
+		this.BASE_DATA_URL = dataLocation;
+	}
 	
 	/**
 	 * Returns the specified card in the form of a {@code Card} object. If the specified number does
@@ -111,13 +117,13 @@ public final class MTGUniverse {
 				cardSets = JSON.mapper.readValue(new URL(BASE_DATA_URL + "SetList.json"), new TypeReference<ArrayList<CardSetInformation>>() {});
 			} catch (Exception e) {
 				System.out.println("Error: could not fetch or parse set code list from upstream, using fallback json...");
-				e.printStackTrace();
+//				e.printStackTrace();
 				
 				try {
 					cardSets = JSON.mapper.readValue(MTGUniverse.class.getResourceAsStream(FALLBACK_LIST_PATH), new TypeReference<ArrayList<CardSetInformation>>() {});
 				} catch (Exception f) {
 					System.out.println("Error: could not parse fallback set code list, aborting...");
-					f.printStackTrace();
+//					f.printStackTrace();
 					System.exit(1);
 				}
 			}
@@ -126,7 +132,7 @@ public final class MTGUniverse {
 	}
 	
 	/**
-	 * This method effectively converts different set code spellings
+	 * This method converts different set code spellings
 	 * into the format parsed from the set code list.
 	 * <br>
 	 * For instance, if "m15" is passed as the argument, this returns
