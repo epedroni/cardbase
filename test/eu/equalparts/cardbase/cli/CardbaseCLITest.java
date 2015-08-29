@@ -372,7 +372,8 @@ public class CardbaseCLITest {
 		
 		assertEquals("LEA          : Limited Edition Alpha\n"
 				+ "LEB          : Limited Edition Beta\n"
-				+ "ARN          : Arabian Nights" + EOL, testOutput.toString());
+				+ "ARN          : Arabian Nights\n"
+				+ "M15          : Magic 2015 Core Set" + EOL, testOutput.toString());
 	}
 	
 	/*
@@ -413,6 +414,25 @@ public class CardbaseCLITest {
 		
 		assertEquals("Selected set: Magic 2015 Core Set." + EOL, testOutput.toString());
 		assertEquals(uut.selectedSet.code, "M15");
+	}
+	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void invalidSetIsProvided() throws Exception {
+		uut.mtgUniverse = new MTGUniverse(getClass().getResource("").toString());
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.set("not a set");
+		} finally {
+			System.setOut(console);
+		}
+
+		assertEquals("\"not a set\" does not correspond to any set (use \"sets\" to see all valid set codes)." 
+				+ EOL, testOutput.toString());
+		assertNull(uut.selectedSet);
 	}
 	
 	/***********************************************************************************
@@ -465,9 +485,55 @@ public class CardbaseCLITest {
 				+ "2    Siege Mastodon (M12, 34)\n"
 				+ "Total: 14" + EOL, testOutput.toString());
 	}
+	
 	/***********************************************************************************
 	 * peruse() tests, happy path
 	 ***********************************************************************************/
+	@Test
+	public void perusalIsPrintedWithOneCard() throws Exception {
+		Card testCard = new ObjectMapper().readValue(getClass().getResourceAsStream("/shivandragon.json"), Card.class);
+		testCard.count = 1;
+		uut.cardbase.addCard(testCard);
+				
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.peruse();
+		} finally {
+			System.setOut(console);
+		}
+		
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("singleCardPerusal"))) {
+			assertEquals(scanner.useDelimiter("\\Z").next() + EOL, testOutput.toString());
+		}
+	}
+	
+	@Test
+	public void perusalIsPrintedWithZeroCards() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.peruse();
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void perusalIsPrintedWithManyCards() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.peruse();
+		} finally {
+			System.setOut(console);
+		}
+		
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("multipleCardsPerusal"))) {
+			assertEquals(scanner.useDelimiter("\\Z").next() + EOL, testOutput.toString());
+		}
+	}
 	
 	/***********************************************************************************
 	 * undo() tests, happy path
