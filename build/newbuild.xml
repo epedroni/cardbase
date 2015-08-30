@@ -1,0 +1,112 @@
+<?xml version="1.0"?>   
+<project name="cardbasenew" default="test" basedir="..">
+  
+  <property name="main.build.dir" value="build/main" />  
+  <property name="main.src.dir" value="src" />
+  <property name="main-class" value="eu.equalparts.cardbase.cli.CardbaseCLI" />
+  
+  <property name="test.build.dir" value="build/test" />
+  <property name="test.src.dir" value="test" />
+  
+  <property name="build.dir" location="build" />
+  <property name="dist.dir" location="dist" />
+  <property name="lib.dir" value="lib" />
+  <property name="test.lib.dir" value="lib/junit" />
+  
+  <property name="res.dir" value="res" />
+  
+  <property name="jar.name" value="cardbase" />
+  
+  <path id="classpath.base" >
+    <fileset dir="${basedir}/">
+	  <include name="${res.dir}/*" />
+	  
+	  <include name="${lib.dir}/*.jar" />
+	  <exclude name="${lib.dir}/*sources.jar"/>
+	  <exclude name="${lib.dir}/*javadoc.jar"/>
+	</fileset>
+  </path>
+
+  <path id="classpath.test">
+    <fileset dir="${basedir}/">
+	  <include name="${lib.dir}/junit/*.jar" />
+	  <exclude name="${lib.dir}/junit/*sources.jar"/>
+	  <exclude name="${lib.dir}/junit/*javadoc.jar"/>
+	</fileset>
+	<pathelement location="${main.build.dir}"/>
+    <path refid="classpath.base" />
+  </path>
+
+  <target name="test" depends="run, clean" />
+
+  <target name="compile" depends="clean">
+    <mkdir dir="${main.build.dir}"/>
+    <javac srcdir="${main.src.dir}" destdir="${main.build.dir}" includeantruntime="false">
+      <classpath refid="classpath.base"/>
+    </javac>
+    <copy todir="${main.build.dir}">
+      <fileset dir="${res.dir}" excludes=""/>
+    </copy>
+  </target>
+
+  <target name="build" depends="compile">
+    <mkdir dir="${test.build.dir}"/>
+    <javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false">
+        <classpath refid="classpath.test"/>
+    </javac>
+    <copy todir="${test.build.dir}">
+      <fileset dir="${test.src.dir}" excludes="**.java"/>
+    </copy>
+    <echo message="Build done" />
+  </target>
+   
+  <!-- Test and build all files  -->
+  <!-- To run this: use "ant" (default) or "ant run" -->
+  <target name="run" depends="build">
+    <junit printsummary="on" haltonfailure="no">
+        <classpath>
+          <path refid="classpath.test" />
+          <pathelement location="${test.build.dir}"/>
+        </classpath>
+        <formatter type="brief" usefile="false" />
+        <batchtest>
+            <fileset dir="${test.src.dir}" includes="**/*Test*.java" />
+        </batchtest>
+    </junit>
+  </target>
+   
+  <!-- delete all class files -->
+  <!-- To run this: use "ant clean" -->
+  <target name="clean">
+    <delete dir="${main.build.dir}" />
+    <delete dir="${test.build.dir}" />
+    <echo message="clean done" />
+  </target>
+  
+  <!-- Create the jar and declare the ext libraries in manifest.mf file -->
+  <target name="jar" depends="compile" >
+	<mkdir dir="${dist.dir}" />
+ 
+	<jar jarfile="${dist.dir}/${jar.name}.jar" basedir="${main.build.dir}">
+	  <zipgroupfileset dir="${lib.dir}" includes="*.jar" excludes="*sources.jar, *javadoc.jar" />
+	  <manifest>
+		<attribute name="Main-Class" value="${main-class}" />
+		<attribute name="Class-Path" value="${classpath.base.name}" />
+	  </manifest>
+	</jar>
+  </target>
+
+  <!-- Produce a standalone, runnable jar -->
+  <target name="deploy" depends="compile, jar" />
+
+  <!-- Concatenate the jar to a pre-set header and chmod 755 it -->
+  <target name="shebang" depends="deploy" >
+	<concat destfile="${dist.dir}/${jar.name}" binary="yes">
+	  <fileset dir="${build.dir}" includes="header"/>
+	  <fileset dir="${dist.dir}" includes="${jar.name}.jar"/>
+    </concat>
+	
+	<chmod file="${dist.dir}/${jar.name}" perm="755"/>
+  </target>
+  
+</project>

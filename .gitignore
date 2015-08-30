@@ -2,3 +2,5 @@ __pycache__/
 bin/
 dist/
 test/spike/
+build/main/
+build/test/
