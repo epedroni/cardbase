@@ -1,5 +1,7 @@
 # cardbase
 
+[![Build Status](https://travis-ci.org/epedroni/cardbase.svg)](https://travis-ci.org/epedroni/cardbase)
+
 The primary purpose of cardbase is to create a digital representation of your own MTG collection. A cardbase file (.cb) is simply a JSON file containing a list of card objects and associated unique keys. The card data structure used is derived from that used in [MTG JSON](http://mtgjson.com/), and in fact that is where most of the data comes from right now.
 
 ## Command Line Interface (CLI) - cardbasecli
