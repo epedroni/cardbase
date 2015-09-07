@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<project name="cardbase" default="deploy" basedir="..">
+   
+	<property name="jar.name" value="cardbase" />
+	<property name="src.dir" location="src" />
+	<property name="bin.dir" location="tmpbin" />
+	<property name="build.dir" location="build" />
+	<property name="dist.dir" location="dist" />
+	<property name="lib.dir" value="lib" />
+	<property name="res.dir" value="res" />
+	<property name="test.src.dir" value="test" />
+	<property name="main-class" value="eu.equalparts.cardbase.cli.CardbaseCLI" />
+	
+	<!-- Clean up temporary directories -->
+	<target name="clean" description="clean up">
+		<delete dir="${bin.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+	
+	<!-- Initialise temporary directories -->
+	<target name="init">
+		<mkdir dir="${bin.dir}" />
+	</target>
+	
+	<!-- External libraries classpath, we don't need sources and javadoc -->
+	<path id="classpath">
+		<fileset dir="${basedir}/">
+			<include name="${res.dir}/*" />
+			
+			<include name="${lib.dir}/*.jar" />
+			<exclude name="${lib.dir}/*sources.jar"/>
+			<exclude name="${lib.dir}/*javadoc.jar"/>
+		</fileset>
+	</path>
+	
+	<!-- Compile project including external libraries and copy resource files across as well -->
+	<target name="compile" depends="init" description="compile the source">
+		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${bin.dir}" classpathref="classpath" />
+		
+		<copy todir="${bin.dir}">
+		   <fileset dir="${res.dir}" excludes=""/>
+		</copy>
+	</target>
+	
+	<!-- Create the jar and declare the ext libraries in manifest.mf file -->
+	<target name="jar" depends="compile" >
+		
+		<mkdir dir="${dist.dir}" />
+	 
+		<jar jarfile="${dist.dir}/${jar.name}.jar" basedir="${bin.dir}">
+			
+			<zipgroupfileset dir="${lib.dir}" includes="*.jar" excludes="*sources.jar, *javadoc.jar" />
+			
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+				<attribute name="Class-Path" value="${classpath.name}" />
+			</manifest>
+		</jar>
+		<delete dir="${bin.dir}" />
+	</target>
+	
+	<!-- Concatenate a the jar to a pre-set header and chmod 755 it -->
+	<target name="shebang" depends="deploy" >
+		<concat destfile="${dist.dir}/${jar.name}" binary="yes">
+			<fileset dir="${build.dir}" includes="header"/>
+			<fileset dir="${dist.dir}" includes="${jar.name}.jar"/>
+		</concat>
+		
+		<chmod file="${dist.dir}/${jar.name}" perm="755"/>
+	</target>
+	
+	<!-- Produce a standalone, runnable jar -->
+	<target name="deploy" depends="clean, compile, jar" />
+	
+</project>
