@@ -1,5 +1,5 @@
 <?xml version="1.0"?>   
-<project name="cardbasenew" default="test" basedir="..">
+<project name="cardbase" default="test" basedir="..">
   
   <property name="main.build.dir" value="build/main" />  
   <property name="main.src.dir" value="src" />
@@ -33,8 +33,9 @@
 	  <exclude name="${lib.dir}/junit/*sources.jar"/>
 	  <exclude name="${lib.dir}/junit/*javadoc.jar"/>
 	</fileset>
-	<pathelement location="${main.build.dir}"/>
-    <path refid="classpath.base" />
+	<pathelement location="${test.build.dir}"/>
+  	<pathelement location="${main.build.dir}"/>
+  	<path refid="classpath.base" />
   </path>
 
   <target name="test" depends="run, clean" />
@@ -63,7 +64,7 @@
   <!-- Test and build all files  -->
   <!-- To run this: use "ant" (default) or "ant run" -->
   <target name="run" depends="build">
-    <junit printsummary="on" haltonfailure="no">
+    <junit printsummary="on" haltonfailure="yes">
         <classpath>
           <path refid="classpath.test" />
           <pathelement location="${test.build.dir}"/>
