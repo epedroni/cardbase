@@ -351,23 +351,6 @@ public final class CardbaseCLI {
 	}
 
 	/**
-	 * Undo previous action.
-	 */
-	void undo() {
-		if (lastAction != null) {
-			if (lastAction == Action.ADD) {
-				removeCard(lastAction.card);
-			} else if (lastAction ==  Action.REMOVE) {
-				addCard(lastAction.card);
-			}
-			// can only undo once
-			lastAction = null;
-		} else {
-			System.out.println("Nothing to undo.");
-		}
-	}
-
-	/**
 	 * Remove one or more of a card.
 	 *
 	 * @param args the set number of the card to remove and optionally the count to be removed.
@@ -375,7 +358,8 @@ public final class CardbaseCLI {
 	void remove(String... args) {
 		if (selectedSet != null) {
 			if (args != null && args.length > 0) {
-				Card cardToRemove = selectedSet.getCardByNumber(args[0]);
+//				Card cardToRemove = selectedSet.getCardByNumber(args[0]);
+				Card cardToRemove = cardbase.getCard(selectedSet.code, args[0]);
 				if (cardToRemove != null) {
 					Integer count = 1;
 					if (args.length > 1 && args[1].matches("[0-9]+")) {
@@ -388,7 +372,7 @@ public final class CardbaseCLI {
 					cardToRemove.count = count;
 					removeCard(cardToRemove);
 				} else {
-					System.out.println(args[0] + " does not correspond to a card in " + selectedSet.name + ".");
+					System.out.println(args[0] + " is not in the cardbase.");
 				}
 			} else {
 				System.out.println("Please specify a card number to remove.");
@@ -433,13 +417,30 @@ public final class CardbaseCLI {
 	}
 	
 	/**
+	 * Undo previous action.
+	 */
+	void undo() {
+		if (lastAction != null) {
+			if (lastAction == Action.ADD) {
+				removeCard(lastAction.card);
+			} else if (lastAction ==  Action.REMOVE) {
+				addCard(lastAction.card);
+			}
+			// can only undo once
+			lastAction = null;
+		} else {
+			System.out.println("Nothing to undo.");
+		}
+	}
+	
+	/**
 	 * Add the specified count of the specified card
 	 * to the cardbase.
 	 * 
 	 * @param card the card to add, set this object's 
 	 * count field to determine the count to add.
 	 */
-	void addCard(Card card) {
+	private void addCard(Card card) {
 		System.out.println("Added " + card.count + "x " + card.name + ".");
 		cardbase.addCard(card);
 		savePrompt = true;
@@ -454,7 +455,7 @@ public final class CardbaseCLI {
 	 * @param card the card to remove, set this object's count field
 	 * to determine how many of the card to remove.
 	 */
-	void removeCard(Card card) {
+	private void removeCard(Card card) {
 		Integer removed = cardbase.removeCard(card); 
 		if (removed > 0) {
 			System.out.println("Removed " + removed + "x " + card.name + ".");
@@ -489,7 +490,7 @@ public final class CardbaseCLI {
 	 * 
 	 * @param card the card to glance.
 	 */
-	void printGlance(Card card) {
+	private void printGlance(Card card) {
 		System.out.println(String.format("%1$-4d %2$s (%3$s, %4$s)", card.count, card.name, card.setCode, card.number));
 	}
 
@@ -500,7 +501,7 @@ public final class CardbaseCLI {
 	 * 
 	 * @param card the card to peruse.
 	 */
-	void printPerusal(Card card) {
+	private void printPerusal(Card card) {
 		printGlance(card);
 		if (card.type != null) System.out.println("\t" + card.type);
 		if (card.manaCost != null) System.out.println("\tCost: " + card.manaCost);

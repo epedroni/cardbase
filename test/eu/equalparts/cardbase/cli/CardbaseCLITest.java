@@ -19,6 +19,7 @@ import org.junit.rules.TemporaryFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.cards.FullCardSet;
 import eu.equalparts.cardbase.utils.MTGUniverse;
 
 public class CardbaseCLITest {
@@ -535,17 +536,153 @@ public class CardbaseCLITest {
 		}
 	}
 	
-	/***********************************************************************************
-	 * undo() tests, happy path
-	 ***********************************************************************************/
+	@Test
+	public void specificPerusalWithValidArgumentIsPrinted() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to peruse from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.peruse("129");
+		} finally {
+			System.setOut(console);
+		}
+		
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("specificCardPerusal"))) {
+			assertEquals(scanner.useDelimiter("\\Z").next() + EOL, testOutput.toString());
+		}
+	}
+	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void specificPerusalWithInvalidArgument() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to peruse from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.peruse("100");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Card not in cardbase." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void specificPerusalWithNoSelectedSet() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		uut.selectedSet = null;
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.peruse("100");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Please select a set before perusing a specific card." + EOL, testOutput.toString());
+	}
 	
 	/***********************************************************************************
 	 * remove() tests, happy path
 	 ***********************************************************************************/
+	@Test
+	public void removeValidAmountOfExistingCard() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to peruse from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		uut.remove("129", "3");
+		
+		assertEquals("Wrong number of cards was removed.", uut.cardbase.getCard("FRF", "129").count, new Integer(6));		
+	}
+	
+	@Test
+	public void removeExceedingAmountOfExistingCard() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to peruse from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		uut.remove("128", "3");
+		
+		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
+	}
+	
+	@Test
+	public void removeExactAmountOfExistingCard() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to peruse from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		uut.remove("128", "1");
+		
+		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
+	}
+	
+	@Test
+	public void removeSingleExistingCardWithoutAmount() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to peruse from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		uut.remove("128");
+		
+		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
+	}
+	
+	@Test
+	public void removeMultipleExistingCardWithoutAmount() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to peruse from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		uut.remove("129");
+		
+		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "129"));
+	}
+	
+	/*
+	 * Edge cases
+	 */
+	// attempt to remove nonexistent card without amount
+	
+	// attempt to remove nonexistent card with amount
+	
+	// remove 0 of existing card
+	
+	// remove negative number of existing card
+	
+	// remove card without selected set
+	
 	
 	/***********************************************************************************
 	 * add() tests, happy path
 	 ***********************************************************************************/
+
+	
+	/***********************************************************************************
+	 * undo() tests, happy path
+	 ***********************************************************************************/
+	
 	
 }
 

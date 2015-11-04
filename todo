@@ -4,12 +4,6 @@ Cardbase:
  * decks
  
 CardbaseCLI:
- * command methods
- * 
- 
+ * undo, add, remove
 
-ANT problems:
- * invalidSetIsProvided
- * correctSetIsSelected
- * correctSetListIsPrinted
- * 
+To pass: happy path remove
