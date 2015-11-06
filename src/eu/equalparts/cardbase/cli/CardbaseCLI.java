@@ -150,7 +150,7 @@ public final class CardbaseCLI {
 	 * @param input the raw input from the user.
 	 * @return an array of strings, where the first element is the command and subsequent elements are the arguments.
 	 */
-	String[] sanitiseInput(String input) {
+	private String[] sanitiseInput(String input) {
 		return input.trim().split("[ \t]+");
 
 	}
@@ -158,54 +158,65 @@ public final class CardbaseCLI {
 	/**
 	 * Read stdin for user input, sanitise and interpret any commands entered.
 	 */
-	void startInterface() {
+	private void startInterface() {
 		BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
 		try {
 			// the main loop
 			while (!exit) {
 				// print prompt
 				System.out.print(selectedSet == null ? "> " : selectedSet.code + " > ");
-				// condition input and interpret
-				String[] input = sanitiseInput(consoleReader.readLine());
-				String command = input[0];
-				String[] args = Arrays.copyOfRange(input, 1, input.length);
-
-				if (command.equalsIgnoreCase("help")) {
-					help();
-				} else if (command.equalsIgnoreCase("write")
-						|| command.equalsIgnoreCase("save")) {
-					write(args);
-				} else if (command.equalsIgnoreCase("version")) {
-					version();
-				} else if (command.equalsIgnoreCase("exit")) {
-					exit();
-				} else if (command.equalsIgnoreCase("sets")) {
-					sets();
-				} else if (command.equalsIgnoreCase("set")) {
-					set(args);
-				} else if (command.equalsIgnoreCase("glance")) {
-					glance();
-				} else if (command.equalsIgnoreCase("peruse")) {
-					peruse(args);
-				} else if (command.equalsIgnoreCase("undo")) {
-					undo();
-				} else if (command.equalsIgnoreCase("remove") 
-						|| command.equalsIgnoreCase("rm")) {
-					remove(args);
-				} else {
-					add(command, args);
-				}
+				// interpret input
+				interpretInput(consoleReader.readLine());
 			}
 		} catch (IOException e) {
 			System.out.println("Error: something went wrong with stdin, exiting...");
 			if (Cardbase.DEBUG) e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Sanitises and interprets raw input as it is read from stdin. This method has default-visibility for unit testing.
+	 * 
+	 * @param rawInput
+	 */
+	void interpretInput(String rawInput) {
+		// condition input
+		String[] input = sanitiseInput(rawInput);
+		String command = input[0];
+		String[] args = Arrays.copyOfRange(input, 1, input.length);
+
+		// interpret
+		if (command.equalsIgnoreCase("help")) {
+			help();
+		} else if (command.equalsIgnoreCase("write")
+				|| command.equalsIgnoreCase("save")) {
+			write(args);
+		} else if (command.equalsIgnoreCase("version")) {
+			version();
+		} else if (command.equalsIgnoreCase("exit")) {
+			exit();
+		} else if (command.equalsIgnoreCase("sets")) {
+			sets();
+		} else if (command.equalsIgnoreCase("set")) {
+			set(args);
+		} else if (command.equalsIgnoreCase("glance")) {
+			glance();
+		} else if (command.equalsIgnoreCase("peruse")) {
+			peruse(args);
+		} else if (command.equalsIgnoreCase("undo")) {
+			undo();
+		} else if (command.equalsIgnoreCase("remove") 
+				|| command.equalsIgnoreCase("rm")) {
+			remove(args);
+		} else {
+			add(command, args);
+		}
+	}
 
 	/**
 	 * Print help to console.
 	 */
-	void help() {
+	private void help() {
 		System.out.println(help);
 	}
 
@@ -214,7 +225,7 @@ public final class CardbaseCLI {
 	 *
 	 * @param args optionally the file to which to write.
 	 */
-	void write(String... args) {
+	private void write(String... args) {
 		File outputFile;
 		// user-provided file overrides everything else
 		if (args != null && args.length > 0) {
@@ -239,7 +250,7 @@ public final class CardbaseCLI {
 					System.out.println("Error: something terrible happened to the internal cardbase data structure. Oops.");
 					if (Cardbase.DEBUG) e.printStackTrace();
 				} catch (IOException e) {
-					System.out.println("Error: lost contact with the output file, try again?");
+					System.out.println("Error: lost contact with the output file.");
 					if (Cardbase.DEBUG) e.printStackTrace();
 				}
 			}
@@ -251,14 +262,14 @@ public final class CardbaseCLI {
 	/**
 	 * Print program version.
 	 */
-	void version() {
+	private void version() {
 		System.out.println("Cardbase v" + VERSION);
 	}
 	
 	/**
 	 * Exit procedure.
 	 */
-	void exit() {
+	private void exit() {
 		if (savePrompt) {
 			System.out.println("Don't forget to save. If you really wish to quit without saving, type \"exit\" again.");
 			savePrompt = false;
@@ -270,7 +281,7 @@ public final class CardbaseCLI {
 	/**
 	 * Print a list of valid set codes.
 	 */
-	void sets() {
+	private void sets() {
 		for (CardSetInformation set : mtgUniverse.getCardSetList()) {
 			// CardSet has an overridden toString()
 			System.out.println(set);
@@ -282,7 +293,7 @@ public final class CardbaseCLI {
 	 * 
 	 * @param args the code of the chosen set.
 	 */
-	void set(String... args) {
+	private void set(String... args) {
 		if (args != null && args.length > 0) {
 			try {
 				selectedSet = mtgUniverse.getFullCardSet(args[0]);
@@ -312,7 +323,7 @@ public final class CardbaseCLI {
 	/**
 	 * Print a brief list of the whole cardbase.
 	 */
-	void glance() {
+	private void glance() {
 		int total = 0;
 		for (Card card : cardbase.getCards()) {
 			printGlance(card);
@@ -326,7 +337,7 @@ public final class CardbaseCLI {
 	 *
 	 * @param args optionally a card within the set (by number) to peruse.
 	 */
-	void peruse(String... args) {
+	private void peruse(String... args) {
 		// if a card is specified, peruse only that
 		if (args != null && args.length > 0) {
 			if (selectedSet != null) {
@@ -355,7 +366,7 @@ public final class CardbaseCLI {
 	 *
 	 * @param args the set number of the card to remove and optionally the count to be removed.
 	 */
-	void remove(String... args) {
+	private void remove(String... args) {
 		if (selectedSet != null) {
 			if (args != null && args.length > 0) {
 //				Card cardToRemove = selectedSet.getCardByNumber(args[0]);
@@ -372,13 +383,13 @@ public final class CardbaseCLI {
 					cardToRemove.count = count;
 					removeCard(cardToRemove);
 				} else {
-					System.out.println(args[0] + " is not in the cardbase.");
+					System.out.println("Card " + selectedSet.code + " " + args[0] + " is not in the cardbase.");
 				}
 			} else {
 				System.out.println("Please specify a card number to remove.");
 			}
 		} else {
-			System.out.println("Select a set before removing cards.");
+			System.out.println("Please select a set before removing cards.");
 		}
 	}
 
@@ -388,7 +399,7 @@ public final class CardbaseCLI {
 	 * @param number the number of the card to add.
 	 * @param args optionally the count to add.
 	 */
-	void add(String number, String... args) {
+	private void add(String number, String... args) {
 		if (selectedSet != null) {
 			// a blank line after adding a card repeats the addition unlimitedly
 			if (number.isEmpty()) {
@@ -412,14 +423,14 @@ public final class CardbaseCLI {
 				}
 			}
 		} else {
-			System.out.println("Select a set before adding cards.");
+			System.out.println("Please select a set before adding cards.");
 		}
 	}
 	
 	/**
 	 * Undo previous action.
 	 */
-	void undo() {
+	private void undo() {
 		if (lastAction != null) {
 			if (lastAction == Action.ADD) {
 				removeCard(lastAction.card);
@@ -474,7 +485,7 @@ public final class CardbaseCLI {
 	 * @param name the file name candidate to sanitise.
 	 * @return the sanitised name.
 	 */
-	String sanitiseFileName(String name) {
+	private String sanitiseFileName(String name) {
 		// POSIX-compliant valid filename characters
 		name = name.replaceAll("[^-_./A-Za-z0-9]", "");
 		// extension is not indispensable, but good practice

@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import org.junit.After;
@@ -53,98 +55,6 @@ public class CardbaseCLITest {
 
 	@After
 	public void tearDown() throws Exception {
-	}
-	
-	/***********************************************************************************
-	 * User input tests, happy path
-	 ***********************************************************************************/
-	@Test
-	public void commandAndArgumentsSeparatedBySpaces() throws Exception {
-		String[] processedInput = uut.sanitiseInput("cOmMand5 argumEnt1 argument2");
-		
-		assertEquals("Wrong array length.", 3, processedInput.length);
-		assertEquals("cOmMand5", processedInput[0]);
-		assertEquals("argumEnt1", processedInput[1]);
-		assertEquals("argument2", processedInput[2]);
-	}
-	
-	@Test
-	public void commandAndNoArguments() throws Exception {
-		String[] processedInput = uut.sanitiseInput("Someth1ng");
-		
-		assertEquals("Wrong array length.", 1, processedInput.length);
-		assertEquals("Someth1ng", processedInput[0]);
-	}
-	
-	/*
-	 * Edge cases
-	 */
-	@Test
-	public void blankInput() throws Exception {
-		String[] processedInput = uut.sanitiseInput("");
-		
-		assertEquals("Wrong array length.", 1, processedInput.length);
-		assertEquals("", processedInput[0]);
-	}
-	
-	@Test
-	public void onlyWhiteSpace() throws Exception {
-		String[] processedInput = uut.sanitiseInput("  		  	");
-		
-		assertEquals("Wrong array length.", 1, processedInput.length);
-		assertEquals("", processedInput[0]);
-	}
-	
-	@Test
-	public void leadingTrailingAndIntermediaryWhiteSpace() throws Exception {
-		String[] processedInput = uut.sanitiseInput("  \t  this   \twas \t  \t  a triumph  \t\t    ");
-		
-		assertEquals("Wrong array length.", 4, processedInput.length);
-		assertEquals("this", processedInput[0]);
-		assertEquals("was", processedInput[1]);
-		assertEquals("a", processedInput[2]);
-		assertEquals("triumph", processedInput[3]);
-	}
-	
-	/***********************************************************************************
-	 * File name sanity tests, happy path
-	 ***********************************************************************************/
-	@Test
-	public void reasonableFileNameWithoutExtension() throws Exception {
-		String processedName = uut.sanitiseFileName("f1lename");
-		
-		assertEquals("f1lename.cb", processedName);
-	}
-	
-	@Test
-	public void reasonableFileNameWithExtension() throws Exception {
-		String processedName = uut.sanitiseFileName("f1lename.cb");
-		
-		assertEquals("f1lename.cb", processedName);
-	}
-	
-	/*
-	 * Edge cases
-	 */
-	@Test
-	public void nameWithBrokenExtension() throws Exception {
-		String processedName = uut.sanitiseFileName("f1lename.c b");
-		
-		assertEquals("f1lename.cb", processedName);
-	}
-	
-	@Test
-	public void nameWithWrongExtension() throws Exception {
-		String processedName = uut.sanitiseFileName("f1lename.tar");
-		
-		assertEquals("f1lename.tar.cb", processedName);
-	}
-	
-	@Test
-	public void nameWithIllegalCharacters() throws Exception {
-		String processedName = uut.sanitiseFileName("f1lEnämẽ\n\t\"--._-//?   \t^|#ŧ@fhw9vLL'''");
-		
-		assertEquals("f1lEnm--._-//fhw9vLL.cb", processedName);
 	}
 	
 	/***********************************************************************************
@@ -216,7 +126,7 @@ public class CardbaseCLITest {
 			
 			try {
 				System.setOut(new PrintStream(testOutput));
-				uut.help();
+				uut.interpretInput("help");
 			} finally {
 				System.setOut(console);
 			}
@@ -240,7 +150,7 @@ public class CardbaseCLITest {
 
 			try {
 				System.setOut(new PrintStream(testOutput));
-				uut.write(testFile.getAbsolutePath());
+				uut.interpretInput("write " + testFile.getAbsolutePath());
 			} finally {
 				System.setOut(console);
 			}
@@ -259,7 +169,7 @@ public class CardbaseCLITest {
 		
 		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"));
 				Scanner scanner2 = new Scanner(testFile)) {
-			uut.write(testFile.getAbsolutePath());
+			uut.interpretInput("write " + testFile.getAbsolutePath());
 			String cardJSON = scanner.useDelimiter("\\Z").next();
 			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
 			testCard.count = 1;
@@ -267,7 +177,7 @@ public class CardbaseCLITest {
 
 			try {
 				System.setOut(new PrintStream(testOutput));
-				uut.write();
+				uut.interpretInput("write");
 			} finally {
 				System.setOut(console);
 			}
@@ -284,11 +194,37 @@ public class CardbaseCLITest {
 	public void noFileIsProvidedAndNoDefaultIsAvailable() throws Exception {
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.write();
+			uut.interpretInput("write");
 		} finally {
 			System.setOut(console);
 		}
 		assertEquals("Please provide a file name." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void reasonableFileNameWithoutExtension() throws Exception {
+		File testFile = tempFolder.newFile("saveTest");
+		
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"));
+				Scanner scanner2 = new Scanner(new File(tempFolder.getRoot().getAbsolutePath() + "/saveTest.cb"))) {
+			String cardJSON = scanner.useDelimiter("\\Z").next();
+			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
+			testCard.count = 1;
+			uut.cardbase.addCard(testCard);
+
+			try {
+				System.setOut(new PrintStream(testOutput));
+				uut.interpretInput("write " + testFile.getAbsolutePath());
+			} finally {
+				System.setOut(console);
+			}
+			
+			String save = scanner2.useDelimiter("\\Z").next();
+			assertTrue(save.contains(cardJSON));
+			
+			assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "saveTest.cb\". "
+							+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		}
 	}
 	
 	/*
@@ -299,11 +235,80 @@ public class CardbaseCLITest {
 		File directory = tempFolder.newFolder("testdirectory.cb");
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.write(directory.getAbsolutePath());
+			uut.interpretInput("write " + directory.getAbsolutePath());
 		} finally {
 			System.setOut(console);
 		}
 		assertEquals("Could not write to \"" + directory.getAbsolutePath() + "\"." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void nameWithBrokenExtension() throws Exception {
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"))) {
+			String cardJSON = scanner.useDelimiter("\\Z").next();
+			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
+			testCard.count = 1;
+			uut.cardbase.addCard(testCard);
+
+			try {
+				System.setOut(new PrintStream(testOutput));
+				uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/saveTest.c b");
+			} finally {
+				System.setOut(console);
+			}
+
+			try (Scanner scanner2 = new Scanner(new File(tempFolder.getRoot().getAbsolutePath() + "/saveTest.c.cb"))) {
+				String save = scanner2.useDelimiter("\\Z").next();
+				assertTrue(save.contains(cardJSON));
+
+				assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "/saveTest.c.cb\". "
+						+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+			}
+		}
+	}
+	
+	@Test
+	public void nameWithWrongExtension() throws Exception {
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"))) {
+			String cardJSON = scanner.useDelimiter("\\Z").next();
+			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
+			testCard.count = 1;
+			uut.cardbase.addCard(testCard);
+
+			try {
+				System.setOut(new PrintStream(testOutput));
+				uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/saveTest.tar");
+			} finally {
+				System.setOut(console);
+			}
+
+			try (Scanner scanner2 = new Scanner(new File(tempFolder.getRoot().getAbsolutePath() + "/saveTest.tar.cb"))) {
+				String save = scanner2.useDelimiter("\\Z").next();
+				assertTrue(save.contains(cardJSON));
+
+				assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "/saveTest.tar.cb\". "
+						+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+			}
+		}
+	}
+	
+	@Test
+	public void nameWithIllegalCharacters() throws Exception {
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"))) {
+			String cardJSON = scanner.useDelimiter("\\Z").next();
+			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
+			testCard.count = 1;
+			uut.cardbase.addCard(testCard);
+
+			try {
+				System.setOut(new PrintStream(testOutput));
+				uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/f1lEnämẽ\"--._-//");
+			} finally {
+				System.setOut(console);
+			}
+			
+			assertEquals("Error: lost contact with the output file." + EOL, testOutput.toString());
+		}
 	}
 	
 	/***********************************************************************************
@@ -313,7 +318,7 @@ public class CardbaseCLITest {
 	public void correctVersionIsPrinted() throws Exception {
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.version();
+			uut.interpretInput("version");
 		} finally {
 			System.setOut(console);
 		}
@@ -325,7 +330,7 @@ public class CardbaseCLITest {
 	 ***********************************************************************************/
 	@Test
 	public void exitFlagIsRaised() throws Exception {
-		uut.exit();
+		uut.interpretInput("exit");
 		
 		assertEquals("Incorrect state for exit flag.", true, uut.exit);
 	}
@@ -335,7 +340,7 @@ public class CardbaseCLITest {
 		uut.savePrompt = true;
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.exit();
+			uut.interpretInput("exit");
 		} finally {
 			System.setOut(console);
 		}
@@ -347,12 +352,12 @@ public class CardbaseCLITest {
 	public void exitFlagIsRaisedAfterSavePromptIsAcknowledged() throws Exception {
 		uut.savePrompt = true;
 		
-		uut.exit();
+		uut.interpretInput("exit");
 		
 		assertEquals("Incorrect state for exit flag.", false, uut.exit);
 		assertEquals("Incorrect state for save flag.", false, uut.savePrompt);
 
-		uut.exit();
+		uut.interpretInput("exit");
 		
 		assertEquals("Incorrect state for exit flag.", true, uut.exit);
 	}
@@ -366,7 +371,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.sets();
+			uut.interpretInput("sets");
 		} finally {
 			System.setOut(console);
 		}
@@ -388,7 +393,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.sets();
+			uut.interpretInput("sets");
 		} finally {
 			System.setOut(console);
 		}
@@ -408,7 +413,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.set("M15");
+			uut.interpretInput("set M15");
 		} finally {
 			System.setOut(console);
 		}
@@ -426,12 +431,12 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.set("not a set");
+			uut.interpretInput("set not_a_set");
 		} finally {
 			System.setOut(console);
 		}
 
-		assertEquals("\"not a set\" does not correspond to any set (use \"sets\" to see all valid set codes)." 
+		assertEquals("\"not_a_set\" does not correspond to any set (use \"sets\" to see all valid set codes)." 
 				+ EOL, testOutput.toString());
 		assertNull(uut.selectedSet);
 	}
@@ -447,7 +452,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.glance();
+			uut.interpretInput("glance");
 		} finally {
 			System.setOut(console);
 		}
@@ -459,7 +464,7 @@ public class CardbaseCLITest {
 	public void glanceIsPrintedWithZeroCards() throws Exception {
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.glance();
+			uut.interpretInput("glance");
 		} finally {
 			System.setOut(console);
 		}
@@ -473,7 +478,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.glance();
+			uut.interpretInput("glance");
 		} finally {
 			System.setOut(console);
 		}
@@ -498,7 +503,7 @@ public class CardbaseCLITest {
 				
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.peruse();
+			uut.interpretInput("peruse");
 		} finally {
 			System.setOut(console);
 		}
@@ -512,7 +517,7 @@ public class CardbaseCLITest {
 	public void perusalIsPrintedWithZeroCards() throws Exception {
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.peruse();
+			uut.interpretInput("peruse");
 		} finally {
 			System.setOut(console);
 		}
@@ -526,7 +531,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.peruse();
+			uut.interpretInput("peruse");
 		} finally {
 			System.setOut(console);
 		}
@@ -546,7 +551,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.peruse("129");
+			uut.interpretInput("peruse 129");
 		} finally {
 			System.setOut(console);
 		}
@@ -569,7 +574,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.peruse("100");
+			uut.interpretInput("peruse 100");
 		} finally {
 			System.setOut(console);
 		}
@@ -584,7 +589,7 @@ public class CardbaseCLITest {
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.peruse("100");
+			uut.interpretInput("peruse 100");
 		} finally {
 			System.setOut(console);
 		}
@@ -598,12 +603,12 @@ public class CardbaseCLITest {
 	@Test
 	public void removeValidAmountOfExistingCard() throws Exception {
 		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to peruse from
+		// dummy set just so the uut knows the set to remove from
 		FullCardSet fcs = new FullCardSet();
 		fcs.code = "FRF";
 		uut.selectedSet = fcs;
 		
-		uut.remove("129", "3");
+		uut.interpretInput("remove 129 3");
 		
 		assertEquals("Wrong number of cards was removed.", uut.cardbase.getCard("FRF", "129").count, new Integer(6));		
 	}
@@ -611,12 +616,12 @@ public class CardbaseCLITest {
 	@Test
 	public void removeExceedingAmountOfExistingCard() throws Exception {
 		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to peruse from
+		// dummy set just so the uut knows the set to remove from
 		FullCardSet fcs = new FullCardSet();
 		fcs.code = "FRF";
 		uut.selectedSet = fcs;
 		
-		uut.remove("128", "3");
+		uut.interpretInput("remove 128 3");
 		
 		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
 	}
@@ -624,12 +629,12 @@ public class CardbaseCLITest {
 	@Test
 	public void removeExactAmountOfExistingCard() throws Exception {
 		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to peruse from
+		// dummy set just so the uut knows the set to remove from
 		FullCardSet fcs = new FullCardSet();
 		fcs.code = "FRF";
 		uut.selectedSet = fcs;
 		
-		uut.remove("128", "1");
+		uut.interpretInput("remove 128 1");
 		
 		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
 	}
@@ -637,12 +642,12 @@ public class CardbaseCLITest {
 	@Test
 	public void removeSingleExistingCardWithoutAmount() throws Exception {
 		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to peruse from
+		// dummy set just so the uut knows the set to remove from
 		FullCardSet fcs = new FullCardSet();
 		fcs.code = "FRF";
 		uut.selectedSet = fcs;
 		
-		uut.remove("128");
+		uut.interpretInput("remove 128");
 		
 		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
 	}
@@ -650,12 +655,12 @@ public class CardbaseCLITest {
 	@Test
 	public void removeMultipleExistingCardWithoutAmount() throws Exception {
 		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to peruse from
+		// dummy set just so the uut knows the set to remove from
 		FullCardSet fcs = new FullCardSet();
 		fcs.code = "FRF";
 		uut.selectedSet = fcs;
 		
-		uut.remove("129");
+		uut.interpretInput("remove 129");
 		
 		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "129"));
 	}
@@ -663,27 +668,150 @@ public class CardbaseCLITest {
 	/*
 	 * Edge cases
 	 */
-	// attempt to remove nonexistent card without amount
+	@Test
+	public void removeNonExistentCardWithoutAmount() throws Exception {
+		// dummy set just so the uut knows the set to remove from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("remove 128");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Card FRF 128 is not in the cardbase." + EOL, testOutput.toString());
+	}
 	
-	// attempt to remove nonexistent card with amount
+	@Test
+	public void removeNonExistentCardWithAmount() throws Exception {
+		// dummy set just so the uut knows the set to remove from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("remove 128 2");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Card FRF 128 is not in the cardbase." + EOL, testOutput.toString());
+	}
 	
-	// remove 0 of existing card
+	@Test
+	public void removeZeroOfExistingCard() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to remove from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+		
+		uut.interpretInput("remove 129 0");
+		
+		assertEquals("Card amount should not have changed.", uut.cardbase.getCard("FRF", "129").count, new Integer(8));
+	}
 	
-	// remove negative number of existing card
+	@Test
+	public void removeNegativeAmountOfExistingCard() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		// dummy set just so the uut knows the set to remove from
+		FullCardSet fcs = new FullCardSet();
+		fcs.code = "FRF";
+		uut.selectedSet = fcs;
+
+		uut.interpretInput("remove 129 -10");
+		
+		assertEquals("Card amount should not have changed.", uut.cardbase.getCard("FRF", "129").count, new Integer(8));
+	}
 	
-	// remove card without selected set
-	
+	@Test
+	public void removeWithNoSetSelected() throws Exception {
+		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		uut.selectedSet = null;
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("remove 100");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Please select a set before removing cards." + EOL, testOutput.toString());
+	}
 	
 	/***********************************************************************************
 	 * add() tests, happy path
 	 ***********************************************************************************/
-
+	// add
+	
+	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void invalidCommandWithNoSelectedSet() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("cOmMand5 argumEnt1 argument2");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Please select a set before adding cards." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void invalidCommandWithSelectedSet() throws Exception {
+		// dummy set just so the uut knows the set to remove from
+		FullCardSet fcs = new FullCardSet();
+		fcs.name = "Fate Reforged";
+		fcs.cards = new HashMap<String, Card>();
+		uut.selectedSet = fcs;
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("cOmMand5 argumEnt1 argument2");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("cOmMand5 does not correspond to a card in Fate Reforged." + EOL, testOutput.toString());
+	}
+	
+//	@Test
+//	public void blankInput() throws Exception {
+//		String[] processedInput = uut.sanitiseInput("");
+//		
+//		assertEquals("Wrong array length.", 1, processedInput.length);
+//		assertEquals("", processedInput[0]);
+//	}
+//	
+//	@Test
+//	public void onlyWhiteSpace() throws Exception {
+//		String[] processedInput = uut.sanitiseInput("  		  	");
+//		
+//		assertEquals("Wrong array length.", 1, processedInput.length);
+//		assertEquals("", processedInput[0]);
+//	}
+//	
+//	@Test
+//	public void leadingTrailingAndIntermediaryWhiteSpace() throws Exception {
+//		String[] processedInput = uut.sanitiseInput("  \t  this   \twas \t  \t  a triumph  \t\t    ");
+//		
+//		assertEquals("Wrong array length.", 4, processedInput.length);
+//		assertEquals("this", processedInput[0]);
+//		assertEquals("was", processedInput[1]);
+//		assertEquals("a", processedInput[2]);
+//		assertEquals("triumph", processedInput[3]);
+//	}
 	
 	/***********************************************************************************
 	 * undo() tests, happy path
-	 ***********************************************************************************/
-	
-	
+	 ***********************************************************************************/	
 }
 
 

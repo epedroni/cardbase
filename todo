@@ -5,5 +5,6 @@ Cardbase:
  
 CardbaseCLI:
  * undo, add, remove
+ * refactor exit tests, shouldnt need to look at flag
 
 To pass: happy path remove
