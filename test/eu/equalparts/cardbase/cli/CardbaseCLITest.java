@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -18,19 +17,32 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.cards.FullCardSet;
 import eu.equalparts.cardbase.utils.MTGUniverse;
 
+/**
+ * These tests do some unusual things, but I think they are reasonable.
+ * 
+ * @author Eduardo Pedroni
+ *
+ */
 public class CardbaseCLITest {
 
 	private CardbaseCLI uut;
 	
-	private ByteArrayOutputStream testOutput;
+	private ByteArrayOutputStream testOutput = new ByteArrayOutputStream();
 	private final PrintStream console = System.out;
 	private final String EOL = System.getProperty("line.separator");
+	
+	/**
+	 * The test remote URL to "query" from, this is actually the same directory
+	 * as the test class. Test files need to be placed accordingly.
+	 */
+	private final String TEST_REMOTE = getClass().getResource("").toString();
 	
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
@@ -49,8 +61,8 @@ public class CardbaseCLITest {
 
 	@Before
 	public void setUp() throws Exception {
-		uut = new CardbaseCLI();
-		testOutput = new ByteArrayOutputStream();
+		uut = new CardbaseCLI(TEST_REMOTE);
+		testOutput.reset();
 	}
 
 	@After
@@ -58,71 +70,92 @@ public class CardbaseCLITest {
 	}
 	
 	/***********************************************************************************
-	 * Constructor tests, happy path
+	 * Start up tests, happy path
 	 ***********************************************************************************/
 	@Test
-	public void instantiationWithoutArguments() throws Exception {
-		uut = new CardbaseCLI();
+	public void welcomeMessageWithoutCardbaseFile() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut = new CardbaseCLI(TEST_REMOTE);
+		} finally {
+			System.setOut(console);
+		}
 		
-		assertEquals("Cardbase contains the wrong number of card entries.", 0, uut.cardbase.getCards().size());
+		assertEquals("Welcome to Cardbase CLI!\nNo cardbase file was provided, creating a clean cardbase." + EOL, testOutput.toString());
 	}
 	
 	@Test
-	public void instantiationWithCardbaseFile() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+	public void glanceWithoutCardbaseFile() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE);
 		
-		assertEquals("Cardbase contains the wrong number of card entries.", 6, uut.cardbase.getCards().size());
-		
-		class CardInfo {
-			String setCode, number;
-			Integer count;
-			public CardInfo(String setCode, String number, Integer count) {
-				this.setCode = setCode;
-				this.number = number;
-				this.count = count;
-			}
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
 		}
-		CardInfo[] testCards = new CardInfo[] {
-				new CardInfo("M12", "34", 2),
-				new CardInfo("FRF", "129", 8),
-				new CardInfo("M12", "26", 1),
-				new CardInfo("FRF", "127", 1),
-				new CardInfo("FRF", "128", 1),
-				new CardInfo("M12", "152", 1)};
 		
-		for (CardInfo ci : testCards) {
-			Card card = uut.cardbase.getCard(ci.setCode, ci.number);
-			assertNotNull("Missing card, set " + ci.setCode + ", " + ci.number, card);
-			assertEquals("Wrong card count, set " + ci.setCode + ", " + ci.number, ci.count, card.count);
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void welcomeMessageWithCardbaseFile() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		} finally {
+			System.setOut(console);
 		}
+		
+		assertEquals("Welcome to Cardbase CLI!\nLoading cardbase from \"" + getClass().getResource("/testbase.cb").getFile() + "\"." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void glanceWithCardbaseFile() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals(getFileContents("multipleCardsGlance") + EOL, testOutput.toString());
 	}
 	
 	/*
 	 * Edge cases
 	 */
 	@Test
-	public void instantiationWithInvalidArguments() throws Exception {
+	public void welcomeMessageWithEmptyCardbaseFileName() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut = new CardbaseCLI(TEST_REMOTE, "");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Welcome to Cardbase CLI!\nNo cardbase file was provided, creating a clean cardbase." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void startWithInvalidArguments() throws Exception {
 		File notAFile = tempFolder.newFile();
 		tempFolder.delete();
 
 		exception.expect(IllegalArgumentException.class);
-		uut = new CardbaseCLI(notAFile.getAbsolutePath());
+		uut = new CardbaseCLI(TEST_REMOTE, notAFile.getAbsolutePath());
 	}
 	
-	@Test
-	public void instantiationWithEmptyArguments() throws Exception {
-		uut = new CardbaseCLI("");
-		
-		assertEquals("Cardbase contains the wrong number of card entries.", 0, uut.cardbase.getCards().size());
-	}
+	// TODO test more invalid file scenarios
 	
 	/***********************************************************************************
 	 * help() tests, happy path
 	 ***********************************************************************************/
 	@Test
 	public void helpInformationIsPrinted() throws Exception {
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/help_en"))) {
-			String help = scanner.useDelimiter("\\Z").next();
+			String help = getFileContents("/help_en");
 			
 			try {
 				System.setOut(new PrintStream(testOutput));
@@ -130,68 +163,85 @@ public class CardbaseCLITest {
 			} finally {
 				System.setOut(console);
 			}
+			
 			assertEquals(help + EOL, testOutput.toString());
-		}
 	}
 	
 	/***********************************************************************************
 	 * write() tests, happy path
 	 ***********************************************************************************/
 	@Test
-	public void writeCardbaseToSpecifiedFile() throws Exception {
+	public void reloadedCardbaseMatchesOriginal() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
 		File testFile = tempFolder.newFile("saveTest.cb");
 		
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"));
-				Scanner scanner2 = new Scanner(testFile)) {
-			String cardJSON = scanner.useDelimiter("\\Z").next();
-			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
-			testCard.count = 1;
-			uut.cardbase.addCard(testCard);
-
-			try {
-				System.setOut(new PrintStream(testOutput));
-				uut.interpretInput("write " + testFile.getAbsolutePath());
-			} finally {
-				System.setOut(console);
-			}
-			
-			String save = scanner2.useDelimiter("\\Z").next();
-			assertTrue(save.contains(cardJSON));
-			
-			assertEquals("Cardbase was saved to \"" + testFile.getAbsolutePath() + "\". "
-							+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("write " + testFile.getAbsolutePath());
+		} finally {
+			System.setOut(console);
 		}
+		
+		assertEquals("Cardbase was saved to \"" + testFile.getAbsolutePath() + "\". "
+				+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		uut = new CardbaseCLI(TEST_REMOTE, testFile.getAbsolutePath());
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void specifiedFileIsSubsequentlyUsedByDefault() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
 		File testFile = tempFolder.newFile("saveTest.cb");
 		
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"));
-				Scanner scanner2 = new Scanner(testFile)) {
-			uut.interpretInput("write " + testFile.getAbsolutePath());
-			String cardJSON = scanner.useDelimiter("\\Z").next();
-			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
-			testCard.count = 1;
-			uut.cardbase.addCard(testCard);
-
-			try {
-				System.setOut(new PrintStream(testOutput));
-				uut.interpretInput("write");
-			} finally {
-				System.setOut(console);
-			}
-			
-			String save = scanner2.useDelimiter("\\Z").next();
-			assertTrue(save.contains(cardJSON));
-			
-			assertEquals("Cardbase was saved to \"" + testFile.getAbsolutePath() + "\". "
-					+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		uut.interpretInput("write " + testFile.getAbsolutePath());
+		
+		uut.interpretInput("set FRF");
+		uut.interpretInput("remove 128");
+		uut.interpretInput("100");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse");
+		} finally {
+			System.setOut(console);
 		}
+		String expectedPerusal = testOutput.toString();
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("write");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("Cardbase was saved to \"" + testFile.getAbsolutePath() + "\". "
+				+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		
+		uut = new CardbaseCLI(TEST_REMOTE, testFile.getAbsolutePath());
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals(expectedPerusal, testOutput.toString());
+		assertNotEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 
 	@Test
-	public void noFileIsProvidedAndNoDefaultIsAvailable() throws Exception {
+	public void userIsPromptedForFileNameIfNoDefaultIsPresent() throws Exception {
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("write");
@@ -202,36 +252,38 @@ public class CardbaseCLITest {
 	}
 	
 	@Test
-	public void reasonableFileNameWithoutExtension() throws Exception {
-		File testFile = tempFolder.newFile("saveTest");
-		
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"));
-				Scanner scanner2 = new Scanner(new File(tempFolder.getRoot().getAbsolutePath() + "/saveTest.cb"))) {
-			String cardJSON = scanner.useDelimiter("\\Z").next();
-			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
-			testCard.count = 1;
-			uut.cardbase.addCard(testCard);
+	public void fileExtensionIsAddedIfMissing() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
 
-			try {
-				System.setOut(new PrintStream(testOutput));
-				uut.interpretInput("write " + testFile.getAbsolutePath());
-			} finally {
-				System.setOut(console);
-			}
-			
-			String save = scanner2.useDelimiter("\\Z").next();
-			assertTrue(save.contains(cardJSON));
-			
-			assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "saveTest.cb\". "
-							+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/testSave");
+		} finally {
+			System.setOut(console);
 		}
+		
+		assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "/testSave.cb" + "\". "
+				+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		assertFalse("File without extension exists.", new File(tempFolder.getRoot().getAbsolutePath() + "/testSave").exists());
+		assertTrue("File with extension does not exist.", new File(tempFolder.getRoot().getAbsolutePath() + "/testSave.cb").exists());
+		
+		testOutput.reset();
+		uut = new CardbaseCLI(TEST_REMOTE, tempFolder.getRoot().getAbsolutePath() + "/testSave.cb");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	/*
 	 * Edge cases
 	 */
 	@Test
-	public void pathProvidedIsDirectory() throws Exception {
+	public void writeFailsIfProvidedPathIsDirectory() throws Exception {
 		File directory = tempFolder.newFolder("testdirectory.cb");
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -243,72 +295,58 @@ public class CardbaseCLITest {
 	}
 	
 	@Test
-	public void nameWithBrokenExtension() throws Exception {
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"))) {
-			String cardJSON = scanner.useDelimiter("\\Z").next();
-			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
-			testCard.count = 1;
-			uut.cardbase.addCard(testCard);
+	public void extensionIsAddedEvenIfFileNameAlreadyHasOne() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
 
-			try {
-				System.setOut(new PrintStream(testOutput));
-				uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/saveTest.c b");
-			} finally {
-				System.setOut(console);
-			}
-
-			try (Scanner scanner2 = new Scanner(new File(tempFolder.getRoot().getAbsolutePath() + "/saveTest.c.cb"))) {
-				String save = scanner2.useDelimiter("\\Z").next();
-				assertTrue(save.contains(cardJSON));
-
-				assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "/saveTest.c.cb\". "
-						+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
-			}
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/testSave.tar");
+		} finally {
+			System.setOut(console);
 		}
+		
+		assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "/testSave.tar.cb" + "\". "
+				+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		assertFalse("File with incorrect extension exists.", new File(tempFolder.getRoot().getAbsolutePath() + "/testSave.tar").exists());
+		assertTrue("File with correct extension does not exist.", new File(tempFolder.getRoot().getAbsolutePath() + "/testSave.tar.cb").exists());
+		
+		testOutput.reset();
+		uut = new CardbaseCLI(TEST_REMOTE, tempFolder.getRoot().getAbsolutePath() + "/testSave.tar.cb");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	@Test
-	public void nameWithWrongExtension() throws Exception {
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"))) {
-			String cardJSON = scanner.useDelimiter("\\Z").next();
-			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
-			testCard.count = 1;
-			uut.cardbase.addCard(testCard);
+	public void illegalCharactersAreRemovedFromFileName() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
 
-			try {
-				System.setOut(new PrintStream(testOutput));
-				uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/saveTest.tar");
-			} finally {
-				System.setOut(console);
-			}
-
-			try (Scanner scanner2 = new Scanner(new File(tempFolder.getRoot().getAbsolutePath() + "/saveTest.tar.cb"))) {
-				String save = scanner2.useDelimiter("\\Z").next();
-				assertTrue(save.contains(cardJSON));
-
-				assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "/saveTest.tar.cb\". "
-						+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
-			}
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/f1lEnämẽ\"--._-");
+		} finally {
+			System.setOut(console);
 		}
-	}
-	
-	@Test
-	public void nameWithIllegalCharacters() throws Exception {
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/shivandragon.json"))) {
-			String cardJSON = scanner.useDelimiter("\\Z").next();
-			Card testCard = new ObjectMapper().readValue(cardJSON, Card.class);
-			testCard.count = 1;
-			uut.cardbase.addCard(testCard);
-
-			try {
-				System.setOut(new PrintStream(testOutput));
-				uut.interpretInput("write " + tempFolder.getRoot().getAbsolutePath() + "/f1lEnämẽ\"--._-//");
-			} finally {
-				System.setOut(console);
-			}
-			
-			assertEquals("Error: lost contact with the output file." + EOL, testOutput.toString());
+		
+		assertEquals("Cardbase was saved to \"" + tempFolder.getRoot().getAbsolutePath() + "/f1lEnm--._-.cb" + "\". "
+				+ "Subsequent writes will be done to this same file unless otherwise requested." + EOL, testOutput.toString());
+		assertTrue("File with correct name does not exist.", new File(tempFolder.getRoot().getAbsolutePath() + "/f1lEnm--._-.cb").exists());
+		
+		testOutput.reset();
+		uut = new CardbaseCLI(TEST_REMOTE, tempFolder.getRoot().getAbsolutePath() + "/f1lEnm--._-.cb");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse");
+		} finally {
+			System.setOut(console);
 		}
+		
+		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	/***********************************************************************************
@@ -322,22 +360,30 @@ public class CardbaseCLITest {
 		} finally {
 			System.setOut(console);
 		}
-		assertEquals("Cardbase v" + CardbaseCLI.VERSION + EOL, testOutput.toString());
+		assertTrue("Incorrect version information was printed.", testOutput.toString().matches("CardbaseCLI v[0-9]+\\.[0-9]+" + EOL));
 	}
 	
 	/***********************************************************************************
 	 * exit() tests, happy path
 	 ***********************************************************************************/
+	// try to exit without changing anything, expect no warning
 	@Test
-	public void exitFlagIsRaised() throws Exception {
-		uut.interpretInput("exit");
-		
-		assertEquals("Incorrect state for exit flag.", true, uut.exit);
+	public void exitWithoutChanges() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("", testOutput.toString());
 	}
 	
+	// try to exit after adding something, expect a warning, try to exit again, expect no warning
 	@Test
-	public void saveReminderIsPrintedIfPromptFlagIsRaised() throws Exception {
-		uut.savePrompt = true;
+	public void exitAfterAddingSomething() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("100");
+		
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("exit");
@@ -345,21 +391,124 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		assertEquals("Don't forget to save. If you really wish to quit without saving, type \"exit\" again." + EOL, testOutput.toString());
-		assertEquals("Incorrect state for exit flag.", false, uut.exit);
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("", testOutput.toString());
 	}
 	
+	// try to exit after removing something, expect a warning, try to exit again, expect no warning
 	@Test
-	public void exitFlagIsRaisedAfterSavePromptIsAcknowledged() throws Exception {
-		uut.savePrompt = true;
+	public void exitAfterRemovingSomething() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
+		uut.interpretInput("remove 128");
 		
-		uut.interpretInput("exit");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Don't forget to save. If you really wish to quit without saving, type \"exit\" again." + EOL, testOutput.toString());
 		
-		assertEquals("Incorrect state for exit flag.", false, uut.exit);
-		assertEquals("Incorrect state for save flag.", false, uut.savePrompt);
-
-		uut.interpretInput("exit");
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("", testOutput.toString());
+	}
+	
+	// try to exit after adding something, expect a warning, write, try to exit again, expect no warning
+	@Test
+	public void exitAfterAddingSomethingAndBeforeWriting() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("100");
 		
-		assertEquals("Incorrect state for exit flag.", true, uut.exit);
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Don't forget to save. If you really wish to quit without saving, type \"exit\" again." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("", testOutput.toString());
+	}
+	
+	// try to exit after removing something, expect a warning, write, try to exit again, expect no warning
+	@Test
+	public void exitAfterRemovingSomethingAndBeforeWriting() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
+		uut.interpretInput("remove 128");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Don't forget to save. If you really wish to quit without saving, type \"exit\" again." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("", testOutput.toString());
+	}
+	
+	// add something, write, try to exit and expect no warning
+	@Test
+	public void exitAfterAddingSomethingAndWriting() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("100");
+		uut.interpretInput("write testSave.cb");
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("", testOutput.toString());
+	}
+	
+	// remove something, write, try to exit and expect no warning
+	@Test
+	public void exitAfterRemovingSomethingAndWriting() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
+		uut.interpretInput("remove 128");
+		uut.interpretInput("write");
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("exit");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("", testOutput.toString());
 	}
 	
 	/***********************************************************************************
@@ -367,8 +516,6 @@ public class CardbaseCLITest {
 	 ***********************************************************************************/
 	@Test
 	public void correctSetListIsPrinted() throws Exception {
-		uut.mtgUniverse = new MTGUniverse(getClass().getResource("").toString());
-		
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("sets");
@@ -474,7 +621,7 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void glanceIsPrintedWithManyCards() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -483,13 +630,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals("1    Reverberate (M12, 152)\n"
-				+ "1    Mighty Leap (M12, 26)\n"
-				+ "8    Formless Nurturing (FRF, 129)\n"
-				+ "1    Feral Krushok (FRF, 128)\n"
-				+ "1    Destructor Dragon (FRF, 127)\n"
-				+ "2    Siege Mastodon (M12, 34)\n"
-				+ "Total: 14" + EOL, testOutput.toString());
+		assertEquals(getFileContents("multipleCardsGlance") + EOL, testOutput.toString());
 	}
 	
 	/***********************************************************************************
@@ -653,7 +794,7 @@ public class CardbaseCLITest {
 	}
 	
 	@Test
-	public void removeMultipleExistingCardWithoutAmount() throws Exception {
+	public void removeMultipleExistingCardsWithoutAmount() throws Exception {
 		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
 		// dummy set just so the uut knows the set to remove from
 		FullCardSet fcs = new FullCardSet();
@@ -662,7 +803,7 @@ public class CardbaseCLITest {
 		
 		uut.interpretInput("remove 129");
 		
-		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "129"));
+		assertEquals("Wrong number of cards was removed.", uut.cardbase.getCard("FRF", "129").count, new Integer(7));	
 	}
 	
 	/*
@@ -725,6 +866,7 @@ public class CardbaseCLITest {
 
 		uut.interpretInput("remove 129 -10");
 		
+		System.out.println(uut.cardbase.getCard("FRF",  "129"));
 		assertEquals("Card amount should not have changed.", uut.cardbase.getCard("FRF", "129").count, new Integer(8));
 	}
 	
@@ -811,7 +953,13 @@ public class CardbaseCLITest {
 	
 	/***********************************************************************************
 	 * undo() tests, happy path
-	 ***********************************************************************************/	
+	 ***********************************************************************************/
+	
+	private String getFileContents(String fileName) {
+		try (Scanner scanner = new Scanner(getClass().getResourceAsStream(fileName))) {
+			return scanner.useDelimiter("\\Z").next();
+		}
+	}
 }
 
 

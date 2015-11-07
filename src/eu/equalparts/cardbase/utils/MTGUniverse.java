@@ -32,9 +32,9 @@ public final class MTGUniverse {
 	/**
 	 * The base URL from where the information is fetched.
 	 */
-	private String BASE_DATA_URL = "http://mtgjson.com/json/";
+	private String BASE_DATA_URL;
 	/**
-	 * If the upstream set code list can't be loaded, this is loaded instead.
+	 * If the upstream set code list can't be loaded, this local copy is loaded instead.
 	 */
 	private final String FALLBACK_LIST_PATH = "/fallbackSetList.json";
 	/**
@@ -45,8 +45,6 @@ public final class MTGUniverse {
 	 * A cache of {@code FullCardSets} to avoid querying the server many times for the same information.
 	 */
 	private HashMap<String, FullCardSet> cardSetCache = new HashMap<String, FullCardSet>();
-	
-	public MTGUniverse() {}
 	
 	public MTGUniverse(String dataLocation) {
 		this.BASE_DATA_URL = dataLocation;

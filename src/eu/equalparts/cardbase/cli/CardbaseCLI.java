@@ -30,7 +30,7 @@ public final class CardbaseCLI {
 	 * 
 	 * @author Eduardo Pedroni
 	 */
-	enum Action {
+	private enum Action {
 		ADD, REMOVE;
 		public Card card;
 	}
@@ -38,44 +38,50 @@ public final class CardbaseCLI {
 	/**
 	 * Location of the help file.
 	 */
-	static final String HELP_FILE_PATH = "/help_en";
+	private static final String HELP_FILE_PATH = "/help_en";
 	/**
 	 * Program version.
 	 */
-	static final String VERSION = "1.0";
+	private static final String VERSION = "1.0";
+	/**
+	 * This is the default remote URL from where card data is queried.
+	 */
+	private static final String REMOTE_URL = "http://mtgjson.com/json/";
 	/**
 	 * The last action performed by the user.
 	 */
-	Action lastAction = null;
+	private Action lastAction = null;
 	/**
-	 * 
+	 * This is the universe of MTG cards. The URL to query from
+	 * is by default {@code REMOTE_URL}, but it can be overridden
+	 * in the default constructor.
 	 */
-	MTGUniverse mtgUniverse = new MTGUniverse();
+	private MTGUniverse mtgUniverse;
 	/**
 	 * The currently selected set, from which new cards are added.
 	 */
-	FullCardSet selectedSet = null;
+	private FullCardSet selectedSet = null;
 	/**
 	 * The actual cardbase being interfaced with.
 	 */
-	Cardbase cardbase;
+	private Cardbase cardbase;
 	/**
 	 * Printed to the console when the user enters the help command.
 	 */
-	String help = "Not available, check project page on GitHub.";
+	private String help = "Not available, check project page on GitHub.";
 	/**
 	 * The cardbase file off which we are currently working, if any.
 	 */
-	File cardbaseFile = null;
+	private File cardbaseFile = null;
 	/**
 	 * Save flag is raised when cards are added or removed and causes a prompt to be shown
 	 * if the user tries to exit with unsaved changed.
 	 */
-	boolean savePrompt = false;
+	private boolean savePrompt = false;
 	/**
 	 * Exit flag, program breaks out of the main loop when true.
 	 */
-	boolean exit = false;
+	private boolean exit = false;
 
 	/**
 	 * Execute the interface.
@@ -84,14 +90,14 @@ public final class CardbaseCLI {
 	 */
 	public static void main(String... args) {
 		try {
-			new CardbaseCLI(args).startInterface();
+			new CardbaseCLI(REMOTE_URL, args).startInterface();
 		} catch (JsonParseException e) {
 			System.out.println("Error: poorly formatted cardbase, check the syntax and try again.");
 			// although the problem could also be with the upstream CardSetList json.
 			if (Cardbase.DEBUG) e.printStackTrace();
 			System.exit(1);
 		} catch (JsonMappingException e) {
-			System.out.println("Error: unexpected fields found in cardbase, it may be from an old version?");
+			System.out.println("Error: unexpected fields found in cardbase, is it from an old version?");
 			if (Cardbase.DEBUG) e.printStackTrace();
 			System.exit(1);
 		} catch (IOException e) {
@@ -99,7 +105,7 @@ public final class CardbaseCLI {
 			if (Cardbase.DEBUG) e.printStackTrace();
 			System.exit(1);
 		} catch (IllegalArgumentException e) {
-			System.out.println("Error: the provided file is invalid.");
+			System.out.println("Error: the file provided is invalid.");
 			if (Cardbase.DEBUG) e.printStackTrace();
 			System.exit(1);
 		}
@@ -110,17 +116,21 @@ public final class CardbaseCLI {
 	 * This does not actually produce the CLI, for that use {@code startInterface()}
 	 * on the constructed object.
 	 * 
+	 * @param remoteURL the remote URL used to query for card and set data.
 	 * @param args a list of arguments. Only the first argument is used, as a cardbase JSON.
 	 * @throws IOException if something goes wrong while reading the provided file.
 	 * @throws JsonMappingException if the provided json did not correspond to the expected format.
 	 * @throws JsonParseException if the provided file did not contain valid json.
 	 */
-	CardbaseCLI(String... args) throws JsonParseException, JsonMappingException, IOException {
+	CardbaseCLI(String remoteURL, String... args) throws JsonParseException, JsonMappingException, IOException {
 		System.out.println("Welcome to Cardbase CLI!");
 
 		// set debug flag if we are debugging
 		if (Cardbase.DEBUG) System.out.println("Debug mode is on.");
 
+		// initialise the universe
+		mtgUniverse = new MTGUniverse(remoteURL);
+		
 		// make the Cardbase
 		if (args != null && args.length > 0 && !args[0].isEmpty()) {
 			cardbaseFile = new File(args[0]);
@@ -263,7 +273,7 @@ public final class CardbaseCLI {
 	 * Print program version.
 	 */
 	private void version() {
-		System.out.println("Cardbase v" + VERSION);
+		System.out.println("CardbaseCLI v" + VERSION);
 	}
 	
 	/**
@@ -369,21 +379,23 @@ public final class CardbaseCLI {
 	private void remove(String... args) {
 		if (selectedSet != null) {
 			if (args != null && args.length > 0) {
-//				Card cardToRemove = selectedSet.getCardByNumber(args[0]);
-				Card cardToRemove = cardbase.getCard(selectedSet.code, args[0]);
+				Card cardToRemove = selectedSet.getCardByNumber(args[0]);
 				if (cardToRemove != null) {
-					Integer count = 1;
-					if (args.length > 1 && args[1].matches("[0-9]+")) {
-						count = Integer.valueOf(args[1]);
-						if (count <= 0) {
-							System.out.println("Can't remove " + count + " cards.");
-							return;
+					String count = args.length > 1 ? args[1] : "1";
+					
+					if (count.matches("[-]?[0-9]+")) {
+						Integer intCount = Integer.valueOf(count);
+						if (intCount > 0) {
+							cardToRemove.count = intCount;
+							removeCard(cardToRemove);
+						} else {
+							System.out.println("Cannot remove " + count + " cards.");
 						}
+					} else {
+						System.out.println(count + " is not a valid number of cards.");
 					}
-					cardToRemove.count = count;
-					removeCard(cardToRemove);
 				} else {
-					System.out.println("Card " + selectedSet.code + " " + args[0] + " is not in the cardbase.");
+					System.out.println(args[0] + " does not correspond to a card in " + selectedSet.name + ".");
 				}
 			} else {
 				System.out.println("Please specify a card number to remove.");
@@ -476,7 +488,6 @@ public final class CardbaseCLI {
 		} else {
 			System.out.println(card.name + " is not in the cardbase.");
 		}
-
 	}
 
 	/**
