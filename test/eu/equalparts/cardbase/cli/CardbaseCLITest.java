@@ -473,9 +473,8 @@ public class CardbaseCLITest {
 	public void exitAfterAddingSomethingAndWriting() throws Exception {
 		uut.interpretInput("set FRF");
 		uut.interpretInput("100");
-		uut.interpretInput("write testSave.cb");
+		uut.interpretInput("write " + tempFolder.newFile().getAbsolutePath());
 		
-		testOutput.reset();
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("exit");
@@ -491,9 +490,8 @@ public class CardbaseCLITest {
 		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
 		uut.interpretInput("set FRF");
 		uut.interpretInput("remove 128");
-		uut.interpretInput("write");
+		uut.interpretInput("write " + tempFolder.newFile().getAbsolutePath());
 		
-		testOutput.reset();
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("exit");
