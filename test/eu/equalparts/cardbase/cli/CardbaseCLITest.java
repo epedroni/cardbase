@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
-import java.util.HashMap;
 import java.util.Scanner;
 
 import org.junit.After;
@@ -16,13 +15,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.cards.FullCardSet;
-import eu.equalparts.cardbase.utils.MTGUniverse;
 
 /**
  * These tests do some unusual things, but I think they are reasonable.
@@ -526,7 +518,8 @@ public class CardbaseCLITest {
 		assertEquals("LEA          : Limited Edition Alpha\n"
 				+ "LEB          : Limited Edition Beta\n"
 				+ "ARN          : Arabian Nights\n"
-				+ "M15          : Magic 2015 Core Set" + EOL, testOutput.toString());
+				+ "M15          : Magic 2015 Core Set\n"
+				+ "FRF          : Fate Reforged" + EOL, testOutput.toString());
 	}
 	
 	/*
@@ -536,7 +529,7 @@ public class CardbaseCLITest {
 	public void fallbackListIsPrintedIfListCannotBeFound() throws Exception {
 		File noListLocation = tempFolder.newFolder();
 		tempFolder.delete();
-		uut.mtgUniverse = new MTGUniverse("file:" + noListLocation.getCanonicalPath() + "/");
+		uut = new CardbaseCLI(noListLocation.getAbsolutePath());
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -545,10 +538,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("expectedFallbackList"))) {
-			String expectedOutput = scanner.useDelimiter("\\Z").next();
-			assertEquals(expectedOutput + EOL, testOutput.toString());
-		}
+		assertEquals(getFileContents("expectedFallbackList") + EOL, testOutput.toString());
 	}
 	
 	/***********************************************************************************
@@ -556,8 +546,6 @@ public class CardbaseCLITest {
 	 ***********************************************************************************/
 	@Test
 	public void correctSetIsSelected() throws Exception {
-		uut.mtgUniverse = new MTGUniverse(getClass().getResource("").toString());
-		
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("set M15");
@@ -566,16 +554,13 @@ public class CardbaseCLITest {
 		}
 		
 		assertEquals("Selected set: Magic 2015 Core Set." + EOL, testOutput.toString());
-		assertEquals(uut.selectedSet.code, "M15");
 	}
 	
 	/*
 	 * Edge cases
 	 */
 	@Test
-	public void invalidSetIsProvided() throws Exception {
-		uut.mtgUniverse = new MTGUniverse(getClass().getResource("").toString());
-		
+	public void invalidSetIsProvided() throws Exception {		
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("set not_a_set");
@@ -585,7 +570,6 @@ public class CardbaseCLITest {
 
 		assertEquals("\"not_a_set\" does not correspond to any set (use \"sets\" to see all valid set codes)." 
 				+ EOL, testOutput.toString());
-		assertNull(uut.selectedSet);
 	}
 	
 	/***********************************************************************************
@@ -593,9 +577,8 @@ public class CardbaseCLITest {
 	 ***********************************************************************************/
 	@Test
 	public void glanceIsPrintedWithOneCard() throws Exception {
-		Card testCard = new ObjectMapper().readValue(getClass().getResourceAsStream("/shivandragon.json"), Card.class);
-		testCard.count = 1;
-		uut.cardbase.addCard(testCard);
+		uut.interpretInput("set M15");
+		uut.interpretInput("281");
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -638,9 +621,8 @@ public class CardbaseCLITest {
 	 ***********************************************************************************/
 	@Test
 	public void perusalIsPrintedWithOneCard() throws Exception {
-		Card testCard = new ObjectMapper().readValue(getClass().getResourceAsStream("/shivandragon.json"), Card.class);
-		testCard.count = 1;
-		uut.cardbase.addCard(testCard);
+		uut.interpretInput("set M15");
+		uut.interpretInput("281");
 				
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -649,9 +631,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("singleCardPerusal"))) {
-			assertEquals(scanner.useDelimiter("\\Z").next() + EOL, testOutput.toString());
-		}
+		assertEquals(getFileContents("singleCardPerusal") + EOL, testOutput.toString());
 	}
 	
 	@Test
@@ -668,7 +648,7 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void perusalIsPrintedWithManyCards() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -677,18 +657,13 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("multipleCardsPerusal"))) {
-			assertEquals(scanner.useDelimiter("\\Z").next() + EOL, testOutput.toString());
-		}
+		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void specificPerusalWithValidArgumentIsPrinted() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to peruse from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -697,9 +672,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		try (Scanner scanner = new Scanner(getClass().getResourceAsStream("specificCardPerusal"))) {
-			assertEquals(scanner.useDelimiter("\\Z").next() + EOL, testOutput.toString());
-		}
+		assertEquals(getFileContents("specificCardPerusal") + EOL, testOutput.toString());
 	}
 	
 	/*
@@ -707,11 +680,7 @@ public class CardbaseCLITest {
 	 */
 	@Test
 	public void specificPerusalWithInvalidArgument() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to peruse from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut.interpretInput("set FRF");
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -725,9 +694,6 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void specificPerusalWithNoSelectedSet() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		uut.selectedSet = null;
-		
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("peruse 100");
@@ -743,67 +709,82 @@ public class CardbaseCLITest {
 	 ***********************************************************************************/
 	@Test
 	public void removeValidAmountOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 129 3");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse 129");
+		} finally {
+			System.setOut(console);
+		}
 		
-		assertEquals("Wrong number of cards was removed.", uut.cardbase.getCard("FRF", "129").count, new Integer(6));		
+		assertTrue("Perusal indicates wrong number of cards: " + testOutput.toString(), testOutput.toString().startsWith("5    Formless Nurturing (FRF, 129)\n"));
 	}
 	
 	@Test
 	public void removeExceedingAmountOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 128 3");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse 128");
+		} finally {
+			System.setOut(console);
+		}
 		
-		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
+		assertEquals("Card not in cardbase." + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void removeExactAmountOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 128 1");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse 128");
+		} finally {
+			System.setOut(console);
+		}
 		
-		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
+		assertEquals("Card not in cardbase." + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void removeSingleExistingCardWithoutAmount() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 128");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse 128");
+		} finally {
+			System.setOut(console);
+		}
 		
-		assertNull("Card was not removed successfully.", uut.cardbase.getCard("FRF", "128"));
+		assertEquals("Card not in cardbase." + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void removeMultipleExistingCardsWithoutAmount() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 129");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse 129");
+		} finally {
+			System.setOut(console);
+		}
 		
-		assertEquals("Wrong number of cards was removed.", uut.cardbase.getCard("FRF", "129").count, new Integer(7));	
+		assertTrue("Perusal indicates wrong number of cards: " + testOutput.toString(), testOutput.toString().startsWith("7    Formless Nurturing (FRF, 129)\n"));
 	}
 	
 	/*
@@ -811,10 +792,7 @@ public class CardbaseCLITest {
 	 */
 	@Test
 	public void removeNonExistentCardWithoutAmount() throws Exception {
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut.interpretInput("set FRF");
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -828,10 +806,7 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void removeNonExistentCardWithAmount() throws Exception {
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut.interpretInput("set FRF");
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -845,36 +820,38 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void removeZeroOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 129 0");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse 129");
+		} finally {
+			System.setOut(console);
+		}
 		
-		assertEquals("Card amount should not have changed.", uut.cardbase.getCard("FRF", "129").count, new Integer(8));
+		assertTrue("Card amount should not have changed: " + testOutput.toString(), testOutput.toString().startsWith("8    Formless Nurturing (FRF, 129)\n"));
 	}
 	
 	@Test
 	public void removeNegativeAmountOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.code = "FRF";
-		uut.selectedSet = fcs;
-
-		uut.interpretInput("remove 129 -10");
+		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut.interpretInput("set FRF");
 		
-		System.out.println(uut.cardbase.getCard("FRF",  "129"));
-		assertEquals("Card amount should not have changed.", uut.cardbase.getCard("FRF", "129").count, new Integer(8));
+		uut.interpretInput("remove 129 -10");
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("peruse 129");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertTrue("Card amount should not have changed: " + testOutput.toString(), testOutput.toString().startsWith("8    Formless Nurturing (FRF, 129)\n"));
 	}
 	
 	@Test
 	public void removeWithNoSetSelected() throws Exception {
-		uut = new CardbaseCLI(getClass().getResource("/testbase.cb").getFile());
-		uut.selectedSet = null;
-		
 		try {
 			System.setOut(new PrintStream(testOutput));
 			uut.interpretInput("remove 100");
@@ -909,10 +886,7 @@ public class CardbaseCLITest {
 	@Test
 	public void invalidCommandWithSelectedSet() throws Exception {
 		// dummy set just so the uut knows the set to remove from
-		FullCardSet fcs = new FullCardSet();
-		fcs.name = "Fate Reforged";
-		fcs.cards = new HashMap<String, Card>();
-		uut.selectedSet = fcs;
+		uut.interpretInput("set FRF");
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
