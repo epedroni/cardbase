@@ -85,12 +85,15 @@ public class Cardbase {
 	 * @param cardToAdd the card to be added. The count value
 	 * of this object is added to the existing count if the card
 	 * already exists.
+	 *TODO fix comment
 	 */
-	public void addCard(Card cardToAdd) {
+	public void addCard(Card cardToAdd, int count) {
 		Card card = getCardByHash(cardToAdd.hashCode());
 		if (card != null) {
-			card.count += cardToAdd.count;
+			card.count += count;
 		} else {
+			// TODO disgusting, refactor
+			cardToAdd.count = count;
 			cards.put(cardToAdd.hashCode(), cardToAdd);
 		}
 	}
@@ -110,9 +113,12 @@ public class Cardbase {
 	 * @param cardToRemove the card to be removed.
 	 * @param count the amount of the card to be removed.
 	 * @return the number of cards actually removed.
+	 *TODO comment
 	 */
-	public Integer removeCard(Card cardToRemove) {
+	public Integer removeCard(Card cardToRemove, int count) {
 		Card card = getCardByHash(cardToRemove.hashCode());
+		// TODO disgusting, refactor
+		cardToRemove.count = count;
 		Integer removed = 0;
 		if (card != null) {
 			if (card.count <= cardToRemove.count) {
@@ -126,14 +132,14 @@ public class Cardbase {
 		return removed;
 	}
 
-//	/**
-//	 * Returns a card from the cardbase by set code and number.
-//	 * If no such card is in the cardbase, returns null.
-//	 * 
-//	 * @param setCode the set to which the requested card belongs.
-//	 * @param number the requested card's set number.
-//	 * @return the requested {@code Card} or null if no card is found.
-//	 */
+	/**
+	 * Returns a card from the cardbase by set code and number.
+	 * If no such card is in the cardbase, returns null.
+	 * 
+	 * @param setCode the set to which the requested card belongs.
+	 * @param number the requested card's set number.
+	 * @return the requested {@code Card} or null if no card is found.
+	 */
 	public Card getCard(String setCode, String number) {
 		return cards.get(Card.makeHash(setCode, number));
 	}

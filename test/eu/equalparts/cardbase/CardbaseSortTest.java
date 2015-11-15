@@ -41,7 +41,7 @@ public class CardbaseSortTest {
 	public void setUp() throws Exception {
 		uut = new Cardbase();
 		for (Card card : testCards) {
-			uut.addCard(card);
+			uut.addCard(card, card.count);
 		}
 	}
 

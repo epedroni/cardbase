@@ -7,10 +7,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -44,23 +41,10 @@ public class CardbaseCLITest {
 	@Rule
 	public TemporaryFolder tempFolder = new TemporaryFolder();
 	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
 	@Before
 	public void setUp() throws Exception {
 		uut = new CardbaseCLI(TEST_REMOTE);
 		testOutput.reset();
-	}
-
-	@After
-	public void tearDown() throws Exception {
 	}
 	
 	/***********************************************************************************
@@ -1065,7 +1049,7 @@ public class CardbaseCLITest {
 		} finally {
 			System.setOut(console);
 		}
-		assertEquals("Wrong glance.", "20    Cunning Strike (FRF, 150)\nTotal: 20" + EOL, testOutput.toString());
+		assertEquals("Wrong glance.", "20   Cunning Strike (FRF, 150)\nTotal: 20" + EOL, testOutput.toString());
 	}
 	
 	/*

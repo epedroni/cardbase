@@ -33,6 +33,7 @@ public final class CardbaseCLI {
 	private enum Action {
 		ADD, REMOVE;
 		public Card card;
+		public int count;
 	}
 
 	/**
@@ -385,8 +386,7 @@ public final class CardbaseCLI {
 					if (count.matches("[-]?[0-9]+")) {
 						Integer intCount = Integer.valueOf(count);
 						if (intCount > 0) {
-							cardToRemove.count = intCount;
-							removeCard(cardToRemove);
+							removeCard(cardToRemove, intCount);
 						} else {
 							System.out.println("Cannot remove " + count + " cards.");
 						}
@@ -415,23 +415,27 @@ public final class CardbaseCLI {
 			// a blank line after adding a card repeats the addition unlimitedly
 			if (number.isEmpty()) {
 				if (lastAction == Action.ADD) {
-					addCard(lastAction.card);
+					addCard(lastAction.card, lastAction.count);
 				} else {
 					System.out.println("Please enter a card number.");
 				}
 			} else {
 				Card cardToAdd = selectedSet.getCardByNumber(number);
 				if (cardToAdd != null) {
-					Integer count = 1;
-					if (args != null && args.length > 0 && args[0].matches("[0-9]+")) {
-						count = Integer.valueOf(args[0]);
-						if (count <= 0) {
-							System.out.println("Cannot add " + count + " cards.");
-							return;
+					String count = args != null && args.length > 0 ? args[0] : "1";
+
+					if (count.matches("[-]?[0-9]+")) {
+						
+						Integer intCount = Integer.valueOf(count);
+
+						if (intCount > 0) {
+							addCard(cardToAdd, intCount);
+						} else {
+							System.out.println("Cannot add " + intCount + " cards.");
 						}
+					} else {
+						System.out.println(count + " is not a valid number of cards.");
 					}
-					cardToAdd.count = count;
-					addCard(cardToAdd);
 				} else {
 					System.out.println(number + " does not correspond to a card in " + selectedSet.name + ".");
 				}
@@ -447,9 +451,9 @@ public final class CardbaseCLI {
 	private void undo() {
 		if (lastAction != null) {
 			if (lastAction == Action.ADD) {
-				removeCard(lastAction.card);
+				removeCard(lastAction.card, lastAction.count);
 			} else if (lastAction ==  Action.REMOVE) {
-				addCard(lastAction.card);
+				addCard(lastAction.card, lastAction.count);
 			}
 			// can only undo once
 			lastAction = null;
@@ -464,13 +468,15 @@ public final class CardbaseCLI {
 	 * 
 	 * @param card the card to add, set this object's 
 	 * count field to determine the count to add.
+	 * TODO comment
 	 */
-	private void addCard(Card card) {
-		System.out.println("Added " + card.count + "x " + card.name + ".");
-		cardbase.addCard(card);
+	private void addCard(Card card, int count) {
+		System.out.println("Added " + count + "x " + card.name + ".");
+		cardbase.addCard(card, count);
 		savePrompt = true;
 		lastAction = Action.ADD;
 		lastAction.card = card;
+		lastAction.count = count;
 	}
 
 	/**
@@ -479,14 +485,16 @@ public final class CardbaseCLI {
 	 * 
 	 * @param card the card to remove, set this object's count field
 	 * to determine how many of the card to remove.
+	 * TODO comment
 	 */
-	private void removeCard(Card card) {
-		Integer removed = cardbase.removeCard(card); 
+	private void removeCard(Card card, int count) {
+		Integer removed = cardbase.removeCard(card, count); 
 		if (removed > 0) {
 			System.out.println("Removed " + removed + "x " + card.name + ".");
 			savePrompt = true;
 			lastAction = Action.REMOVE;
 			lastAction.card = card;
+			lastAction.count = removed;
 		} else {
 			System.out.println(card.name + " is not in the cardbase.");
 		}
