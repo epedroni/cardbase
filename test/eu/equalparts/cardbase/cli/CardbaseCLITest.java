@@ -17,7 +17,9 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 /**
- * These tests do some unusual things, but I think they are reasonable.
+ * These are interface tests, and as such they do some unusual things. The objective here is not to
+ * strictly test the class, but rather simulate user interaction and judge based on program output
+ * whether the expected behaviour is occurring. 
  * 
  * @author Eduardo Pedroni
  *
@@ -94,17 +96,17 @@ public class CardbaseCLITest {
 	public void welcomeMessageWithCardbaseFile() throws Exception {
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+			uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		} finally {
 			System.setOut(console);
 		}
 		
-		assertEquals("Welcome to Cardbase CLI!\nLoading cardbase from \"" + getClass().getResource("/testbase.cb").getFile() + "\"." + EOL, testOutput.toString());
+		assertEquals("Welcome to Cardbase CLI!\nLoading cardbase from \"" + path("/testbase.cb") + "\"." + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void glanceWithCardbaseFile() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -113,7 +115,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("multipleCardsGlance") + EOL, testOutput.toString());
+		assertEquals(contents("multipleCardsGlance") + EOL, testOutput.toString());
 	}
 	
 	/*
@@ -140,14 +142,14 @@ public class CardbaseCLITest {
 		uut = new CardbaseCLI(TEST_REMOTE, notAFile.getAbsolutePath());
 	}
 	
-	// TODO test more invalid file scenarios
+	// TODO test more invalid file scenarios - it'll just throw an exception and quit, so it is not urgent to do these tests
 	
 	/***********************************************************************************
 	 * help() tests, happy path
 	 ***********************************************************************************/
 	@Test
 	public void helpInformationIsPrinted() throws Exception {
-			String help = getFileContents("/help_en");
+			String help = contents("/help_en");
 			
 			try {
 				System.setOut(new PrintStream(testOutput));
@@ -164,7 +166,7 @@ public class CardbaseCLITest {
 	 ***********************************************************************************/
 	@Test
 	public void reloadedCardbaseMatchesOriginal() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		File testFile = tempFolder.newFile("saveTest.cb");
 		
 		try {
@@ -186,12 +188,12 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
+		assertEquals(contents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void specifiedFileIsSubsequentlyUsedByDefault() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		File testFile = tempFolder.newFile("saveTest.cb");
 		
 		uut.interpretInput("write " + testFile.getAbsolutePath());
@@ -229,7 +231,7 @@ public class CardbaseCLITest {
 		}
 		
 		assertEquals(expectedPerusal, testOutput.toString());
-		assertNotEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
+		assertNotEquals(contents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 
 	@Test
@@ -245,7 +247,7 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void fileExtensionIsAddedIfMissing() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -268,7 +270,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
+		assertEquals(contents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	/*
@@ -288,7 +290,7 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void extensionIsAddedEvenIfFileNameAlreadyHasOne() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -311,12 +313,12 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
+		assertEquals(contents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void illegalCharactersAreRemovedFromFileName() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -338,7 +340,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
+		assertEquals(contents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	/***********************************************************************************
@@ -397,7 +399,7 @@ public class CardbaseCLITest {
 	// try to exit after removing something, expect a warning, try to exit again, expect no warning
 	@Test
 	public void exitAfterRemovingSomething() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		uut.interpretInput("remove 128");
 		
@@ -446,7 +448,7 @@ public class CardbaseCLITest {
 	// try to exit after removing something, expect a warning, write, try to exit again, expect no warning
 	@Test
 	public void exitAfterRemovingSomethingAndBeforeWriting() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		uut.interpretInput("remove 128");
 		
@@ -487,7 +489,7 @@ public class CardbaseCLITest {
 	// remove something, write, try to exit and expect no warning
 	@Test
 	public void exitAfterRemovingSomethingAndWriting() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		uut.interpretInput("remove 128");
 		uut.interpretInput("write " + tempFolder.newFile().getAbsolutePath());
@@ -536,7 +538,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("expectedFallbackList") + EOL, testOutput.toString());
+		assertEquals(contents("expectedFallbackList") + EOL, testOutput.toString());
 	}
 	
 	/***********************************************************************************
@@ -602,7 +604,7 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void glanceIsPrintedWithManyCards() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -611,7 +613,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("multipleCardsGlance") + EOL, testOutput.toString());
+		assertEquals(contents("multipleCardsGlance") + EOL, testOutput.toString());
 	}
 	
 	/***********************************************************************************
@@ -629,7 +631,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("singleCardPerusal") + EOL, testOutput.toString());
+		assertEquals(contents("singleCardPerusal") + EOL, testOutput.toString());
 	}
 	
 	@Test
@@ -646,7 +648,7 @@ public class CardbaseCLITest {
 	
 	@Test
 	public void perusalIsPrintedWithManyCards() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		
 		try {
 			System.setOut(new PrintStream(testOutput));
@@ -655,12 +657,12 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("multipleCardsPerusal") + EOL, testOutput.toString());
+		assertEquals(contents("multipleCardsPerusal") + EOL, testOutput.toString());
 	}
 	
 	@Test
 	public void specificPerusalWithValidArgumentIsPrinted() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		
 		try {
@@ -670,7 +672,7 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals(getFileContents("specificCardPerusal") + EOL, testOutput.toString());
+		assertEquals(contents("specificCardPerusal") + EOL, testOutput.toString());
 	}
 	
 	/*
@@ -706,8 +708,8 @@ public class CardbaseCLITest {
 	 * remove() tests, happy path
 	 ***********************************************************************************/
 	@Test
-	public void removeValidAmountOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+	public void removeValidAmountOfPresentCard() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 129 3");
@@ -722,8 +724,8 @@ public class CardbaseCLITest {
 	}
 	
 	@Test
-	public void removeExceedingAmountOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+	public void removeExceedingAmountOfPresentCard() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 128 3");
@@ -738,8 +740,8 @@ public class CardbaseCLITest {
 	}
 	
 	@Test
-	public void removeExactAmountOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+	public void removeExactAmountOfPresentCard() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 128 1");
@@ -754,8 +756,8 @@ public class CardbaseCLITest {
 	}
 	
 	@Test
-	public void removeSingleExistingCardWithoutAmount() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+	public void removeSinglePresentCardWithoutAmount() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 128");
@@ -770,8 +772,8 @@ public class CardbaseCLITest {
 	}
 	
 	@Test
-	public void removeMultipleExistingCardsWithoutAmount() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+	public void removeMultiplePresentCardsWithoutAmount() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 129");
@@ -789,7 +791,7 @@ public class CardbaseCLITest {
 	 * Edge cases
 	 */
 	@Test
-	public void removeNonExistentCardWithoutAmount() throws Exception {
+	public void removeAbsentCardWithoutAmount() throws Exception {
 		uut.interpretInput("set FRF");
 		
 		try {
@@ -799,11 +801,25 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals("Card FRF 128 is not in the cardbase." + EOL, testOutput.toString());
+		assertEquals("Feral Krushok is not in the cardbase." + EOL, testOutput.toString());
 	}
 	
 	@Test
-	public void removeNonExistentCardWithAmount() throws Exception {
+	public void removeNonExistentCardWithoutAmount() throws Exception {
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("remove 1000");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("1000 does not correspond to a card in Fate Reforged." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void removeAbsentCardWithAmount() throws Exception {
 		uut.interpretInput("set FRF");
 		
 		try {
@@ -813,12 +829,12 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		
-		assertEquals("Card FRF 128 is not in the cardbase." + EOL, testOutput.toString());
+		assertEquals("Feral Krushok is not in the cardbase." + EOL, testOutput.toString());
 	}
 	
 	@Test
-	public void removeZeroOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+	public void removeZeroOfPresentCard() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 129 0");
@@ -833,8 +849,8 @@ public class CardbaseCLITest {
 	}
 	
 	@Test
-	public void removeNegativeAmountOfExistingCard() throws Exception {
-		uut = new CardbaseCLI(TEST_REMOTE, getClass().getResource("/testbase.cb").getFile());
+	public void removeNegativeAmountOfPresentCard() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
 		uut.interpretInput("set FRF");
 		
 		uut.interpretInput("remove 129 -10");
@@ -863,27 +879,310 @@ public class CardbaseCLITest {
 	/***********************************************************************************
 	 * add() tests, happy path
 	 ***********************************************************************************/
-	// add
+	@Test
+	public void addValidCardNoAmount() throws Exception {
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("150");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Added 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("1    Cunning Strike (FRF, 150)\nTotal: 1" + EOL, testOutput.toString());
+	}
 	
+	@Test
+	public void addValidCardWithAmountOne() throws Exception {
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("150 1");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Added 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("1    Cunning Strike (FRF, 150)\nTotal: 1" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addValidCardWithAmountOverOne() throws Exception {
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("150 5");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Added 5x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("5    Cunning Strike (FRF, 150)\nTotal: 5" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addValidCardNoAmountRepeated() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("First repeat incorrect.", "Added 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Second repeat incorrect.", "Added 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Third repeat incorrect.", "Added 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Wrong glance.", "4    Cunning Strike (FRF, 150)\nTotal: 4" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addValidCardWithAmountOneRepeated() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150 1");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("First repeat incorrect.", "Added 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Second repeat incorrect.", "Added 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Third repeat incorrect.", "Added 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Wrong glance.", "4    Cunning Strike (FRF, 150)\nTotal: 4" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addValidCardWithAmountOverOneRepeated() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150 5");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("First repeat incorrect.", "Added 5x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Second repeat incorrect.", "Added 5x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Third repeat incorrect.", "Added 5x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Wrong glance.", "20    Cunning Strike (FRF, 150)\nTotal: 20" + EOL, testOutput.toString());
+	}
 	
 	/*
 	 * Edge cases
 	 */
 	@Test
-	public void invalidCommandWithNoSelectedSet() throws Exception {
+	public void addZeroOfValidCard() throws Exception {
+		uut.interpretInput("set FRF");
+		
 		try {
 			System.setOut(new PrintStream(testOutput));
-			uut.interpretInput("cOmMand5 argumEnt1 argument2");
+			uut.interpretInput("150 0");
 		} finally {
 			System.setOut(console);
 		}
+		assertEquals("Cannot add 0 cards." + EOL, testOutput.toString());
 		
-		assertEquals("Please select a set before adding cards." + EOL, testOutput.toString());
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
 	}
 	
 	@Test
-	public void invalidCommandWithSelectedSet() throws Exception {
-		// dummy set just so the uut knows the set to remove from
+	public void addNegativeNumberOfValidCard() throws Exception {
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("150 -5");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Cannot add -5 cards." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addZeroOfValidCardRepeated() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150 0");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Please enter a card number." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addNegativeNumberOfValidCardRepeated() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150 -5");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Please enter a card number." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addCommandWithNoSelectedSet() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("150");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Please select a set before adding cards." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void invalidAddWithSelectedSet() throws Exception {
 		uut.interpretInput("set FRF");
 		
 		try {
@@ -892,72 +1191,360 @@ public class CardbaseCLITest {
 		} finally {
 			System.setOut(console);
 		}
-		
 		assertEquals("cOmMand5 does not correspond to a card in Fate Reforged." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
 	}
 	
-//	@Test
-//	public void blankInput() throws Exception {
-//		String[] processedInput = uut.sanitiseInput("");
-//		
-//		assertEquals("Wrong array length.", 1, processedInput.length);
-//		assertEquals("", processedInput[0]);
-//	}
-//	
-//	@Test
-//	public void onlyWhiteSpace() throws Exception {
-//		String[] processedInput = uut.sanitiseInput("  		  	");
-//		
-//		assertEquals("Wrong array length.", 1, processedInput.length);
-//		assertEquals("", processedInput[0]);
-//	}
-//	
-//	@Test
-//	public void leadingTrailingAndIntermediaryWhiteSpace() throws Exception {
-//		String[] processedInput = uut.sanitiseInput("  \t  this   \twas \t  \t  a triumph  \t\t    ");
-//		
-//		assertEquals("Wrong array length.", 4, processedInput.length);
-//		assertEquals("this", processedInput[0]);
-//		assertEquals("was", processedInput[1]);
-//		assertEquals("a", processedInput[2]);
-//		assertEquals("triumph", processedInput[3]);
-//	}
+	@Test
+	public void invalidAddRepeatedWithSelectedSet() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("cOmMand5 argumEnt1 argument2");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Please enter a card number." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void blankInputWithSelectedSet() throws Exception {
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Please enter a card number." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void blankInputWithNoSelectedSet() throws Exception {
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Please select a set before adding cards." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
 	
 	/***********************************************************************************
 	 * undo() tests, happy path
 	 ***********************************************************************************/
+	@Test
+	public void addSingleAbsentCardAndUndo() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Removed 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
 	
-	private String getFileContents(String fileName) {
+	@Test
+	public void addMultipleAbsentCardAndUndo() throws Exception {
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150 10");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Removed 10x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void removeSinglePartialCardAndUndo() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		uut.interpretInput("remove 129");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Added 1x Formless Nurturing." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals(contents("multipleCardsGlance") + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void removeMultiplePartialCardAndUndo() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		uut.interpretInput("remove 129 5");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Added 5x Formless Nurturing." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals(contents("multipleCardsGlance") + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addPresentCardAndUndo() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		uut.interpretInput("129");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Removed 1x Formless Nurturing." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals(contents("multipleCardsGlance") + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void removeWholePresentCardAndUndo() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		uut.interpretInput("remove 129 8");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Added 8x Formless Nurturing." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertTrue(testOutput.toString().endsWith("Total: 14" + EOL));
+	}
+	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void undoWithNoPreviousAction() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Nothing to undo." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals(contents("multipleCardsGlance") + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void undoAfterChangingSet() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150");
+		uut.interpretInput("set M15");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Nothing to undo." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertTrue(testOutput.toString().endsWith("Total: 15" + EOL));
+	}
+	
+	@Test
+	public void undoAfterWriting() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150");
+		uut.interpretInput("write " + tempFolder.newFile().getAbsolutePath());
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Removed 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals(contents("multipleCardsGlance") + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void undoTwiceAfterAdding() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		uut.interpretInput("150");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Removed 1x Cunning Strike." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("undo");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals("Nothing to undo." + EOL, testOutput.toString());
+		
+		testOutput.reset();
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("glance");
+		} finally {
+			System.setOut(console);
+		}
+		assertEquals(contents("multipleCardsGlance") + EOL, testOutput.toString());
+	}
+	
+	/***********************************************************************************
+	 * Utility methods for dealing with files
+	 ***********************************************************************************/
+	/**
+	 * Returns the contents of a resource file by reading it with a {@code Scanner}. The file is
+	 * loaded using {@code getClass().getResourceAsStream()}, so make sure to address it relative
+	 * to the classloader of this class.
+	 * 
+	 * @param fileName the relative path of the file to load.
+	 * @return the contents of the file with no EOL.
+	 */
+	private String contents(String fileName) {
 		try (Scanner scanner = new Scanner(getClass().getResourceAsStream(fileName))) {
 			return scanner.useDelimiter("\\Z").next();
 		}
 	}
+	
+	/**
+	 * Returns the absolute path of a resource file by resolving it with {@code getClass().getResourceAsStream()}.
+	 * 
+	 * @param fileName the path of the file to load relative to this class's classloader.
+	 * @return the absolute path of the file.
+	 */
+	private String path(String fileName) {
+		return getClass().getResource(fileName).getFile();
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -162,7 +162,6 @@ public final class CardbaseCLI {
 	 */
 	private String[] sanitiseInput(String input) {
 		return input.trim().split("[ \t]+");
-
 	}
 
 	/**
@@ -415,8 +414,11 @@ public final class CardbaseCLI {
 		if (selectedSet != null) {
 			// a blank line after adding a card repeats the addition unlimitedly
 			if (number.isEmpty()) {
-				if (lastAction == Action.ADD)
+				if (lastAction == Action.ADD) {
 					addCard(lastAction.card);
+				} else {
+					System.out.println("Please enter a card number.");
+				}
 			} else {
 				Card cardToAdd = selectedSet.getCardByNumber(number);
 				if (cardToAdd != null) {
@@ -424,7 +426,7 @@ public final class CardbaseCLI {
 					if (args != null && args.length > 0 && args[0].matches("[0-9]+")) {
 						count = Integer.valueOf(args[0]);
 						if (count <= 0) {
-							System.out.println("Can't add " + count + " cards.");
+							System.out.println("Cannot add " + count + " cards.");
 							return;
 						}
 					}

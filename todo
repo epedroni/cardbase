@@ -2,8 +2,5 @@ TESTS
 
 Cardbase:
  * decks
- 
-CardbaseCLI:
- * undo, add, remove
 
 To pass: happy path remove
