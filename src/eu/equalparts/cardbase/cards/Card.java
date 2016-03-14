@@ -29,7 +29,7 @@ public class Card {
 	// Not part of upstream JSON
 	public String setCode;
 	public String imageCode;
-	public Integer count;
+	//public Integer count;
 	
 	@Override
 	public Card clone() {
@@ -53,7 +53,7 @@ public class Card {
 		clone.watermark = this.watermark;
 		clone.setCode = this.setCode;
 		clone.imageCode = this.imageCode;
-		clone.count = this.count;
+		//clone.count = this.count;
 		
 		return clone;
 	}

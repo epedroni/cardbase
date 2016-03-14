@@ -21,8 +21,9 @@ public class ReferenceDeck extends Deck {
 		this.mountains = deck.mountains;
 		this.forests = deck.forests;
 		
+		// TODO sort this out
 		for (Card card : deck.cards) {
-			cardReferences.put(card.hashCode(), card.count);
+			cardReferences.put(card.hashCode(), 1);
 		}
 	}
 	

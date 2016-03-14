@@ -337,7 +337,7 @@ public final class CardbaseCLI {
 		int total = 0;
 		for (Card card : cardbase.getCards()) {
 			printGlance(card);
-			total += card.count;
+			total += cardbase.getCount(card.setCode, card.number);
 		}
 		System.out.println("Total: " + total);
 	}
@@ -365,7 +365,7 @@ public final class CardbaseCLI {
 			int total = 0;
 			for (Card card : cardbase.getCards()) {
 				printPerusal(card);
-				total += card.count;
+				total += cardbase.getCount(card.setCode, card.number);
 			}
 			System.out.println("Total: " + total);
 		}
@@ -523,7 +523,7 @@ public final class CardbaseCLI {
 	 * @param card the card to glance.
 	 */
 	private void printGlance(Card card) {
-		System.out.println(String.format("%1$-4d %2$s (%3$s, %4$s)", card.count, card.name, card.setCode, card.number));
+		System.out.println(String.format("%1$-4d %2$s (%3$s, %4$s)", cardbase.getCount(card.setCode, card.number), card.name, card.setCode, card.number));
 	}
 
 	/**

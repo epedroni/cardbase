@@ -19,7 +19,8 @@ public final class Statistics {
 		for (Card card : deck.cards) {
 			if (card.type != null &&
 					card.type.contains(type)) {
-				count += card.count;
+				// TODO sort this out
+				count += 1;
 			}
 		}
 		return count;
@@ -29,7 +30,8 @@ public final class Statistics {
 		int totalCards = countBasicLands(deck);
 		
 		for (Card card : deck.cards) {
-			totalCards += card.count;
+			// TODO sort this out
+			totalCards += 1;
 		}
 		
 		return totalCards;
@@ -55,7 +57,8 @@ public final class Statistics {
 		for (Card card : deck.cards) {
 			if (card.type != null && card.type.contains(type))
 				if (card.cmc != null)
-					costs[card.cmc] += card.count; 
+					// TODO sort this out
+					costs[card.cmc] += 1; 
 		}
 		
 		return costs;
@@ -71,7 +74,8 @@ public final class Statistics {
 		int[] costs = new int[arraySize];
 		for (Card card : deck.cards) {
 			if (card.cmc != null)
-				costs[card.cmc] += card.count; 
+				// TODO sort this out
+				costs[card.cmc] += 1; 
 		}
 		
 		return costs;

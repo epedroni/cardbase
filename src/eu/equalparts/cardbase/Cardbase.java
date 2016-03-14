@@ -33,6 +33,10 @@ public class Cardbase {
 	 */
 	private Map<Integer, Card> cards;
 	/**
+	 * TODO comment
+	 */
+	private Map<Integer, Integer> collection;
+	/**
 	 * The decks which have been saved along with this collection of cards.
 	 */
 	private Map<String, ReferenceDeck> decks;
@@ -87,14 +91,18 @@ public class Cardbase {
 	 * already exists.
 	 *TODO fix comment
 	 */
-	public void addCard(Card cardToAdd, int count) {
-		Card card = getCardByHash(cardToAdd.hashCode());
-		if (card != null) {
-			card.count += count;
+	public void addCard(Card cardToAdd, int addCount) {
+		Integer hashCode = cardToAdd.hashCode();
+		
+		// ensure that card is in the card map
+		cards.putIfAbsent(hashCode, cardToAdd);
+		
+		// ensure that card is in the collection, with the correct count
+		Integer currentCount = collection.get(hashCode);
+		if (currentCount != null) {
+			collection.replace(hashCode, currentCount + addCount);
 		} else {
-			// TODO disgusting, refactor
-			cardToAdd.count = count;
-			cards.put(cardToAdd.hashCode(), cardToAdd);
+			collection.put(hashCode, addCount);
 		}
 	}
 
@@ -111,22 +119,23 @@ public class Cardbase {
 	 * Shivan Dragon is removed from the cardbase, and the value returned is 5.
 	 * 
 	 * @param cardToRemove the card to be removed.
-	 * @param count the amount of the card to be removed.
+	 * @param removeCount the amount of the card to be removed.
 	 * @return the number of cards actually removed.
 	 *TODO comment
 	 */
-	public Integer removeCard(Card cardToRemove, int count) {
-		Card card = getCardByHash(cardToRemove.hashCode());
-		// TODO disgusting, refactor
-		cardToRemove.count = count;
-		Integer removed = 0;
-		if (card != null) {
-			if (card.count <= cardToRemove.count) {
-				cards.remove(card.hashCode());
-				removed = card.count;
+	public Integer removeCard(Card cardToRemove, int removeCount) {
+		Integer hashCode = cardToRemove.hashCode();
+		int removed = 0;
+		
+		Integer currentCount = collection.get(hashCode);
+		if (currentCount != null) {
+			if (removeCount >= currentCount) {
+				collection.remove(hashCode);
+				cards.remove(hashCode);
+				removed = currentCount;
 			} else {
-				card.count -= cardToRemove.count;
-				removed = cardToRemove.count;
+				collection.replace(hashCode, currentCount - removeCount);
+				removed = removeCount;
 			}
 		}
 		return removed;
@@ -182,61 +191,66 @@ public class Cardbase {
 	public Map<String, ReferenceDeck> getDecks() {
 		return Collections.unmodifiableMap(decks);
 	}
-	
-	public List<Card> getMissingCards(StandaloneDeck deckToCheck) {
-		List<Card> missingCards = new ArrayList<Card>();
-		for (Card card : deckToCheck.cards) {
-			Integer hash = card.hashCode();
-			if (cards.containsKey(hash)) {
-				if (cards.get(hash).count < card.count) {
-					Card missingCard = card.clone();
-					missingCard.count = card.count - cards.get(hash).count;
-					missingCards.add(missingCard);
-				}
-			} else {
-				missingCards.add(card);
-			}
-		}
-		return missingCards;
-	}
-	
-	public void addStandaloneDeck(StandaloneDeck deckToAdd) {
-		List<Card> missingCards = getMissingCards(deckToAdd);
-		if (missingCards.size() <= 0) {
-			decks.put(deckToAdd.name, new ReferenceDeck(deckToAdd));
-		} else {
-			throw new IllegalArgumentException("The cardbase is missing cards to add this deck.");
-		}
-	}
-	
-	public StandaloneDeck exportDeck(String deckName) {
-		ReferenceDeck referenceDeck = decks.get(deckName);
-		
-		if (referenceDeck != null) {
-			StandaloneDeck standaloneDeck = new StandaloneDeck();
-			
-			standaloneDeck.name = referenceDeck.name;
-			standaloneDeck.plains = referenceDeck.plains;
-			standaloneDeck.islands = referenceDeck.islands;
-			standaloneDeck.swamps = referenceDeck.swamps;
-			standaloneDeck.mountains = referenceDeck.mountains;
-			standaloneDeck.forests = referenceDeck.forests;
-			
-			for (Integer cardHash : referenceDeck.cardReferences.keySet()) {
-				Card card = getCardByHash(cardHash);
-				if (card != null) {
-					// must clone otherwise the original count is affected too
-					card = card.clone();
-					card.count = referenceDeck.cardReferences.get(cardHash);
-					standaloneDeck.cards.add(card);
-				} else {
-					throw new IllegalArgumentException("Deck refers to card not in cardbase: " + cardHash);
-				}
-			}
 
-			return standaloneDeck;
-		} else {
-			throw new IllegalArgumentException("The specified deck does not exist.");
-		}
+	public int getCount(String setCode, String number) {
+		Integer count = collection.get(Card.makeHash(setCode, number));
+		return count != null ? count : 0;
 	}
+	
+//	public List<Card> getMissingCards(StandaloneDeck deckToCheck) {
+//		List<Card> missingCards = new ArrayList<Card>();
+//		for (Card card : deckToCheck.cards) {
+//			Integer hash = card.hashCode();
+//			if (cards.containsKey(hash)) {
+//				if (cards.get(hash).count < card.count) {
+//					Card missingCard = card.clone();
+//					missingCard.count = card.count - cards.get(hash).count;
+//					missingCards.add(missingCard);
+//				}
+//			} else {
+//				missingCards.add(card);
+//			}
+//		}
+//		return missingCards;
+//	}
+	
+//	public void addStandaloneDeck(StandaloneDeck deckToAdd) {
+//		List<Card> missingCards = getMissingCards(deckToAdd);
+//		if (missingCards.size() <= 0) {
+//			decks.put(deckToAdd.name, new ReferenceDeck(deckToAdd));
+//		} else {
+//			throw new IllegalArgumentException("The cardbase is missing cards to add this deck.");
+//		}
+//	}
+	
+//	public StandaloneDeck exportDeck(String deckName) {
+//		ReferenceDeck referenceDeck = decks.get(deckName);
+//		
+//		if (referenceDeck != null) {
+//			StandaloneDeck standaloneDeck = new StandaloneDeck();
+//			
+//			standaloneDeck.name = referenceDeck.name;
+//			standaloneDeck.plains = referenceDeck.plains;
+//			standaloneDeck.islands = referenceDeck.islands;
+//			standaloneDeck.swamps = referenceDeck.swamps;
+//			standaloneDeck.mountains = referenceDeck.mountains;
+//			standaloneDeck.forests = referenceDeck.forests;
+//			
+//			for (Integer cardHash : referenceDeck.cardReferences.keySet()) {
+//				Card card = getCardByHash(cardHash);
+//				if (card != null) {
+//					// must clone otherwise the original count is affected too
+//					card = card.clone();
+//					card.count = referenceDeck.cardReferences.get(cardHash);
+//					standaloneDeck.cards.add(card);
+//				} else {
+//					throw new IllegalArgumentException("Deck refers to card not in cardbase: " + cardHash);
+//				}
+//			}
+//
+//			return standaloneDeck;
+//		} else {
+//			throw new IllegalArgumentException("The specified deck does not exist.");
+//		}
+//	}
 }
