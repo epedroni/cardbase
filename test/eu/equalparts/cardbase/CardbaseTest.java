@@ -90,7 +90,7 @@ public class CardbaseTest {
 		for (CardInfo ci : testCards) {
 			Card card = uut.getCard(ci.setCode, ci.number);
 			assertNotNull("Missing card, set " + ci.setCode + ", " + ci.number, card);
-			assertEquals("Wrong card count, set " + ci.setCode + ", " + ci.number, ci.count, card.count);
+			assertEquals("Wrong card count, set " + ci.setCode + ", " + ci.number, ci.count, (Integer) uut.getCount(card));
 		}
 	}
 	
@@ -139,19 +139,21 @@ public class CardbaseTest {
 	 ***********************************************************************************/
 	@Test
 	public void cardbaseIsSaved() throws Exception {
+		final int testCount = 5;
+		
 		File testFile = tempFolder.newFile("saveTest.cb");
 		uut.writeCollection(testFile);
 		uut = new Cardbase(testFile);
 		assertEquals("Cardbase should contain no cards.", 0, uut.getCards().size());
 
-		uut.addCard(testCard, testCard.count);
+		uut.addCard(testCard, testCount);
 
 		uut.writeCollection(testFile);
 		uut = new Cardbase(testFile);
-		assertEquals("Cardbase should contain one card.", 1, uut.getCards().size());
+		assertEquals("Cardbase should contain " + testCount + " cards.", testCount, uut.getCards().size());
 		Card card = uut.getCard("M15", "281");
 		assertNotNull("Cardbase should contain a Shivan Dragon.", card);
-		assertEquals("Cardbase should contain only one Shivan Dragon.", new Integer(1), card.count);
+		assertEquals("Cardbase should contain " + testCount + " Shivan Dragon.", testCount, uut.getCount(card));
 	}
 	
 	/*
@@ -176,7 +178,7 @@ public class CardbaseTest {
 	 ***********************************************************************************/
 	@Test
 	public void newCardIsAdded() throws Exception {
-		uut.addCard(testCard, testCard.count);
+		uut.addCard(testCard, 1);
 		Card addedCard = uut.getCard("M15", "281");
 		
 		assertNotNull("Card was not found in cardbase.", addedCard);
@@ -185,15 +187,12 @@ public class CardbaseTest {
 	
 	@Test
 	public void existingCardIsIncremented() throws Exception {
-		Card shivanClone = testCard.clone();
-		uut.addCard(shivanClone, shivanClone.count);
-		Card shivanClone2 = testCard.clone();
-		shivanClone2.count = 2;
-		uut.addCard(shivanClone2, shivanClone2.count);
+		uut.addCard(testCard, 2);
+		uut.addCard(testCard, 4);
 		
 		Card addedCard = uut.getCard("M15", "281");
 		assertNotNull("Card was not found in cardbase.", addedCard);
-		assertEquals("Card count was not updated correctly.", new Integer(3), addedCard.count);
+		assertEquals("Card count was not updated correctly.", 6, uut.getCount(addedCard));
 	}
 	
 	/*
@@ -210,39 +209,31 @@ public class CardbaseTest {
 	 ***********************************************************************************/
 	@Test
 	public void cardRemoveCountIsLessThanCardCount() throws Exception {
-		Card shivanClone = testCard.clone();
-		shivanClone.count = 5;
-		uut.addCard(shivanClone, shivanClone.count);
+		uut.addCard(testCard, 5);
 		
-		int removed = uut.removeCard(testCard, testCard.count);
+		int removed = uut.removeCard(testCard, 3);
 		
 		Card removedCard = uut.getCard("M15", "281");
 		assertNotNull("Card was not found in cardbase.", removedCard);
-		assertEquals("Card count was not updated correctly.", new Integer(4), removedCard.count);
-		assertEquals("Cardbase reports wrong removed count.", 1, removed);
+		assertEquals("Card count was not updated correctly.", 2, uut.getCount(removedCard));
+		assertEquals("Cardbase reports wrong removed count.", 3, removed);
 	}
 	
 	@Test
 	public void cardRemoveCountIsEqualToCardCount() throws Exception {
-		Card shivanClone = testCard.clone();
-		uut.addCard(shivanClone, shivanClone.count);
+		uut.addCard(testCard, 5);
 		
-		int removed = uut.removeCard(testCard, testCard.count);
+		int removed = uut.removeCard(testCard, 5);
 		
 		Card removedCard = uut.getCard("M15", "281");
 		assertNull("Card was not removed from cardbase.", removedCard);
-		assertEquals("Cardbase reports wrong removed count.", 1, removed);
+		assertEquals("Cardbase reports wrong removed count.", 5, removed);
 	}
 	
 	@Test
 	public void cardRemoveCountIsGreaterThanCardCount() throws Exception {
-		Card shivanClone = testCard.clone();
-		shivanClone.count = 3;
-		uut.addCard(shivanClone, shivanClone.count);
-		
-		Card shivanClone2 = testCard.clone();
-		shivanClone2.count = 5;
-		int removed = uut.removeCard(shivanClone2, shivanClone2.count);
+		uut.addCard(testCard, 3);
+		int removed = uut.removeCard(testCard, 5);
 		
 		Card removedCard = uut.getCard("M15", "281");
 		assertNull("Card was not removed from cardbase.", removedCard);
@@ -260,7 +251,7 @@ public class CardbaseTest {
 	
 	@Test
 	public void removedCardIsNotInCardbase() throws Exception {
-		int removed = uut.removeCard(testCard, testCard.count);
+		int removed = uut.removeCard(testCard, 1);
 		
 		assertEquals("Removed count should be 0.", 0, removed);
 	}
@@ -270,7 +261,7 @@ public class CardbaseTest {
 	 ***********************************************************************************/
 	@Test
 	public void correctCardIsReturnedByGetter() throws Exception {
-		uut.addCard(testCard.clone(), testCard.count);
+		uut.addCard(testCard, 1);
 		
 		Card card = uut.getCard("M15", "281");
 		

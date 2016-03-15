@@ -1,4 +1,5 @@
-TESTS
+parsing the new cardbase file format
+fix up the test files
 
-Cardbase:
+Cardbase tests:
  * decks

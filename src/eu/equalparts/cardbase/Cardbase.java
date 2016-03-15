@@ -11,8 +11,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.comparator.CardComparator;
@@ -56,14 +56,21 @@ public class Cardbase {
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public Cardbase(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
-		cards = JSON.mapper.readValue(cardbaseFile, new TypeReference<Map<Integer, Card>>() {});
+		initialise();
+		parseCardbase(JSON.mapper.readValue(cardbaseFile, JsonNode.class));
+
 	}
 	
 	/**
 	 * Initialises a clean cardbase.
 	 */
 	public Cardbase() {
+		initialise();
+	}
+	
+	private void initialise() {
 		cards = new HashMap<Integer, Card>();
+		collection = new HashMap<Integer, Integer>();
 		decks = new HashMap<String, ReferenceDeck>();
 	}
 
@@ -192,9 +199,13 @@ public class Cardbase {
 		return Collections.unmodifiableMap(decks);
 	}
 
-	public int getCount(String setCode, String number) {
-		Integer count = collection.get(Card.makeHash(setCode, number));
+	public int getCount(Card card) {
+		Integer count = collection.get(Card.makeHash(card.setCode, card.number));
 		return count != null ? count : 0;
+	}
+	
+	private void parseCardbase(JsonNode jsonTree) {
+		
 	}
 	
 //	public List<Card> getMissingCards(StandaloneDeck deckToCheck) {

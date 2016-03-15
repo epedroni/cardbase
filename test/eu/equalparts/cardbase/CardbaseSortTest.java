@@ -1,5 +1,6 @@
 package eu.equalparts.cardbase;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
@@ -40,8 +41,9 @@ public class CardbaseSortTest {
 	@Before
 	public void setUp() throws Exception {
 		uut = new Cardbase();
-		for (Card card : testCards) {
-			uut.addCard(card, card.count);
+		int[] cardCounts = {1, 2, 3, 8, 1, 15, 1, 1};
+		for (int i = 0; i < testCards.size(); i++) {
+			uut.addCard(testCards.get(i), cardCounts[i]);
 		}
 	}
 
@@ -387,11 +389,10 @@ public class CardbaseSortTest {
 	public void sortByCount() throws Exception {
 		Collection<Card> sortedCards = uut.sort("count");
 		int i = 0;
-		Integer[] counts = {1, 1, 1, 1, 2, 3, 8, 15 };
+		int[] counts = {1, 1, 1, 1, 2, 3, 8, 15 };
 		for (Card card : sortedCards) {
-			assertTrue(card.count + " should have been " + counts[i] + ", i = " + i, card.count.equals(counts[i]));
+			assertEquals(uut.getCount(card) + " should have been " + counts[i] + ", i = " + i, uut.getCount(card), counts[i]);
 			i++;
 		}
 	}
-	
 }
