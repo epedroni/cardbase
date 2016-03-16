@@ -53,7 +53,6 @@ public class Card {
 		clone.watermark = this.watermark;
 		clone.setCode = this.setCode;
 		clone.imageCode = this.imageCode;
-		//clone.count = this.count;
 		
 		return clone;
 	}

@@ -13,7 +13,6 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.comparator.CardComparator;

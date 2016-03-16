@@ -19,6 +19,7 @@ import org.junit.rules.TemporaryFolder;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.equalparts.cardbase.Cardbase;
@@ -116,7 +117,7 @@ public class CardbaseTest {
 	public void loadFileHasWrongStructure() throws Exception {
 		File wrongStructure = tempFolder.newFile("wrongStructure.json");
 		try (FileWriter writer = new FileWriter(wrongStructure)) {
-			writer.write("{\"field1\":\"content\",\"field2\":50,\"list\":[10,20,30]}");
+			writer.write("{\"field1\":\"content\",\"field2\":50,\"field3\":{\"subfield\":10},\"list\":[10,20,30]}");
 		}
 		
 		exception.expect(JsonMappingException.class);
@@ -150,7 +151,7 @@ public class CardbaseTest {
 
 		uut.writeCollection(testFile);
 		uut = new Cardbase(testFile);
-		assertEquals("Cardbase should contain " + testCount + " cards.", testCount, uut.getCards().size());
+		assertEquals("Cardbase should contain 1 card.", 1, uut.getCards().size());
 		Card card = uut.getCard("M15", "281");
 		assertNotNull("Cardbase should contain a Shivan Dragon.", card);
 		assertEquals("Cardbase should contain " + testCount + " Shivan Dragon.", testCount, uut.getCount(card));
@@ -273,8 +274,10 @@ public class CardbaseTest {
 	@Test
 	public void correctCardCollectionIsReturnedByGetter() throws Exception {
 		uut = new Cardbase(new File(getClass().getResource("/testbase.cb").getFile()));
-		Map<Integer, Card> cards = new ObjectMapper().readValue(getClass().getResourceAsStream("/testbase.cb"), new TypeReference<Map<Integer, Card>>() {});
-		
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode rawFile = mapper.readTree(getClass().getResourceAsStream("/testbase.cb"));
+		Map<Integer, Card> cards = rawFile.get("cards").traverse(mapper).readValueAs(new TypeReference<Map<Integer, Card>>() {});
+
 		assertTrue("Not all cards were returned by the getter.", uut.getCards().containsAll(cards.values()));
 	}
 	
