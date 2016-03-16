@@ -98,7 +98,7 @@ public final class MTGUniverse {
 			} 
 			// not cached; fetch and cache
 			else {
-				requestedSet = parseFullSet(JSON.mapper.readValue(new URL(BASE_DATA_URL + validCode + ".json"), JsonNode.class));
+				requestedSet = parseFullSet(JSON.mapper.readTree(new URL(BASE_DATA_URL + validCode + ".json")));
 				cardSetCache.put(validCode, requestedSet);
 			}
 		}

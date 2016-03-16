@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -27,19 +28,30 @@ import eu.equalparts.cardbase.utils.JSON;
  */
 public class Cardbase {
 	
-	/**
-	 * The cards in the cardbase, set in key-value pairs where the key is the card hash,
-	 * generated using {makeHash()}.
-	 */
-	private Map<Integer, Card> cards;
-	/**
-	 * TODO comment
-	 */
-	private Map<Integer, Integer> collection;
-	/**
-	 * The decks which have been saved along with this collection of cards.
-	 */
-	private Map<String, ReferenceDeck> decks;
+	private static class DataContainer {
+		/**
+		 * The cards in the cardbase, set in key-value pairs where the key is the card hash,
+		 * generated using {makeHash()}.
+		 */
+		public Map<Integer, Card> cards;
+		/**
+		 * TODO comment
+		 */
+		public Map<Integer, Integer> collection;
+		/**
+		 * The decks which have been saved along with this collection of cards.
+		 */
+		public Map<String, ReferenceDeck> decks;
+		
+		public DataContainer() {
+			cards = new HashMap<Integer, Card>();
+			collection = new HashMap<Integer, Integer>();
+			decks = new HashMap<String, ReferenceDeck>();
+		}
+	}
+	
+	private DataContainer dataContainer;
+	
 	/**
 	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
 	 * information to be printed to the console.
@@ -56,24 +68,16 @@ public class Cardbase {
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public Cardbase(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
-		initialise();
-		parseCardbase(JSON.mapper.readValue(cardbaseFile, JsonNode.class));
-
+		dataContainer = JSON.mapper.readValue(cardbaseFile, DataContainer.class);
 	}
 	
 	/**
 	 * Initialises a clean cardbase.
 	 */
 	public Cardbase() {
-		initialise();
+		dataContainer = new DataContainer();
 	}
 	
-	private void initialise() {
-		cards = new HashMap<Integer, Card>();
-		collection = new HashMap<Integer, Integer>();
-		decks = new HashMap<String, ReferenceDeck>();
-	}
-
 	/**
 	 * Writes the provided {@code Cardbase} to the provided file in JSON format.
 	 * 
@@ -85,7 +89,7 @@ public class Cardbase {
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public void writeCollection(File outputFile) throws JsonGenerationException, JsonMappingException, IOException {
-		JSON.mapper.writeValue(outputFile, cards);
+		JSON.mapper.writeValue(outputFile, dataContainer);
 	}
 
 	/**
@@ -102,14 +106,14 @@ public class Cardbase {
 		Integer hashCode = cardToAdd.hashCode();
 		
 		// ensure that card is in the card map
-		cards.putIfAbsent(hashCode, cardToAdd);
+		dataContainer.cards.putIfAbsent(hashCode, cardToAdd);
 		
 		// ensure that card is in the collection, with the correct count
-		Integer currentCount = collection.get(hashCode);
+		Integer currentCount = dataContainer.collection.get(hashCode);
 		if (currentCount != null) {
-			collection.replace(hashCode, currentCount + addCount);
+			dataContainer.collection.replace(hashCode, currentCount + addCount);
 		} else {
-			collection.put(hashCode, addCount);
+			dataContainer.collection.put(hashCode, addCount);
 		}
 	}
 
@@ -134,14 +138,14 @@ public class Cardbase {
 		Integer hashCode = cardToRemove.hashCode();
 		int removed = 0;
 		
-		Integer currentCount = collection.get(hashCode);
+		Integer currentCount = dataContainer.collection.get(hashCode);
 		if (currentCount != null) {
 			if (removeCount >= currentCount) {
-				collection.remove(hashCode);
-				cards.remove(hashCode);
+				dataContainer.collection.remove(hashCode);
+				dataContainer.cards.remove(hashCode);
 				removed = currentCount;
 			} else {
-				collection.replace(hashCode, currentCount - removeCount);
+				dataContainer.collection.replace(hashCode, currentCount - removeCount);
 				removed = removeCount;
 			}
 		}
@@ -157,7 +161,7 @@ public class Cardbase {
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	public Card getCard(String setCode, String number) {
-		return cards.get(Card.makeHash(setCode, number));
+		return dataContainer.cards.get(Card.makeHash(setCode, number));
 	}
 	
 	/**
@@ -169,7 +173,7 @@ public class Cardbase {
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
 	protected Card getCardByHash(Integer hash) {
-		return cards.get(hash);
+		return dataContainer.cards.get(hash);
 	}
 	
 	/**
@@ -181,7 +185,7 @@ public class Cardbase {
 	 * @return an unmodifiable list of all the cards in the cardbase.
 	 */
 	public Collection<Card> getCards() {
-		return Collections.unmodifiableCollection(cards.values());
+		return Collections.unmodifiableCollection(dataContainer.cards.values());
 	}
 	
 	/**
@@ -190,22 +194,18 @@ public class Cardbase {
 	 * @throws NoSuchFieldException if the field provided is invalid.
 	 */
 	public Collection<Card> sort(String field) throws NoSuchFieldException {
-		List<Card> sortedCards = new ArrayList<Card>(cards.values());
+		List<Card> sortedCards = new ArrayList<Card>(dataContainer.cards.values());
 		sortedCards.sort(new CardComparator(Card.class.getDeclaredField(field)));
 		return Collections.unmodifiableCollection(sortedCards);
 	}
 	
 	public Map<String, ReferenceDeck> getDecks() {
-		return Collections.unmodifiableMap(decks);
+		return Collections.unmodifiableMap(dataContainer.decks);
 	}
 
 	public int getCount(Card card) {
-		Integer count = collection.get(Card.makeHash(card.setCode, card.number));
+		Integer count = dataContainer.collection.get(Card.makeHash(card.setCode, card.number));
 		return count != null ? count : 0;
-	}
-	
-	private void parseCardbase(JsonNode jsonTree) {
-		
 	}
 	
 //	public List<Card> getMissingCards(StandaloneDeck deckToCheck) {
