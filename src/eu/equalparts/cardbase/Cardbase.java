@@ -2,6 +2,7 @@ package eu.equalparts.cardbase;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -188,13 +189,13 @@ public class Cardbase {
 	}
 	
 	/**
-	 * @param field the name of the field by which to sort.
+	 * @param fieldName the name of the field by which to sort.
 	 * @return an unmodifiable collection representing the cardbase sorted in the required order.
 	 * @throws NoSuchFieldException if the field provided is invalid.
 	 */
-	public Collection<Card> sort(String field) throws NoSuchFieldException {
+	public Collection<Card> sortByField(String fieldName) throws NoSuchFieldException {
 		List<Card> sortedCards = new ArrayList<Card>(dataContainer.cards.values());
-		sortedCards.sort(new CardComparator(Card.class.getDeclaredField(field)));
+		sortedCards.sort(new CardComparator(Card.class.getDeclaredField(fieldName)));
 		return Collections.unmodifiableCollection(sortedCards);
 	}
 	

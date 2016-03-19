@@ -117,11 +117,23 @@ public class CardbaseTest {
 	public void loadFileHasWrongStructure() throws Exception {
 		File wrongStructure = tempFolder.newFile("wrongStructure.json");
 		try (FileWriter writer = new FileWriter(wrongStructure)) {
-			writer.write("{\"field1\":\"content\",\"field2\":50,\"field3\":{\"subfield\":10},\"list\":[10,20,30]}");
+			writer.write("{\"cards\":\"content\",\"collection\":50,\"decks\":{\"subfield\":10}}");
 		}
 		
 		exception.expect(JsonMappingException.class);
 		uut = new Cardbase(wrongStructure);
+	}
+	
+	@Test
+	public void loadFileHasUnkownStructure() throws Exception {
+		File unkownStructure = tempFolder.newFile("wrongStructure.json");
+		try (FileWriter writer = new FileWriter(unkownStructure)) {
+			writer.write("{\"field1\":\"content\",\"field2\":50,\"field3\":{\"subfield\":10},\"list\":[10,20,30]}");
+		}
+		
+		uut = new Cardbase(unkownStructure);
+		
+		assertEquals("Cardbase should contain 0 cards.", 0, uut.getCards().size());
 	}
 	
 	@Test

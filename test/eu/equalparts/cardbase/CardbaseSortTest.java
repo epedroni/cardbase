@@ -1,6 +1,5 @@
 package eu.equalparts.cardbase;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
@@ -49,7 +48,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByName() throws Exception {
-		Collection<Card> sortedCards = uut.sort("name");
+		Collection<Card> sortedCards = uut.sortByField("name");
 		int i = 0;
 		String[] names = {
 				"Callow Jushi",
@@ -69,7 +68,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByLayout() throws Exception {
-		Collection<Card> sortedCards = uut.sort("layout");
+		Collection<Card> sortedCards = uut.sortByField("layout");
 		int i = 0;
 		String[] layouts = {
 				"flip",
@@ -89,7 +88,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByManaCost() throws Exception {
-		Collection<Card> sortedCards = uut.sort("manaCost");
+		Collection<Card> sortedCards = uut.sortByField("manaCost");
 		int i = 0;
 		String[] costs = {
 				"{1}{U}{U}",
@@ -109,7 +108,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByCMC() throws Exception {
-		Collection<Card> sortedCards = uut.sort("cmc");
+		Collection<Card> sortedCards = uut.sortByField("cmc");
 		int i = 0;
 		Integer[] cmcs = {2, 3, 4, 5, 6, 6, 6, 8};
 		for (Card card : sortedCards) {
@@ -120,7 +119,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByType() throws Exception {
-		Collection<Card> sortedCards = uut.sort("type");
+		Collection<Card> sortedCards = uut.sortByField("type");
 		int i = 0;
 		String[] types = {
 				"Artifact Creature — Construct",
@@ -140,7 +139,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByRarity() throws Exception {
-		Collection<Card> sortedCards = uut.sort("rarity");
+		Collection<Card> sortedCards = uut.sortByField("rarity");
 		int i = 0;
 		String[] rarities = {
 				"Uncommon",
@@ -160,7 +159,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByText() throws Exception {
-		Collection<Card> sortedCards = uut.sort("text");
+		Collection<Card> sortedCards = uut.sortByField("text");
 		int i = 0;
 		String[] texts = {
 				"+2: Sorin Markov deals 2 damage to target creature or player and you gain 2 life.\n−3: Target opponent's life total becomes 10.\n−7: You control target player during that player's next turn.",
@@ -180,7 +179,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByFlavor() throws Exception {
-		Collection<Card> sortedCards = uut.sort("flavor");
+		Collection<Card> sortedCards = uut.sortByField("flavor");
 		int i = 0;
 		String[] flavors = {
 				"",
@@ -201,7 +200,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByArtist() throws Exception {
-		Collection<Card> sortedCards = uut.sort("artist");
+		Collection<Card> sortedCards = uut.sortByField("artist");
 		int i = 0;
 		String[] artists = {
 				"Donato Giancola",
@@ -221,7 +220,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByNumber() throws Exception {
-		Collection<Card> sortedCards = uut.sort("number");
+		Collection<Card> sortedCards = uut.sortByField("number");
 		int i = 0;
 		String[] numbers = {
 				"31a",
@@ -241,7 +240,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByPower() throws Exception {
-		Collection<Card> sortedCards = uut.sort("power");
+		Collection<Card> sortedCards = uut.sortByField("power");
 		int i = 0;
 		String[] powers = {
 				"",
@@ -262,7 +261,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByToughness() throws Exception {
-		Collection<Card> sortedCards = uut.sort("power");
+		Collection<Card> sortedCards = uut.sortByField("power");
 		int i = 0;
 		String[] toughnesses = {
 				"",
@@ -283,7 +282,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByLoyalty() throws Exception {
-		Collection<Card> sortedCards = uut.sort("loyalty");
+		Collection<Card> sortedCards = uut.sortByField("loyalty");
 		int i = 0;
 		Integer[] loyalties = {0, 0, 0, 0, 0, 0, 0, 4};
 		for (Card card : sortedCards) {
@@ -295,7 +294,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByMultiverseID() throws Exception {
-		Collection<Card> sortedCards = uut.sort("multiverseid");
+		Collection<Card> sortedCards = uut.sortByField("multiverseid");
 		int i = 0;
 		Integer[] ids = {74128, 74489, 193551, 238330, 366408, 383168, 383172, 391949 };
 		for (Card card : sortedCards) {
@@ -307,7 +306,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByImageName() throws Exception {
-		Collection<Card> sortedCards = uut.sort("imageName");
+		Collection<Card> sortedCards = uut.sortByField("imageName");
 		int i = 0;
 		String[] names = {
 				"callow jushi",
@@ -327,7 +326,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByWatermark() throws Exception {
-		Collection<Card> sortedCards = uut.sort("watermark");
+		Collection<Card> sortedCards = uut.sortByField("watermark");
 		int i = 0;
 		String[] watermarks = {
 				"",
@@ -348,7 +347,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortBySetCode() throws Exception {
-		Collection<Card> sortedCards = uut.sort("setCode");
+		Collection<Card> sortedCards = uut.sortByField("setCode");
 		int i = 0;
 		String[] sets = {
 				"BOK",
@@ -367,7 +366,7 @@ public class CardbaseSortTest {
 	}
 	
 	public void sortByImageCode() throws Exception {
-		Collection<Card> sortedCards = uut.sort("imageCode");
+		Collection<Card> sortedCards = uut.sortByField("imageCode");
 		int i = 0;
 		String[] codes = {
 				"bok",
@@ -381,17 +380,6 @@ public class CardbaseSortTest {
 		};
 		for (Card card : sortedCards) {
 			assertTrue(card.imageCode + " should have been " + codes[i] + ", i = " + i, card.imageCode.equals(codes[i]));
-			i++;
-		}
-	}
-	
-	@Test
-	public void sortByCount() throws Exception {
-		Collection<Card> sortedCards = uut.sort("count");
-		int i = 0;
-		int[] counts = {1, 1, 1, 1, 2, 3, 8, 15 };
-		for (Card card : sortedCards) {
-			assertEquals(uut.getCount(card) + " should have been " + counts[i] + ", i = " + i, uut.getCount(card), counts[i]);
 			i++;
 		}
 	}

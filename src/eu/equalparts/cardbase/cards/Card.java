@@ -29,7 +29,6 @@ public class Card {
 	// Not part of upstream JSON
 	public String setCode;
 	public String imageCode;
-	//public Integer count;
 	
 	@Override
 	public Card clone() {
