@@ -1,16 +1,11 @@
 package eu.equalparts.cardbase.decks;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import eu.equalparts.cardbase.cards.Card;
+import java.util.Map.Entry;
 
 public class ReferenceDeck extends Deck {
-
-	public Map<Integer, Integer> cardReferences = new HashMap<Integer, Integer>();
 	
-	public ReferenceDeck() {
-		
+	public ReferenceDeck(String deckName) {
+		this.name = deckName;
 	}
 	
 	public ReferenceDeck(StandaloneDeck deck) {
@@ -21,9 +16,8 @@ public class ReferenceDeck extends Deck {
 		this.mountains = deck.mountains;
 		this.forests = deck.forests;
 		
-		// TODO sort this out
-		for (Card card : deck.cards) {
-			cardReferences.put(card.hashCode(), 1);
+		for (Entry<Integer, Integer> entry : deck.getCardReferences().entrySet()) {
+			getCardReferences().put(entry.getKey(), entry.getValue());
 		}
 	}
 	

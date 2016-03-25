@@ -2,7 +2,6 @@ package eu.equalparts.cardbase;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,13 +11,11 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.comparator.CardComparator;
 import eu.equalparts.cardbase.decks.ReferenceDeck;
-import eu.equalparts.cardbase.decks.StandaloneDeck;
 import eu.equalparts.cardbase.utils.JSON;
 
 /**
