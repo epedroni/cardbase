@@ -6,8 +6,6 @@ public final class Statistics {
 
 	private Statistics() {}
 	
-	
-	
 	public static double calculatePercentage(StandaloneDeck deck, String type) {
 		double allCardsByType = count(deck, type);
 		double allCards = count(deck);

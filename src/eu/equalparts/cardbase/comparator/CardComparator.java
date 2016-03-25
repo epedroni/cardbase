@@ -7,7 +7,6 @@ import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.function.BiFunction;
 
-import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.comparator.SpecialFields.DirtyNumber;
 import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;
@@ -93,10 +92,10 @@ public class CardComparator implements Comparator<Card> {
 			
 		} catch (IllegalArgumentException e) {
 			System.out.println("Error: class Card does not define field \"" + fieldToCompare.getName() + "\".");
-			if (Cardbase.DEBUG) e.printStackTrace();
+			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			System.out.println("Error: field " + fieldToCompare.getName() + " in Card is not visible.");
-			if (Cardbase.DEBUG) e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 		// fallback, this shouldn't happen

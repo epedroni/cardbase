@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.cardstorage.StandaloneCardContainer;
 import eu.equalparts.cardbase.comparator.CardComparator;
 import eu.equalparts.cardbase.decks.ReferenceDeck;
 import eu.equalparts.cardbase.utils.JSON;
@@ -23,37 +24,33 @@ import eu.equalparts.cardbase.utils.JSON;
  * 
  * @author Eduardo Pedroni
  */
-public class Cardbase {
+public class Cardbase extends StandaloneCardContainer {
 	
-	private static class DataContainer {
-		/**
-		 * The cards in the cardbase, set in key-value pairs where the key is the card hash,
-		 * generated using {makeHash()}.
-		 */
-		public Map<Integer, Card> cards;
-		/**
-		 * TODO comment
-		 */
-		public Map<Integer, Integer> collection;
-		/**
-		 * The decks which have been saved along with this collection of cards.
-		 */
-		public Map<String, ReferenceDeck> decks;
-		
-		public DataContainer() {
-			cards = new HashMap<Integer, Card>();
-			collection = new HashMap<Integer, Integer>();
-			decks = new HashMap<String, ReferenceDeck>();
-		}
-	}
+//	private static class DataContainer {
+//		/**
+//		 * The cards in the cardbase, set in key-value pairs where the key is the card hash,
+//		 * generated using {makeHash()}.
+//		 */
+//		public Map<Integer, Card> cards;
+//		/**
+//		 * TODO comment
+//		 */
+//		public Map<Integer, Integer> collection;
 	
-	private DataContainer dataContainer;
+//		
+//		public DataContainer() {
+//			cards = new HashMap<Integer, Card>();
+//			collection = new HashMap<Integer, Integer>();
+//			decks = new HashMap<String, ReferenceDeck>();
+//		}
+//	}
+	
+//	private DataContainer dataContainer;
 	
 	/**
-	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
-	 * information to be printed to the console.
+	 * The decks which have been saved along with this collection of cards.
 	 */
-	public static final boolean DEBUG = System.getenv("CB_DEBUG") != null;
+	public Map<String, ReferenceDeck> decks;
 	
 	/**
 	 * Initialises the cardbase with the contents of a file.
@@ -64,15 +61,15 @@ public class Cardbase {
 	 * @throws JsonMappingException if the specified file structure does not match that of {@code Cardbase}.
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
-	public Cardbase(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
-		dataContainer = JSON.mapper.readValue(cardbaseFile, DataContainer.class);
+	public static Cardbase load(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
+		return JSON.mapper.readValue(cardbaseFile, Cardbase.class);
 	}
 	
 	/**
 	 * Initialises a clean cardbase.
 	 */
 	public Cardbase() {
-		dataContainer = new DataContainer();
+		super();
 	}
 	
 	/**
@@ -86,7 +83,7 @@ public class Cardbase {
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
 	 */
 	public void writeCollection(File outputFile) throws JsonGenerationException, JsonMappingException, IOException {
-		JSON.mapper.writeValue(outputFile, dataContainer);
+		JSON.mapper.writeValue(outputFile, this);
 	}
 
 	/**
@@ -99,20 +96,20 @@ public class Cardbase {
 	 * already exists.
 	 *TODO fix comment
 	 */
-	public void addCard(Card cardToAdd, int addCount) {
-		Integer hashCode = cardToAdd.hashCode();
-		
-		// ensure that card is in the card map
-		dataContainer.cards.putIfAbsent(hashCode, cardToAdd);
-		
-		// ensure that card is in the collection, with the correct count
-		Integer currentCount = dataContainer.collection.get(hashCode);
-		if (currentCount != null) {
-			dataContainer.collection.replace(hashCode, currentCount + addCount);
-		} else {
-			dataContainer.collection.put(hashCode, addCount);
-		}
-	}
+//	public void addCard(Card cardToAdd, int addCount) {
+//		Integer hashCode = cardToAdd.hashCode();
+//		
+//		// ensure that card is in the card map
+//		dataContainer.cards.putIfAbsent(hashCode, cardToAdd);
+//		
+//		// ensure that card is in the collection, with the correct count
+//		Integer currentCount = dataContainer.collection.get(hashCode);
+//		if (currentCount != null) {
+//			dataContainer.collection.replace(hashCode, currentCount + addCount);
+//		} else {
+//			dataContainer.collection.put(hashCode, addCount);
+//		}
+//	}
 
 	/**
 	 * Removes a specific amount of a card from the cardbase.
@@ -131,23 +128,23 @@ public class Cardbase {
 	 * @return the number of cards actually removed.
 	 *TODO comment
 	 */
-	public Integer removeCard(Card cardToRemove, int removeCount) {
-		Integer hashCode = cardToRemove.hashCode();
-		int removed = 0;
-		
-		Integer currentCount = dataContainer.collection.get(hashCode);
-		if (currentCount != null) {
-			if (removeCount >= currentCount) {
-				dataContainer.collection.remove(hashCode);
-				dataContainer.cards.remove(hashCode);
-				removed = currentCount;
-			} else {
-				dataContainer.collection.replace(hashCode, currentCount - removeCount);
-				removed = removeCount;
-			}
-		}
-		return removed;
-	}
+//	public Integer removeCard(Card cardToRemove, int removeCount) {
+//		Integer hashCode = cardToRemove.hashCode();
+//		int removed = 0;
+//		
+//		Integer currentCount = dataContainer.collection.get(hashCode);
+//		if (currentCount != null) {
+//			if (removeCount >= currentCount) {
+//				dataContainer.collection.remove(hashCode);
+//				dataContainer.cards.remove(hashCode);
+//				removed = currentCount;
+//			} else {
+//				dataContainer.collection.replace(hashCode, currentCount - removeCount);
+//				removed = removeCount;
+//			}
+//		}
+//		return removed;
+//	}
 
 	/**
 	 * Returns a card from the cardbase by set code and number.
@@ -157,9 +154,9 @@ public class Cardbase {
 	 * @param number the requested card's set number.
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
-	public Card getCard(String setCode, String number) {
-		return dataContainer.cards.get(Card.makeHash(setCode, number));
-	}
+//	public Card getCard(String setCode, String number) {
+//		return dataContainer.cards.get(Card.makeHash(setCode, number));
+//	}
 	
 	/**
 	 * Returns a card from the cardbase by hash. The card's hash
@@ -169,21 +166,9 @@ public class Cardbase {
 	 * @param hash the Cardbase hash of the requested card.
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
-	protected Card getCardByHash(Integer hash) {
-		return dataContainer.cards.get(hash);
-	}
-	
-	/**
-	 * This method is intended to allow iteration directly on the list of cards,
-	 * while at the same time retaining control over the insert and remove procedures.
-	 * The returned {@code List} is a read-only; trying to modify its structure will
-	 * result in an {@code UnsupportedOperationException}.
-	 * 
-	 * @return an unmodifiable list of all the cards in the cardbase.
-	 */
-	public Collection<Card> getCards() {
-		return Collections.unmodifiableCollection(dataContainer.cards.values());
-	}
+//	protected Card getCardByHash(Integer hash) {
+//		return dataContainer.cards.get(hash);
+//	}
 	
 	/**
 	 * @param fieldName the name of the field by which to sort.
@@ -191,19 +176,15 @@ public class Cardbase {
 	 * @throws NoSuchFieldException if the field provided is invalid.
 	 */
 	public Collection<Card> sortByField(String fieldName) throws NoSuchFieldException {
-		List<Card> sortedCards = new ArrayList<Card>(dataContainer.cards.values());
+		List<Card> sortedCards = new ArrayList<Card>(getCards());
 		sortedCards.sort(new CardComparator(Card.class.getDeclaredField(fieldName)));
 		return Collections.unmodifiableCollection(sortedCards);
 	}
-	
-	public Map<String, ReferenceDeck> getDecks() {
-		return Collections.unmodifiableMap(dataContainer.decks);
-	}
 
-	public int getCount(Card card) {
-		Integer count = dataContainer.collection.get(Card.makeHash(card.setCode, card.number));
-		return count != null ? count : 0;
-	}
+//	public int getCount(Card card) {
+//		Integer count = dataContainer.collection.get(Card.makeHash(card.setCode, card.number));
+//		return count != null ? count : 0;
+//	}
 	
 //	public List<Card> getMissingCards(StandaloneDeck deckToCheck) {
 //		List<Card> missingCards = new ArrayList<Card>();

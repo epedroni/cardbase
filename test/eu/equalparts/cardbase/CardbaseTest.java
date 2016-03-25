@@ -1,12 +1,11 @@
 package eu.equalparts.cardbase;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -17,12 +16,9 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
 
 /**
@@ -67,7 +63,7 @@ public class CardbaseTest {
 	
 	@Test
 	public void fileCardbaseIsInitialised() throws Exception {
-		uut = new Cardbase(new File(getClass().getResource("/testbase.cb").getFile()));
+		uut = Cardbase.load(new File(getClass().getResource("/testbase.cb").getFile()));
 		
 		assertEquals("Card collection contains the wrong number of card entries.", 6, uut.getCards().size());
 		
@@ -101,7 +97,7 @@ public class CardbaseTest {
 	@Test
 	public void loadFileIsNull() throws Exception {
 		exception.expect(NullPointerException.class);
-		uut = new Cardbase(null);
+		uut = Cardbase.load(null);
 	}
 	
 	@Test
@@ -110,7 +106,7 @@ public class CardbaseTest {
 		tempFolder.delete();
 		
 		exception.expect(IOException.class);
-		uut = new Cardbase(notAFile);
+		uut = Cardbase.load(notAFile);
 	}
 	
 	@Test
@@ -121,7 +117,7 @@ public class CardbaseTest {
 		}
 		
 		exception.expect(JsonMappingException.class);
-		uut = new Cardbase(wrongStructure);
+		uut = Cardbase.load(wrongStructure);
 	}
 	
 	@Test
@@ -131,7 +127,7 @@ public class CardbaseTest {
 			writer.write("{\"field1\":\"content\",\"field2\":50,\"field3\":{\"subfield\":10},\"list\":[10,20,30]}");
 		}
 		
-		uut = new Cardbase(unkownStructure);
+		uut = Cardbase.load(unkownStructure);
 		
 		assertEquals("Cardbase should contain 0 cards.", 0, uut.getCards().size());
 	}
@@ -144,7 +140,7 @@ public class CardbaseTest {
 		}
 		
 		exception.expect(JsonParseException.class);
-		uut = new Cardbase(notJson);
+		uut = Cardbase.load(notJson);
 	}
 	
 	/***********************************************************************************
@@ -156,13 +152,13 @@ public class CardbaseTest {
 		
 		File testFile = tempFolder.newFile("saveTest.cb");
 		uut.writeCollection(testFile);
-		uut = new Cardbase(testFile);
+		uut = Cardbase.load(testFile);
 		assertEquals("Cardbase should contain no cards.", 0, uut.getCards().size());
 
 		uut.addCard(testCard, testCount);
 
 		uut.writeCollection(testFile);
-		uut = new Cardbase(testFile);
+		uut = Cardbase.load(testFile);
 		assertEquals("Cardbase should contain 1 card.", 1, uut.getCards().size());
 		Card card = uut.getCard("M15", "281");
 		assertNotNull("Cardbase should contain a Shivan Dragon.", card);
@@ -183,126 +179,6 @@ public class CardbaseTest {
 	@Test
 	public void saveFileIsNull() throws Exception {
 		exception.expect(NullPointerException.class);
-		uut = new Cardbase(null);
-	}
-	
-	/***********************************************************************************
-	 * Adding card tests, happy path
-	 ***********************************************************************************/
-	@Test
-	public void newCardIsAdded() throws Exception {
-		uut.addCard(testCard, 1);
-		Card addedCard = uut.getCard("M15", "281");
-		
-		assertNotNull("Card was not found in cardbase.", addedCard);
-		assertEquals(testCard, addedCard);
-	}
-	
-	@Test
-	public void existingCardIsIncremented() throws Exception {
-		uut.addCard(testCard, 2);
-		uut.addCard(testCard, 4);
-		
-		Card addedCard = uut.getCard("M15", "281");
-		assertNotNull("Card was not found in cardbase.", addedCard);
-		assertEquals("Card count was not updated correctly.", 6, uut.getCount(addedCard));
-	}
-	
-	/*
-	 * Edge cases
-	 */
-	@Test
-	public void cardAddedIsNull() throws Exception {
-		exception.expect(NullPointerException.class);
-		uut.addCard(null, 0);
-	}
-	
-	/***********************************************************************************
-	 * Removing card tests, happy path
-	 ***********************************************************************************/
-	@Test
-	public void cardRemoveCountIsLessThanCardCount() throws Exception {
-		uut.addCard(testCard, 5);
-		
-		int removed = uut.removeCard(testCard, 3);
-		
-		Card removedCard = uut.getCard("M15", "281");
-		assertNotNull("Card was not found in cardbase.", removedCard);
-		assertEquals("Card count was not updated correctly.", 2, uut.getCount(removedCard));
-		assertEquals("Cardbase reports wrong removed count.", 3, removed);
-	}
-	
-	@Test
-	public void cardRemoveCountIsEqualToCardCount() throws Exception {
-		uut.addCard(testCard, 5);
-		
-		int removed = uut.removeCard(testCard, 5);
-		
-		Card removedCard = uut.getCard("M15", "281");
-		assertNull("Card was not removed from cardbase.", removedCard);
-		assertEquals("Cardbase reports wrong removed count.", 5, removed);
-	}
-	
-	@Test
-	public void cardRemoveCountIsGreaterThanCardCount() throws Exception {
-		uut.addCard(testCard, 3);
-		int removed = uut.removeCard(testCard, 5);
-		
-		Card removedCard = uut.getCard("M15", "281");
-		assertNull("Card was not removed from cardbase.", removedCard);
-		assertEquals("Cardbase reports wrong removed count.", 3, removed);
-	}
-	
-	/*
-	 * Edge cases
-	 */
-	@Test
-	public void removedCardIsNull() throws Exception {
-		exception.expect(NullPointerException.class);
-		uut.removeCard(null, 0);
-	}
-	
-	@Test
-	public void removedCardIsNotInCardbase() throws Exception {
-		int removed = uut.removeCard(testCard, 1);
-		
-		assertEquals("Removed count should be 0.", 0, removed);
-	}
-
-	/***********************************************************************************
-	 * Card getter tests, happy path
-	 ***********************************************************************************/
-	@Test
-	public void correctCardIsReturnedByGetter() throws Exception {
-		uut.addCard(testCard, 1);
-		
-		Card card = uut.getCard("M15", "281");
-		
-		for (Field field : Card.class.getFields()) {
-			assertEquals("Field " + field.getName(), field.get(testCard), field.get(card));
-		}
-	}
-	
-	@Test
-	public void correctCardCollectionIsReturnedByGetter() throws Exception {
-		uut = new Cardbase(new File(getClass().getResource("/testbase.cb").getFile()));
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode rawFile = mapper.readTree(getClass().getResourceAsStream("/testbase.cb"));
-		Map<Integer, Card> cards = rawFile.get("cards").traverse(mapper).readValueAs(new TypeReference<Map<Integer, Card>>() {});
-
-		assertTrue("Not all cards were returned by the getter.", uut.getCards().containsAll(cards.values()));
-	}
-	
-	/*
-	 * Edge cases
-	 */
-	@Test
-	public void getCardIsNotInCardbase() throws Exception {
-		assertNull("Method should have returned null", uut.getCard("M15", "281"));
-	}
-	
-	@Test
-	public void cardCollectionWhenCardbaseIsEmpty() throws Exception {
-		assertEquals("Returned collection size should have been 0.", 0, uut.getCards().size());
+		uut = Cardbase.load(null);
 	}
 }

@@ -35,7 +35,12 @@ public final class CardbaseCLI {
 		public Card card;
 		public int count;
 	}
-
+	
+	/**
+	 * Debug flag is raised when the DEBUG environment variable is set. This causes additional
+	 * information to be printed to the console.
+	 */
+	public static final boolean DEBUG = System.getenv("CB_DEBUG") != null;
 	/**
 	 * Location of the help file.
 	 */
@@ -95,19 +100,19 @@ public final class CardbaseCLI {
 		} catch (JsonParseException e) {
 			System.out.println("Error: poorly formatted cardbase, check the syntax and try again.");
 			// although the problem could also be with the upstream CardSetList json.
-			if (Cardbase.DEBUG) e.printStackTrace();
+			if (DEBUG) e.printStackTrace();
 			System.exit(1);
 		} catch (JsonMappingException e) {
 			System.out.println("Error: unexpected fields found in cardbase, is it from an old version?");
-			if (Cardbase.DEBUG) e.printStackTrace();
+			if (DEBUG) e.printStackTrace();
 			System.exit(1);
 		} catch (IOException e) {
 			System.out.println("Error: something went wrong reading cardbase file, abort...");
-			if (Cardbase.DEBUG) e.printStackTrace();
+			if (DEBUG) e.printStackTrace();
 			System.exit(1);
 		} catch (IllegalArgumentException e) {
 			System.out.println("Error: the file provided is invalid.");
-			if (Cardbase.DEBUG) e.printStackTrace();
+			if (DEBUG) e.printStackTrace();
 			System.exit(1);
 		}
 	}
@@ -127,7 +132,7 @@ public final class CardbaseCLI {
 		System.out.println("Welcome to Cardbase CLI!");
 
 		// set debug flag if we are debugging
-		if (Cardbase.DEBUG) System.out.println("Debug mode is on.");
+		if (DEBUG) System.out.println("Debug mode is on.");
 
 		// initialise the universe
 		mtgUniverse = new MTGUniverse(remoteURL);
@@ -137,7 +142,7 @@ public final class CardbaseCLI {
 			cardbaseFile = new File(args[0]);
 			if (cardbaseFile.exists() && cardbaseFile.isFile() && cardbaseFile.canRead()) {
 				System.out.println("Loading cardbase from \"" + args[0] + "\".");
-				cardbase = new Cardbase(cardbaseFile);
+				cardbase = Cardbase.load(cardbaseFile);
 			} else {
 				throw new IllegalArgumentException();
 			}
@@ -180,7 +185,7 @@ public final class CardbaseCLI {
 			}
 		} catch (IOException e) {
 			System.out.println("Error: something went wrong with stdin, exiting...");
-			if (Cardbase.DEBUG) e.printStackTrace();
+			if (DEBUG) e.printStackTrace();
 		}
 	}
 	
@@ -211,7 +216,8 @@ public final class CardbaseCLI {
 			set(args);
 		} else if (command.equalsIgnoreCase("glance")) {
 			glance();
-		} else if (command.equalsIgnoreCase("peruse")) {
+		} else if (command.equalsIgnoreCase("peruse")
+				|| command.equalsIgnoreCase("p")) {
 			peruse(args);
 		} else if (command.equalsIgnoreCase("undo")) {
 			undo();
@@ -258,10 +264,10 @@ public final class CardbaseCLI {
 					savePrompt = false;
 				} catch (JsonGenerationException | JsonMappingException e) {
 					System.out.println("Error: something terrible happened to the internal cardbase data structure. Oops.");
-					if (Cardbase.DEBUG) e.printStackTrace();
+					if (DEBUG) e.printStackTrace();
 				} catch (IOException e) {
 					System.out.println("Error: lost contact with the output file.");
-					if (Cardbase.DEBUG) e.printStackTrace();
+					if (DEBUG) e.printStackTrace();
 				}
 			}
 		} else {
@@ -317,13 +323,13 @@ public final class CardbaseCLI {
 				}
 			} catch (JsonParseException e) {
 				System.out.println("Error: JSON fetched from upstream was not formatted properly.");
-				if (Cardbase.DEBUG) e.printStackTrace();
+				if (DEBUG) e.printStackTrace();
 			} catch (JsonMappingException e) {
 				System.out.println("Error: JSON fetched from upstream does not match the data structure used internally.");
-				if (Cardbase.DEBUG) e.printStackTrace();
+				if (DEBUG) e.printStackTrace();
 			} catch (IOException e) {
 				System.out.println("Error: JSON could not be fetched from upstream.");
-				if (Cardbase.DEBUG) e.printStackTrace();
+				if (DEBUG) e.printStackTrace();
 			}
 		} else {
 			System.out.println("Please enter a set code (use \"sets\" to see all valid set codes).");
