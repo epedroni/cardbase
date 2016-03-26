@@ -1,8 +1,11 @@
 package eu.equalparts.cardbase.cards;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import eu.equalparts.cardbase.comparator.SpecialFields.DirtyNumber;
 import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;
 
+@JsonAutoDetect
 public class Card {
 	
 	public String name;

@@ -151,13 +151,13 @@ public class CardbaseTest {
 		final int testCount = 5;
 		
 		File testFile = tempFolder.newFile("saveTest.cb");
-		uut.writeCollection(testFile);
+		uut.write(testFile);
 		uut = Cardbase.load(testFile);
 		assertEquals("Cardbase should contain no cards.", 0, uut.getCards().size());
 
 		uut.addCard(testCard, testCount);
 
-		uut.writeCollection(testFile);
+		uut.write(testFile);
 		uut = Cardbase.load(testFile);
 		assertEquals("Cardbase should contain 1 card.", 1, uut.getCards().size());
 		Card card = uut.getCard("M15", "281");
@@ -173,7 +173,7 @@ public class CardbaseTest {
 		File testFile = tempFolder.newFile("saveTest.cb");
 		testFile.setWritable(false);
 		exception.expect(IOException.class);
-		uut.writeCollection(testFile);
+		uut.write(testFile);
 	}
 	
 	@Test

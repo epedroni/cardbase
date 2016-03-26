@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase;
+package eu.equalparts.cardbase.cardstorage;
 
 import static org.junit.Assert.assertTrue;
 
@@ -13,7 +13,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
 
 /**
@@ -22,15 +21,15 @@ import eu.equalparts.cardbase.cards.Card;
  * @author Eduardo Pedroni
  *
  */
-public class CardbaseSortTest {
+public class StandaloneCardContainerSortTest {
 
-	private Cardbase uut;
+	private StandaloneCardContainer uut;
 	private static List<Card> testCards;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		testCards = mapper.readValue(CardbaseSortTest.class.getResourceAsStream("/testcards.json"), new TypeReference<List<Card>>() {});
+		testCards = mapper.readValue(StandaloneCardContainerSortTest.class.getResourceAsStream("/testcards.json"), new TypeReference<List<Card>>() {});
 	}
 
 	@AfterClass
@@ -39,7 +38,7 @@ public class CardbaseSortTest {
 
 	@Before
 	public void setUp() throws Exception {
-		uut = new Cardbase();
+		uut = new StandaloneCardContainer() {};
 		int[] cardCounts = {1, 2, 3, 8, 1, 15, 1, 1};
 		for (int i = 0; i < testCards.size(); i++) {
 			uut.addCard(testCards.get(i), cardCounts[i]);

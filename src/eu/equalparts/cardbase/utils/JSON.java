@@ -1,6 +1,7 @@
 package eu.equalparts.cardbase.utils;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -30,6 +31,11 @@ public final class JSON {
 		ObjectMapper objectMapper = new ObjectMapper();
 		// classes don't necessarily use all json fields
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		// disable auto detection
+		objectMapper.disable(MapperFeature.AUTO_DETECT_CREATORS,
+	            MapperFeature.AUTO_DETECT_FIELDS,
+	            MapperFeature.AUTO_DETECT_GETTERS,
+	            MapperFeature.AUTO_DETECT_IS_GETTERS);
 		return objectMapper;
 	}
 }
