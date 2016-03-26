@@ -113,7 +113,7 @@ public class CardbaseTest {
 	public void loadFileHasWrongStructure() throws Exception {
 		File wrongStructure = tempFolder.newFile("wrongStructure.json");
 		try (FileWriter writer = new FileWriter(wrongStructure)) {
-			writer.write("{\"cards\":\"content\",\"collection\":50,\"decks\":{\"subfield\":10}}");
+			writer.write("{\"cardData\":\"content\",\"cardReferences\":50,\"decks\":{\"subfield\":10}}");
 		}
 		
 		exception.expect(JsonMappingException.class);

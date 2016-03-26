@@ -106,7 +106,7 @@ public class StandaloneCardContainerTest {
 		uut.addCard(testCard, 3);
 		
 		uut.removeCard(testCard, 5);
-
+		
 		assertNull("Card is not missing from container.", uut.getCard(testCard.setCode, testCard.number));
 	}
 	

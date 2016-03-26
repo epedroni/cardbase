@@ -12,14 +12,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.comparator.CardComparator;
 
+/**
+ * Holds actual card data in addition to the card counts in {@code ReferenceCardContainer}.
+ * 
+ * @author Eduardo Pedroni
+ *
+ */
 public abstract class StandaloneCardContainer extends ReferenceCardContainer {
 	
-	@JsonProperty private Map<Integer, Card> cardData;
-	
-	public StandaloneCardContainer() {
-		super();
-		cardData = new HashMap<>();
-	}
+	/**
+	 * A map with card hashes as entry keys (calculated used {@code Card.hashCode()})
+	 * and card objects as entry values.
+	 */
+	@JsonProperty private Map<Integer, Card> cardData = new HashMap<>();
 	
 	@Override
 	public void addCard(Card cardToAdd, int count) {
@@ -30,9 +35,11 @@ public abstract class StandaloneCardContainer extends ReferenceCardContainer {
 	@Override
 	public int removeCard(Card cardToRemove, int count) {
 		int removed = super.removeCard(cardToRemove, count);
+		
 		if (getCount(cardToRemove) <= 0) {
 			cardData.remove(cardToRemove.hashCode());
 		}
+		
 		return removed;
 	}
 	

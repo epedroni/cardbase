@@ -22,23 +22,25 @@ public class Cardbase extends StandaloneCardContainer {
 	/**
 	 * The decks which have been saved along with this collection of cards.
 	 */
-	@JsonProperty private Map<String, Object> decks;
+	@JsonProperty private Map<Integer, Object> decks;
 	
 	/**
-	 * Initialises the cardbase with the contents of a file.
+	 * Creates and returns a cardbase with the contents of a file.
 	 *
 	 * @param cardbaseFile the cardbase JSON to load.
 	 * 
 	 * @throws JsonParseException if the specified file does not contain valid JSON.
 	 * @throws JsonMappingException if the specified file structure does not match that of {@code Cardbase}.
 	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
+	 * 
+	 * @return the initialised {@code Cardbase} object.
 	 */
 	public static Cardbase load(File cardbaseFile) throws JsonParseException, JsonMappingException, IOException {
 		return JSON.mapper.readValue(cardbaseFile, Cardbase.class);
 	}
 	
 	/**
-	 * Writes the provided {@code Cardbase} to the provided file in JSON format.
+	 * Writes the {@code Cardbase} instance to the provided file in JSON format.
 	 * 
 	 * @param file the file to which to write the {@code Cardbase}.
 	 * @param cardbase the {@code Cardbase} to write out.
