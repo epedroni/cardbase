@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.cardstorage.StandaloneCardContainer;
-import eu.equalparts.cardbase.decks.ReferenceDeck;
 import eu.equalparts.cardbase.utils.JSON;
 
 /**
@@ -23,7 +22,7 @@ public class Cardbase extends StandaloneCardContainer {
 	/**
 	 * The decks which have been saved along with this collection of cards.
 	 */
-	@JsonProperty private Map<String, ReferenceDeck> decks;
+	@JsonProperty private Map<String, Object> decks;
 	
 	/**
 	 * Initialises the cardbase with the contents of a file.
