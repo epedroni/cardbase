@@ -37,8 +37,7 @@ public class StandaloneCardContainerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		uut = new StandaloneCardContainer() {
-		};
+		uut = new StandaloneCardContainer() {};
 	}
 	
 	/***********************************************************************************
