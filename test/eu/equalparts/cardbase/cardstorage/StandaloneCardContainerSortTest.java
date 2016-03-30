@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
 
 /**
@@ -38,7 +39,7 @@ public class StandaloneCardContainerSortTest {
 
 	@Before
 	public void setUp() throws Exception {
-		uut = new StandaloneCardContainer() {};
+		uut = new Cardbase();
 		int[] cardCounts = {1, 2, 3, 8, 1, 15, 1, 1};
 		for (int i = 0; i < testCards.size(); i++) {
 			uut.addCard(testCards.get(i), cardCounts[i]);

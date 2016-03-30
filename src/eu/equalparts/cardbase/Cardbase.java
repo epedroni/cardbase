@@ -2,6 +2,11 @@ package eu.equalparts.cardbase;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,7 +14,9 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import eu.equalparts.cardbase.cards.Card;
 import eu.equalparts.cardbase.cardstorage.StandaloneCardContainer;
+import eu.equalparts.cardbase.comparator.CardComparator;
 import eu.equalparts.cardbase.utils.JSON;
 
 /**
@@ -17,8 +24,17 @@ import eu.equalparts.cardbase.utils.JSON;
  * 
  * @author Eduardo Pedroni
  */
-public class Cardbase extends StandaloneCardContainer {
+public class Cardbase implements StandaloneCardContainer {
 	
+	/**
+	 * A map with card hashes as entry keys (calculated used {@code Card.hashCode()}) and card amounts as entry values.
+	 */
+	@JsonProperty private Map<Integer, Integer> cardReferences = new HashMap<>();
+	/**
+	 * A map with card hashes as entry keys (calculated used {@code Card.hashCode()})
+	 * and card objects as entry values.
+	 */
+	@JsonProperty private Map<Integer, Card> cardData = new HashMap<>();
 	/**
 	 * The decks which have been saved along with this collection of cards.
 	 */
@@ -51,5 +67,60 @@ public class Cardbase extends StandaloneCardContainer {
 	 */
 	public void write(File outputFile) throws JsonGenerationException, JsonMappingException, IOException {
 		JSON.mapper.writeValue(outputFile, this);
+	}
+
+	@Override
+	public int getCount(Card cardToCount) {
+		int hashCode = cardToCount.hashCode();
+		return cardReferences.containsKey(hashCode) ? cardReferences.get(hashCode) : 0;
+	}
+	
+	@Override
+	public void addCard(Card cardToAdd, int count) {
+		int hashCode = cardToAdd.hashCode();
+		if (cardReferences.containsKey(hashCode)) {
+			cardReferences.replace(hashCode, cardReferences.get(hashCode) + count);
+		} else {
+			cardReferences.put(hashCode, count);
+		}
+		cardData.putIfAbsent(hashCode, cardToAdd);
+	}
+
+	@Override
+	public int removeCard(Card cardToRemove, int count) {
+		int hashCode = cardToRemove.hashCode();
+		int removed = 0;
+		
+		if (cardReferences.containsKey(hashCode) && count > 0) {
+			int oldCount = cardReferences.get(hashCode);
+			
+			if (oldCount > count) {
+				cardReferences.replace(hashCode, oldCount - count);
+				removed = count;
+			} else {
+				cardReferences.remove(hashCode);
+				cardData.remove(cardToRemove.hashCode());
+				removed = oldCount;
+			}
+		}
+
+		return removed;
+	}
+	
+	@Override
+	public Card getCard(String setCode, String number) {
+		return cardData.get(Card.makeHash(setCode, number));
+	}
+	
+	@Override
+	public Collection<Card> getCards() {
+		return Collections.unmodifiableCollection(cardData.values());
+	}
+	
+	@Override
+	public Collection<Card> sortByField(String fieldName) throws NoSuchFieldException {
+		List<Card> sortedCards = new ArrayList<Card>(getCards());
+		sortedCards.sort(new CardComparator(Card.class.getDeclaredField(fieldName)));
+		return Collections.unmodifiableCollection(sortedCards);
 	}
 }

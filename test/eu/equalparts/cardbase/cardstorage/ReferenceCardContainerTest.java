@@ -11,6 +11,7 @@ import org.junit.rules.ExpectedException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
 
 /**
@@ -39,8 +40,7 @@ public class ReferenceCardContainerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		uut = new ReferenceCardContainer() {
-		};
+		uut = new Cardbase();
 	}
 	
 	/***********************************************************************************

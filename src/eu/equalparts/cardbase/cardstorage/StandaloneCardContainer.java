@@ -1,16 +1,8 @@
 package eu.equalparts.cardbase.cardstorage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.comparator.CardComparator;
 
 /**
  * Holds actual card data in addition to the card counts in {@code ReferenceCardContainer}.
@@ -18,31 +10,7 @@ import eu.equalparts.cardbase.comparator.CardComparator;
  * @author Eduardo Pedroni
  *
  */
-public abstract class StandaloneCardContainer extends ReferenceCardContainer {
-	
-	/**
-	 * A map with card hashes as entry keys (calculated used {@code Card.hashCode()})
-	 * and card objects as entry values.
-	 */
-	@JsonProperty private Map<Integer, Card> cardData = new HashMap<>();
-	
-	@Override
-	public void addCard(Card cardToAdd, int count) {
-		super.addCard(cardToAdd, count);
-		cardData.putIfAbsent(cardToAdd.hashCode(), cardToAdd);
-	}
-
-	@Override
-	public int removeCard(Card cardToRemove, int count) {
-		int removed = super.removeCard(cardToRemove, count);
-		
-		if (getCount(cardToRemove) <= 0) {
-			cardData.remove(cardToRemove.hashCode());
-		}
-		
-		return removed;
-	}
-	
+public interface StandaloneCardContainer extends ReferenceCardContainer {
 	/**
 	 * Returns a card from the cardbase by set code and number.
 	 * If no such card is in the cardbase, returns null.
@@ -51,10 +19,7 @@ public abstract class StandaloneCardContainer extends ReferenceCardContainer {
 	 * @param number the requested card's set number.
 	 * @return the requested {@code Card} or null if no card is found.
 	 */
-	public Card getCard(String setCode, String number) {
-		return cardData.get(Card.makeHash(setCode, number));
-	}
-	
+	public Card getCard(String setCode, String number);
 	/**
 	 * This method is intended to allow iteration directly on the list of cards,
 	 * while at the same time retaining control over the insert and remove procedures.
@@ -63,18 +28,12 @@ public abstract class StandaloneCardContainer extends ReferenceCardContainer {
 	 * 
 	 * @return an unmodifiable list of all the cards in the cardbase.
 	 */
-	public Collection<Card> getCards() {
-		return Collections.unmodifiableCollection(cardData.values());
-	}
-	
+	public Collection<Card> getCards();
 	/**
 	 * @param fieldName the name of the field by which to sort.
 	 * @return an unmodifiable collection representing the cardbase sorted in the required order.
 	 * @throws NoSuchFieldException if the field provided is invalid.
 	 */
-	public Collection<Card> sortByField(String fieldName) throws NoSuchFieldException {
-		List<Card> sortedCards = new ArrayList<Card>(getCards());
-		sortedCards.sort(new CardComparator(Card.class.getDeclaredField(fieldName)));
-		return Collections.unmodifiableCollection(sortedCards);
-	}
+	public Collection<Card> sortByField(String fieldName) throws NoSuchFieldException;
+	
 }
