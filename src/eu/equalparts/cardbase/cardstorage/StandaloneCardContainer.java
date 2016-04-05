@@ -5,6 +5,7 @@ import java.util.Collection;
 import eu.equalparts.cardbase.cards.Card;
 
 /**
+ * TODO fix comments
  * Holds actual card data in addition to the card counts in {@code ReferenceCardContainer}.
  * 
  * @author Eduardo Pedroni

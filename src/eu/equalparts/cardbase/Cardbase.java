@@ -41,6 +41,15 @@ public class Cardbase implements StandaloneCardContainer {
 	@JsonProperty private Map<Integer, Object> decks;
 	
 	/**
+	 * Creates a clean cardbase.
+	 */
+	public Cardbase() {
+		cardReferences = new HashMap<>();
+		cardData = new HashMap<>();
+		decks = new HashMap<>();
+	}
+	
+	/**
 	 * Creates and returns a cardbase with the contents of a file.
 	 *
 	 * @param cardbaseFile the cardbase JSON to load.

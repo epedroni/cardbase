@@ -4,3 +4,4 @@ dist/
 test/spike/
 build/main/
 build/test/
+src/Tests.java

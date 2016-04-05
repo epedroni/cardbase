@@ -3,6 +3,7 @@ package eu.equalparts.cardbase.cardstorage;
 import eu.equalparts.cardbase.cards.Card;
 
 /**
+ * TODO fix comments
  * A class which holds card counts by reference (hash).
  * 
  * @author Eduardo Pedroni
