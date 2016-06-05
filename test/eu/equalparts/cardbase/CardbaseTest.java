@@ -181,4 +181,12 @@ public class CardbaseTest {
 		exception.expect(NullPointerException.class);
 		uut = Cardbase.load(null);
 	}
+	
+	/***********************************************************************************
+	 * Deck tests
+	 ***********************************************************************************/
+	@Test
+	public void test() throws Exception {
+		
+	}
 }

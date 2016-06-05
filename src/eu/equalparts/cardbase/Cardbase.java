@@ -23,13 +23,13 @@ public class Cardbase extends StandaloneCardContainer {
 	/**
 	 * The decks which have been saved along with this collection of cards.
 	 */
-	@JsonProperty private Map<Integer, Object> decks;
+//	@JsonProperty private Map<Integer, Object> decks;
 	
 	/**
 	 * Creates a clean cardbase.
 	 */
 	public Cardbase() {
-		decks = new HashMap<>();
+		
 	}
 	
 	/**
