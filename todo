@@ -1,8 +1,1 @@
-Cardbase tests:
- * decks
-
-Sanity:
- * check that refData does not contain 0-count entries
- * check that refdata does not contain entries which are not in carddata
- * check that carddata does not contain cards which are not in refdata
- * 
+sorting and filtering should work on StandaloneCardContainer, not Cardbase.

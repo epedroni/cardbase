@@ -1,16 +1,13 @@
 package eu.equalparts.cardbase.cardstorage;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.comparator.CardComparator;
 
 /**
  * TODO fix comments
@@ -46,19 +43,8 @@ public class StandaloneCardContainer extends ReferenceCardContainer {
 	 * 
 	 * @return an unmodifiable list of all the cards in the cardbase.
 	 */
-	public Collection<Card> getCards() {
-		return Collections.unmodifiableCollection(cardData.values());
-	}
-	
-	/**
-	 * @param fieldName the name of the field by which to sort.
-	 * @return an unmodifiable collection representing the cardbase sorted in the required order.
-	 * @throws NoSuchFieldException if the field provided is invalid.
-	 */
-	public Collection<Card> sortByField(String fieldName) throws NoSuchFieldException {
-		List<Card> sortedCards = new ArrayList<Card>(getCards());
-		sortedCards.sort(new CardComparator(Card.class.getDeclaredField(fieldName)));
-		return Collections.unmodifiableCollection(sortedCards);
+	public List<Card> getCards() {
+		return new LinkedList<Card>(cardData.values());
 	}
 	
 	@Override

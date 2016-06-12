@@ -1,21 +1,17 @@
-package eu.equalparts.cardbase;
+package eu.equalparts.cardbase.sorting;
 
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.Cardbase;
 import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.cardstorage.StandaloneCardContainer;
 
 /**
  * Tests the sorting functionality.
@@ -23,33 +19,18 @@ import eu.equalparts.cardbase.cardstorage.StandaloneCardContainer;
  * @author Eduardo Pedroni
  *
  */
-public class CardbaseSortTest {
-
-	private StandaloneCardContainer uut;
+public class CardSortingTest {
 	private static List<Card> testCards;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		testCards = mapper.readValue(CardbaseSortTest.class.getResourceAsStream("/testcards.json"), new TypeReference<List<Card>>() {});
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
-	@Before
-	public void setUp() throws Exception {
-		uut = new Cardbase();
-		int[] cardCounts = {1, 2, 3, 8, 1, 15, 1, 1};
-		for (int i = 0; i < testCards.size(); i++) {
-			uut.addCard(testCards.get(i), cardCounts[i]);
-		}
+		testCards = mapper.readValue(CardSortingTest.class.getResourceAsStream("/testcards.json"), new TypeReference<List<Card>>() {});
 	}
 
 	@Test
 	public void sortByName() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("name");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "name");
 		int i = 0;
 		String[] names = {
 				"Callow Jushi",
@@ -69,7 +50,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByLayout() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("layout");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "layout");
 		int i = 0;
 		String[] layouts = {
 				"flip",
@@ -89,7 +70,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByManaCost() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("manaCost");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "manaCost");
 		int i = 0;
 		String[] costs = {
 				"{1}{U}{U}",
@@ -109,7 +90,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByCMC() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("cmc");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "cmc");
 		int i = 0;
 		Integer[] cmcs = {2, 3, 4, 5, 6, 6, 6, 8};
 		for (Card card : sortedCards) {
@@ -120,7 +101,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByType() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("type");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "type");
 		int i = 0;
 		String[] types = {
 				"Artifact Creature — Construct",
@@ -140,7 +121,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByRarity() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("rarity");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "rarity");
 		int i = 0;
 		String[] rarities = {
 				"Uncommon",
@@ -160,7 +141,7 @@ public class CardbaseSortTest {
 
 	@Test
 	public void sortByText() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("text");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "text");
 		int i = 0;
 		String[] texts = {
 				"+2: Sorin Markov deals 2 damage to target creature or player and you gain 2 life.\n−3: Target opponent's life total becomes 10.\n−7: You control target player during that player's next turn.",
@@ -180,7 +161,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByFlavor() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("flavor");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "flavor");
 		int i = 0;
 		String[] flavors = {
 				"",
@@ -201,7 +182,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByArtist() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("artist");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "artist");
 		int i = 0;
 		String[] artists = {
 				"Donato Giancola",
@@ -221,7 +202,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByNumber() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("number");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "number");
 		int i = 0;
 		String[] numbers = {
 				"31a",
@@ -241,7 +222,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByPower() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("power");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "power");
 		int i = 0;
 		String[] powers = {
 				"",
@@ -262,7 +243,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByToughness() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("power");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "power");
 		int i = 0;
 		String[] toughnesses = {
 				"",
@@ -283,7 +264,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByLoyalty() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("loyalty");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "loyalty");
 		int i = 0;
 		Integer[] loyalties = {0, 0, 0, 0, 0, 0, 0, 4};
 		for (Card card : sortedCards) {
@@ -295,7 +276,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByMultiverseID() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("multiverseid");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "multiverseid");
 		int i = 0;
 		Integer[] ids = {74128, 74489, 193551, 238330, 366408, 383168, 383172, 391949 };
 		for (Card card : sortedCards) {
@@ -307,7 +288,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByImageName() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("imageName");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "imageName");
 		int i = 0;
 		String[] names = {
 				"callow jushi",
@@ -327,7 +308,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortByWatermark() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("watermark");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "watermark");
 		int i = 0;
 		String[] watermarks = {
 				"",
@@ -348,7 +329,7 @@ public class CardbaseSortTest {
 	
 	@Test
 	public void sortBySetCode() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("setCode");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "setCode");
 		int i = 0;
 		String[] sets = {
 				"BOK",
@@ -367,7 +348,7 @@ public class CardbaseSortTest {
 	}
 	
 	public void sortByImageCode() throws Exception {
-		Collection<Card> sortedCards = uut.sortByField("imageCode");
+		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "imageCode");
 		int i = 0;
 		String[] codes = {
 				"bok",
