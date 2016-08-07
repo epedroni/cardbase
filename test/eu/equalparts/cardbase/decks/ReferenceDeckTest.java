@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.equalparts.cardbase.cardstorage.ReferenceCardContainer;
+import eu.equalparts.cardbase.containers.ReferenceCardContainer;
 
 public class ReferenceDeckTest {
 	private ReferenceDeck uut;

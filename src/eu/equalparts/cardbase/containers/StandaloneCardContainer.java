@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase.cardstorage;
+package eu.equalparts.cardbase.containers;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,8 +38,8 @@ public class StandaloneCardContainer extends ReferenceCardContainer {
 	/**
 	 * This method is intended to allow iteration directly on the list of cards,
 	 * while at the same time retaining control over the insert and remove procedures.
-	 * The returned {@code List} is a read-only; trying to modify its structure will
-	 * result in an {@code UnsupportedOperationException}.
+	 * The returned {@code List} is a copy of the list kept internally by {@code StandaloneCardContainer};
+	 * modifying its structure is possible but will not affect the container instance from which it came.
 	 * 
 	 * @return an unmodifiable list of all the cards in the cardbase.
 	 */

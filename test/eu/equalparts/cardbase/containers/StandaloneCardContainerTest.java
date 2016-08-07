@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase.cardstorage;
+package eu.equalparts.cardbase.containers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,7 +16,6 @@ import org.junit.rules.TemporaryFolder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.CardbaseTest;
 import eu.equalparts.cardbase.cards.Card;
 
 public class StandaloneCardContainerTest {
@@ -32,7 +31,7 @@ public class StandaloneCardContainerTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		testCard = mapper.readValue(CardbaseTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
+		testCard = mapper.readValue(StandaloneCardContainerTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
 	}
 
 	@Before

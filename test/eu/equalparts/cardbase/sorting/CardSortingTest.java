@@ -2,11 +2,12 @@ package eu.equalparts.cardbase.sorting;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,9 @@ import eu.equalparts.cardbase.cards.Card;
  */
 public class CardSortingTest {
 	private static List<Card> testCards;
+	
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -30,7 +34,7 @@ public class CardSortingTest {
 
 	@Test
 	public void sortByName() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "name");
+		CardSorting.sortByField(testCards, "name");
 		int i = 0;
 		String[] names = {
 				"Callow Jushi",
@@ -42,7 +46,7 @@ public class CardSortingTest {
 				"Sorin Markov",
 				"Ugin's Construct",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.name + " should have been " + names[i] + ", i = " + i, card.name.equals(names[i]));
 			i++;
 		}
@@ -50,7 +54,7 @@ public class CardSortingTest {
 
 	@Test
 	public void sortByLayout() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "layout");
+		CardSorting.sortByField(testCards, "layout");
 		int i = 0;
 		String[] layouts = {
 				"flip",
@@ -62,7 +66,7 @@ public class CardSortingTest {
 				"normal",
 				"normal",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.layout + " should have been " + layouts[i] + ", i = " + i, card.layout.equals(layouts[i]));
 			i++;
 		}
@@ -70,7 +74,7 @@ public class CardSortingTest {
 
 	@Test
 	public void sortByManaCost() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "manaCost");
+		CardSorting.sortByField(testCards, "manaCost");
 		int i = 0;
 		String[] costs = {
 				"{1}{U}{U}",
@@ -82,7 +86,7 @@ public class CardSortingTest {
 				"{G}{G}{G}{G}{G}{G}{G}{G}",
 				"{X}{U}{U}",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.manaCost + " should have been " + costs[i] + ", i = " + i, card.manaCost.equals(costs[i]));
 			i++;
 		}
@@ -90,10 +94,10 @@ public class CardSortingTest {
 
 	@Test
 	public void sortByCMC() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "cmc");
+		CardSorting.sortByField(testCards, "cmc");
 		int i = 0;
 		Integer[] cmcs = {2, 3, 4, 5, 6, 6, 6, 8};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.cmc + " should have been " + cmcs[i] + ", i = " + i, card.cmc.equals(cmcs[i]));
 			i++;
 		}
@@ -101,7 +105,7 @@ public class CardSortingTest {
 
 	@Test
 	public void sortByType() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "type");
+		CardSorting.sortByField(testCards, "type");
 		int i = 0;
 		String[] types = {
 				"Artifact Creature — Construct",
@@ -113,7 +117,7 @@ public class CardSortingTest {
 				"Planeswalker — Sorin",
 				"Sorcery",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.type + " should have been " + types[i] + ", i = " + i, card.type.equals(types[i]));
 			i++;
 		}
@@ -121,7 +125,7 @@ public class CardSortingTest {
 
 	@Test
 	public void sortByRarity() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "rarity");
+		CardSorting.sortByField(testCards, "rarity");
 		int i = 0;
 		String[] rarities = {
 				"Uncommon",
@@ -133,7 +137,7 @@ public class CardSortingTest {
 				"Mythic Rare",
 				"Mythic Rare",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.rarity + " should have been " + rarities[i] + ", i = " + i, card.rarity.equals(rarities[i]));
 			i++;
 		}
@@ -141,7 +145,7 @@ public class CardSortingTest {
 
 	@Test
 	public void sortByText() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "text");
+		CardSorting.sortByField(testCards, "text");
 		int i = 0;
 		String[] texts = {
 				"+2: Sorin Markov deals 2 damage to target creature or player and you gain 2 life.\n−3: Target opponent's life total becomes 10.\n−7: You control target player during that player's next turn.",
@@ -153,7 +157,7 @@ public class CardSortingTest {
 				"Whenever you cast a Spirit or Arcane spell, you may put a ki counter on Callow Jushi.\nAt the beginning of the end step, if there are two or more ki counters on Callow Jushi, you may flip it.",
 				"You may exile a blue card with converted mana cost X from your hand rather than pay Disrupting Shoal's mana cost.\nCounter target spell if its converted mana cost is X.",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.text + " should have been " + texts[i] + ", i = " + i, card.text.equals(texts[i]));
 			i++;
 		}
@@ -161,7 +165,7 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByFlavor() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "flavor");
+		CardSorting.sortByField(testCards, "flavor");
 		int i = 0;
 		String[] flavors = {
 				"",
@@ -173,7 +177,7 @@ public class CardSortingTest {
 				"The undisputed master of the mountains of Shiv.",
 				"While trapping the Eldrazi on Zendikar, Ugin learned little from Sorin, but he gleaned the rudiments of lithomancy from Nahiri.",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			String flavor = card.flavor != null ? card.flavor : "";
 			assertTrue(flavor + " should have been " + flavors[i] + ", i = " + i, flavor.equals(flavors[i]));
 			i++;
@@ -182,7 +186,7 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByArtist() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "artist");
+		CardSorting.sortByField(testCards, "artist");
 		int i = 0;
 		String[] artists = {
 				"Donato Giancola",
@@ -194,7 +198,7 @@ public class CardSortingTest {
 				"Tsutomu Kawade",
 				"Vance Kovacs",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.artist + " should have been " + artists[i] + ", i = " + i, card.artist.equals(artists[i]));
 			i++;
 		}
@@ -202,7 +206,7 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByNumber() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "number");
+		CardSorting.sortByField(testCards, "number");
 		int i = 0;
 		String[] numbers = {
 				"31a",
@@ -214,7 +218,7 @@ public class CardSortingTest {
 				"276",
 				"281",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.number + " should have been " + numbers[i] + ", i = " + i, card.number.equals(numbers[i]));
 			i++;
 		}
@@ -222,7 +226,7 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByPower() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "power");
+		CardSorting.sortByField(testCards, "power");
 		int i = 0;
 		String[] powers = {
 				"",
@@ -234,7 +238,7 @@ public class CardSortingTest {
 				"5",
 				"8",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			String power = card.power != null ? card.power : "";
 			assertTrue(power + " should have been " + powers[i] + ", i = " + i, power.equals(powers[i]));
 			i++;
@@ -243,7 +247,7 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByToughness() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "power");
+		CardSorting.sortByField(testCards, "power");
 		int i = 0;
 		String[] toughnesses = {
 				"",
@@ -255,7 +259,7 @@ public class CardSortingTest {
 				"5",
 				"8",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			String toughness = card.toughness != null ? card.toughness : "";
 			assertTrue(toughness + " should have been " + toughnesses[i] + ", i = " + i, toughness.equals(toughnesses[i]));
 			i++;
@@ -264,10 +268,10 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByLoyalty() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "loyalty");
+		CardSorting.sortByField(testCards, "loyalty");
 		int i = 0;
 		Integer[] loyalties = {0, 0, 0, 0, 0, 0, 0, 4};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			Integer loyalty = card.loyalty != null ? card.loyalty : 0;
 			assertTrue(loyalty + " should have been " + loyalties[i] + ", i = " + i, loyalty.equals(loyalties[i]));
 			i++;
@@ -276,10 +280,10 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByMultiverseID() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "multiverseid");
+		CardSorting.sortByField(testCards, "multiverseid");
 		int i = 0;
 		Integer[] ids = {74128, 74489, 193551, 238330, 366408, 383168, 383172, 391949 };
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			Integer id = card.multiverseid != null ? card.multiverseid : 0;
 			assertTrue(id + " should have been " + ids[i] + ", i = " + i, id.equals(ids[i]));
 			i++;
@@ -288,7 +292,7 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByImageName() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "imageName");
+		CardSorting.sortByField(testCards, "imageName");
 		int i = 0;
 		String[] names = {
 				"callow jushi",
@@ -300,7 +304,7 @@ public class CardSortingTest {
 				"sorin markov",
 				"ugin's construct",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.imageName + " should have been " + names[i] + ", i = " + i, card.imageName.equals(names[i]));
 			i++;
 		}
@@ -308,7 +312,7 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortByWatermark() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "watermark");
+		CardSorting.sortByField(testCards, "watermark");
 		int i = 0;
 		String[] watermarks = {
 				"",
@@ -320,7 +324,7 @@ public class CardSortingTest {
 				"",
 				"Dimir",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			String watermark = card.watermark != null ? card.watermark : "";
 			assertTrue(watermark + " should have been " + watermarks[i] + ", i = " + i, watermark.equals(watermarks[i]));
 			i++;
@@ -329,7 +333,7 @@ public class CardSortingTest {
 	
 	@Test
 	public void sortBySetCode() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "setCode");
+		CardSorting.sortByField(testCards, "setCode");
 		int i = 0;
 		String[] sets = {
 				"BOK",
@@ -341,14 +345,15 @@ public class CardSortingTest {
 				"M15",
 				"ROE",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.setCode + " should have been " + sets[i] + ", i = " + i, card.setCode.equals(sets[i]));
 			i++;
 		}
 	}
 	
+	@Test
 	public void sortByImageCode() throws Exception {
-		Collection<Card> sortedCards = CardSorting.sortByField(testCards, "imageCode");
+		CardSorting.sortByField(testCards, "imageCode");
 		int i = 0;
 		String[] codes = {
 				"bok",
@@ -360,9 +365,18 @@ public class CardSortingTest {
 				"m15",
 				"roe",
 		};
-		for (Card card : sortedCards) {
+		for (Card card : testCards) {
 			assertTrue(card.imageCode + " should have been " + codes[i] + ", i = " + i, card.imageCode.equals(codes[i]));
 			i++;
 		}
+	}
+	
+	/*
+	 * Edge cases
+	 */
+	@Test
+	public void sortFieldDoesNotExist() throws Exception {
+		exception.expect(NoSuchFieldException.class);
+		CardSorting.sortByField(testCards, "not a field name");
 	}
 }

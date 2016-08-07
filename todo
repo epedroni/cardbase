@@ -1,1 +1,10 @@
-sorting and filtering should work on StandaloneCardContainer, not Cardbase.
+"Callow Jushi",
+"Coerced Confession",
+"Khalni Hydra",
+"Nightmare",
+"Shivan Dragon",
+"Disrupting Shoal",
+"Sorin Markov",
+"Ugin's Construct",
+
+cat test/testcards.json | sed -e "s/,/,\n/g" | awk '/cmc/ { r = gensub(/.+?\":\"(.+?)\".+/, "\"\\1\",", "g"); print r }'

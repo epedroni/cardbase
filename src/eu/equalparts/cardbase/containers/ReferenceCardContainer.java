@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase.cardstorage;
+package eu.equalparts.cardbase.containers;
 
 import java.util.HashMap;
 import java.util.Map;

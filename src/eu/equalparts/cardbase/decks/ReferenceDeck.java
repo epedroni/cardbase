@@ -1,6 +1,6 @@
 package eu.equalparts.cardbase.decks;
 
-import eu.equalparts.cardbase.cardstorage.ReferenceCardContainer;
+import eu.equalparts.cardbase.containers.ReferenceCardContainer;
 
 public class ReferenceDeck extends ReferenceCardContainer {
 	private String name = "";

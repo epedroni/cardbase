@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import eu.equalparts.cardbase.cardstorage.StandaloneCardContainer;
+import eu.equalparts.cardbase.containers.StandaloneCardContainer;
 import eu.equalparts.cardbase.utils.JSON;
 
 /**

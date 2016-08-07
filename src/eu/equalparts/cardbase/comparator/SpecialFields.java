@@ -13,5 +13,4 @@ public final class SpecialFields {
 	
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface Rarity {}
-	
 }
