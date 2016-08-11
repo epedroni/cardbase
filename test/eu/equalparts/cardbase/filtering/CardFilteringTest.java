@@ -39,7 +39,7 @@ public class CardFilteringTest {
 		CardFiltering.filterByField(testCards, "name", Filter.EQUALS, "Callow jushi");
 		
 		assertEquals("Wrong list size.", 1, testCards.size());
-		assertEquals("Callow Jushi", testCards.get(0).name);
+		assertEquals("Callow Jushi", testCards.get(0).name.get());
 	}
 	
 	@Test
@@ -80,7 +80,7 @@ public class CardFilteringTest {
 		CardFiltering.filterByField(testCards, "layout", Filter.EQUALS, "flip");
 		
 		assertEquals("Wrong list size.", 1, testCards.size());
-		assertEquals("Callow Jushi", testCards.get(0).name);
+		assertEquals("Callow Jushi", testCards.get(0).name.get());
 	}
 	
 	@Test
@@ -110,7 +110,7 @@ public class CardFilteringTest {
 		CardFiltering.filterByField(testCards, "layout", Filter.REGEX, "fl[a-z]p");
 		
 		assertEquals("Wrong list size.", 1, testCards.size());
-		assertEquals("Callow Jushi", testCards.get(0).name);
+		assertEquals("Callow Jushi", testCards.get(0).name.get());
 	}
 	
 	@Test
@@ -118,7 +118,7 @@ public class CardFilteringTest {
 		CardFiltering.filterByField(testCards, "manaCost", Filter.EQUALS, "{X}{U}{U}");
 		
 		assertEquals("Wrong list size.", 1, testCards.size());
-		assertEquals("Disrupting Shoal", testCards.get(0).name);
+		assertEquals("Disrupting Shoal", testCards.get(0).name.get());
 	}
 	
 	@Test
@@ -143,7 +143,7 @@ public class CardFilteringTest {
 		CardFiltering.filterByField(testCards, "manaCost", Filter.REGEX, "(\\{G\\}){8}");
 		
 		assertEquals("Wrong list size.", 1, testCards.size());
-		assertEquals("Khalni Hydra", testCards.get(0).name);
+		assertEquals("Khalni Hydra", testCards.get(0).name.get());
 	}
 	
 	@Test
@@ -151,7 +151,7 @@ public class CardFilteringTest {
 		CardFiltering.filterByField(testCards, "cmc", Filter.EQUALS, "5");
 		
 		assertEquals("Wrong list size.", 1, testCards.size());
-		assertEquals("Coerced Confession", testCards.get(0).name);
+		assertEquals("Coerced Confession", testCards.get(0).name.get());
 	}
 	
 	@Test
