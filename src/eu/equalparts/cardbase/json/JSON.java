@@ -1,8 +1,11 @@
-package eu.equalparts.cardbase.utils;
+package eu.equalparts.cardbase.json;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import eu.equalparts.cardbase.card.Card;
 
 /**
  * This class simply holds an {@code ObjectMapper} to be used whenever JSON must be parsed.
@@ -36,6 +39,12 @@ public final class JSON {
 	            MapperFeature.AUTO_DETECT_FIELDS,
 	            MapperFeature.AUTO_DETECT_GETTERS,
 	            MapperFeature.AUTO_DETECT_IS_GETTERS);
+		
+		SimpleModule sm = new SimpleModule();
+		sm.addDeserializer(Card.class, new CardDeserializer());
+		sm.addSerializer(Card.class, new CardSerializer());
+		
+		objectMapper.registerModule(sm);
 		return objectMapper;
 	}
 }

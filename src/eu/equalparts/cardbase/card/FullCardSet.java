@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase.cards;
+package eu.equalparts.cardbase.card;
 
 import java.util.Map;
 

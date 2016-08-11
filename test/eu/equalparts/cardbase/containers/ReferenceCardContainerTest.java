@@ -9,9 +9,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.card.Card;
+import eu.equalparts.cardbase.json.JSON;
 
 public class ReferenceCardContainerTest {
 
@@ -26,8 +25,7 @@ public class ReferenceCardContainerTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		testCard = mapper.readValue(ReferenceCardContainerTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
+		testCard = JSON.mapper.readValue(ReferenceCardContainerTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
 	}
 	
 	@Before

@@ -2,12 +2,11 @@ package eu.equalparts.cardbase.comparator;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.function.BiFunction;
 
-import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.card.Card;
+import eu.equalparts.cardbase.cardfield.CardField;
 import eu.equalparts.cardbase.comparator.SpecialFields.DirtyNumber;
 import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;
 
@@ -26,7 +25,7 @@ import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;
  * @author Eduardo Pedroni
  *
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+//@SuppressWarnings({"rawtypes", "unchecked"})
 public class CardComparator implements Comparator<Card> {
 	
 	/**
@@ -36,7 +35,7 @@ public class CardComparator implements Comparator<Card> {
 	/**
 	 * The comparison delegate to use for the specified field.
 	 */
-	private BiFunction<Comparable, Comparable, Integer> comparisonDelegate = (field1, field2) -> field1.compareTo(field2);
+	private BiFunction<CardField, CardField, Integer> comparisonDelegate = (field1, field2) -> field1.compareTo(field2);
 	
 	/**
 	 * Creates a new comparator for the specified field only. This class
@@ -46,11 +45,13 @@ public class CardComparator implements Comparator<Card> {
 	 * <br>
 	 * For reference, {@code String} and {@code Integer} are both self comparable.
 	 * 
+	 * TODO comment
+	 * 
 	 * @param fieldToCompare the field this comparator will use to compare cards, as declared in {@code Card}.
 	 */
 	public CardComparator(Field fieldToCompare) {
 		if (fieldToCompare.getDeclaringClass().equals(Card.class) &&
-				isSelfComparable(fieldToCompare.getType())) {
+				CardField.class.isAssignableFrom(fieldToCompare.getType())) {
 
 			this.fieldToCompare = fieldToCompare;
 			
@@ -74,17 +75,17 @@ public class CardComparator implements Comparator<Card> {
 		 * so we are now free to cast to comparable
 		 */
 		try {
-			Comparable field1 = (Comparable) fieldToCompare.get(o1);
-			Comparable field2 = (Comparable) fieldToCompare.get(o2);
+			CardField field1 = (CardField) fieldToCompare.get(o1);
+			CardField field2 = (CardField) fieldToCompare.get(o2);
 			
 			// if either or both fields' values are null, skip delegation altogether since delegates are not required to deal with null values
-			if (field1 == null) {
-				if (field2 == null) {
+			if (field1.get() == null) {
+				if (field2.get() == null) {
 					return 0;
 				} else {
 					return -1;
 				}
-			} else if (field2 == null) {
+			} else if (field2.get() == null) {
 				return 1;
 			} else {
 				return comparisonDelegate.apply(field1, field2);
@@ -100,27 +101,5 @@ public class CardComparator implements Comparator<Card> {
 		
 		// fallback, this shouldn't happen
 		return 0;
-	}
-
-	/**
-	 * Use reflection to determine if the specified class can be compared with itself.
-	 * 
-	 * @param type the type to analyse.
-	 * @return true if the type can be compared to itself using {@code compareTo()}, false otherwise.
-	 */
-	private boolean isSelfComparable(Class<?> type) {
-
-		// go through all interfaces implemented by this class
-		for (Type implementedInterface : type.getGenericInterfaces()) {
-			// check if any parameterised interface found is "Comparable"
-			if (implementedInterface instanceof ParameterizedType) {
-				ParameterizedType genericInterface = (ParameterizedType) implementedInterface;
-				if (genericInterface.getRawType().equals(Comparable.class)) {
-					// check that the type argument of comparable is the same as the field type itself
-					return genericInterface.getActualTypeArguments()[0].equals(type);
-				}
-			}
-		}
-		return false;
 	}
 }

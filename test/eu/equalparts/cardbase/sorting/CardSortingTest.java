@@ -10,9 +10,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.card.Card;
+import eu.equalparts.cardbase.json.JSON;
 
 /**
  * Tests the sorting functionality.
@@ -28,8 +28,7 @@ public class CardSortingTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		testCards = mapper.readValue(CardSortingTest.class.getResourceAsStream("/testcards.json"), new TypeReference<List<Card>>() {});
+		testCards = JSON.mapper.readValue(CardSortingTest.class.getResourceAsStream("/testcards.json"), new TypeReference<List<Card>>() {});
 	}
 
 	@Test
@@ -47,7 +46,7 @@ public class CardSortingTest {
 				"Ugin's Construct",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.name + " should have been " + names[i] + ", i = " + i, card.name.equals(names[i]));
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
 			i++;
 		}
 	}
@@ -67,7 +66,7 @@ public class CardSortingTest {
 				"normal",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.layout + " should have been " + layouts[i] + ", i = " + i, card.layout.equals(layouts[i]));
+			assertTrue(card.layout.get() + " should have been " + layouts[i] + ", i = " + i, card.layout.get().equals(layouts[i]));
 			i++;
 		}
 	}
@@ -87,7 +86,7 @@ public class CardSortingTest {
 				"{X}{U}{U}",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.manaCost + " should have been " + costs[i] + ", i = " + i, card.manaCost.equals(costs[i]));
+			assertTrue(card.manaCost.get() + " should have been " + costs[i] + ", i = " + i, card.manaCost.get().equals(costs[i]));
 			i++;
 		}
 	}
@@ -98,7 +97,7 @@ public class CardSortingTest {
 		int i = 0;
 		Integer[] cmcs = {2, 3, 4, 5, 6, 6, 6, 8};
 		for (Card card : testCards) {
-			assertTrue(card.cmc + " should have been " + cmcs[i] + ", i = " + i, card.cmc.equals(cmcs[i]));
+			assertTrue(card.cmc.get() + " should have been " + cmcs[i] + ", i = " + i, card.cmc.get().equals(cmcs[i]));
 			i++;
 		}
 	}
@@ -118,7 +117,7 @@ public class CardSortingTest {
 				"Sorcery",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.type + " should have been " + types[i] + ", i = " + i, card.type.equals(types[i]));
+			assertTrue(card.type.get() + " should have been " + types[i] + ", i = " + i, card.type.get().equals(types[i]));
 			i++;
 		}
 	}
@@ -138,7 +137,7 @@ public class CardSortingTest {
 				"Mythic Rare",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.rarity + " should have been " + rarities[i] + ", i = " + i, card.rarity.equals(rarities[i]));
+			assertTrue(card.rarity.get() + " should have been " + rarities[i] + ", i = " + i, card.rarity.get().equals(rarities[i]));
 			i++;
 		}
 	}
@@ -158,7 +157,7 @@ public class CardSortingTest {
 				"You may exile a blue card with converted mana cost X from your hand rather than pay Disrupting Shoal's mana cost.\nCounter target spell if its converted mana cost is X.",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.text + " should have been " + texts[i] + ", i = " + i, card.text.equals(texts[i]));
+			assertTrue(card.text.get() + " should have been " + texts[i] + ", i = " + i, card.text.get().equals(texts[i]));
 			i++;
 		}
 	}
@@ -178,7 +177,7 @@ public class CardSortingTest {
 				"While trapping the Eldrazi on Zendikar, Ugin learned little from Sorin, but he gleaned the rudiments of lithomancy from Nahiri.",
 		};
 		for (Card card : testCards) {
-			String flavor = card.flavor != null ? card.flavor : "";
+			String flavor = card.flavor.get() != null ? card.flavor.get() : "";
 			assertTrue(flavor + " should have been " + flavors[i] + ", i = " + i, flavor.equals(flavors[i]));
 			i++;
 		}
@@ -199,7 +198,7 @@ public class CardSortingTest {
 				"Vance Kovacs",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.artist + " should have been " + artists[i] + ", i = " + i, card.artist.equals(artists[i]));
+			assertTrue(card.artist.get() + " should have been " + artists[i] + ", i = " + i, card.artist.get().equals(artists[i]));
 			i++;
 		}
 	}
@@ -219,7 +218,7 @@ public class CardSortingTest {
 				"281",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.number + " should have been " + numbers[i] + ", i = " + i, card.number.equals(numbers[i]));
+			assertTrue(card.number.get() + " should have been " + numbers[i] + ", i = " + i, card.number.get().equals(numbers[i]));
 			i++;
 		}
 	}
@@ -239,7 +238,7 @@ public class CardSortingTest {
 				"8",
 		};
 		for (Card card : testCards) {
-			String power = card.power != null ? card.power : "";
+			String power = card.power.get() != null ? card.power.get() : "";
 			assertTrue(power + " should have been " + powers[i] + ", i = " + i, power.equals(powers[i]));
 			i++;
 		}
@@ -260,7 +259,7 @@ public class CardSortingTest {
 				"8",
 		};
 		for (Card card : testCards) {
-			String toughness = card.toughness != null ? card.toughness : "";
+			String toughness = card.toughness.get() != null ? card.toughness.get() : "";
 			assertTrue(toughness + " should have been " + toughnesses[i] + ", i = " + i, toughness.equals(toughnesses[i]));
 			i++;
 		}
@@ -272,7 +271,7 @@ public class CardSortingTest {
 		int i = 0;
 		Integer[] loyalties = {0, 0, 0, 0, 0, 0, 0, 4};
 		for (Card card : testCards) {
-			Integer loyalty = card.loyalty != null ? card.loyalty : 0;
+			Integer loyalty = card.loyalty.get() != null ? card.loyalty.get() : 0;
 			assertTrue(loyalty + " should have been " + loyalties[i] + ", i = " + i, loyalty.equals(loyalties[i]));
 			i++;
 		}
@@ -284,7 +283,7 @@ public class CardSortingTest {
 		int i = 0;
 		Integer[] ids = {74128, 74489, 193551, 238330, 366408, 383168, 383172, 391949 };
 		for (Card card : testCards) {
-			Integer id = card.multiverseid != null ? card.multiverseid : 0;
+			Integer id = card.multiverseid.get() != null ? card.multiverseid.get() : 0;
 			assertTrue(id + " should have been " + ids[i] + ", i = " + i, id.equals(ids[i]));
 			i++;
 		}
@@ -305,7 +304,7 @@ public class CardSortingTest {
 				"ugin's construct",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.imageName + " should have been " + names[i] + ", i = " + i, card.imageName.equals(names[i]));
+			assertTrue(card.imageName.get() + " should have been " + names[i] + ", i = " + i, card.imageName.get().equals(names[i]));
 			i++;
 		}
 	}
@@ -325,7 +324,7 @@ public class CardSortingTest {
 				"Dimir",
 		};
 		for (Card card : testCards) {
-			String watermark = card.watermark != null ? card.watermark : "";
+			String watermark = card.watermark.get() != null ? card.watermark.get() : "";
 			assertTrue(watermark + " should have been " + watermarks[i] + ", i = " + i, watermark.equals(watermarks[i]));
 			i++;
 		}
@@ -346,7 +345,7 @@ public class CardSortingTest {
 				"ROE",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.setCode + " should have been " + sets[i] + ", i = " + i, card.setCode.equals(sets[i]));
+			assertTrue(card.setCode.get() + " should have been " + sets[i] + ", i = " + i, card.setCode.get().equals(sets[i]));
 			i++;
 		}
 	}
@@ -366,7 +365,7 @@ public class CardSortingTest {
 				"roe",
 		};
 		for (Card card : testCards) {
-			assertTrue(card.imageCode + " should have been " + codes[i] + ", i = " + i, card.imageCode.equals(codes[i]));
+			assertTrue(card.imageCode.get() + " should have been " + codes[i] + ", i = " + i, card.imageCode.get().equals(codes[i]));
 			i++;
 		}
 	}

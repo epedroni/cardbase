@@ -13,9 +13,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.Cardbase;
-import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.cards.CardSetInformation;
-import eu.equalparts.cardbase.cards.FullCardSet;
+import eu.equalparts.cardbase.card.Card;
+import eu.equalparts.cardbase.card.CardSetInformation;
+import eu.equalparts.cardbase.card.FullCardSet;
 import eu.equalparts.cardbase.utils.MTGUniverse;
 
 /**
@@ -477,7 +477,7 @@ public final class CardbaseCLI {
 	 * TODO comment
 	 */
 	private void addCard(Card card, int count) {
-		System.out.println("Added " + count + "x " + card.name + ".");
+		System.out.println("Added " + count + "x " + card.name.get() + ".");
 		cardbase.addCard(card, count);
 		savePrompt = true;
 		lastAction = Action.ADD;
@@ -496,13 +496,13 @@ public final class CardbaseCLI {
 	private void removeCard(Card card, int count) {
 		Integer removed = cardbase.removeCard(card, count); 
 		if (removed > 0) {
-			System.out.println("Removed " + removed + "x " + card.name + ".");
+			System.out.println("Removed " + removed + "x " + card.name.get() + ".");
 			savePrompt = true;
 			lastAction = Action.REMOVE;
 			lastAction.card = card;
 			lastAction.count = removed;
 		} else {
-			System.out.println(card.name + " is not in the cardbase.");
+			System.out.println(card.name.get() + " is not in the cardbase.");
 		}
 	}
 
@@ -529,7 +529,7 @@ public final class CardbaseCLI {
 	 * @param card the card to glance.
 	 */
 	private void printGlance(Card card) {
-		System.out.println(String.format("%1$-4d %2$s (%3$s, %4$s)", cardbase.getCount(card), card.name, card.setCode, card.number));
+		System.out.println(String.format("%1$-4d %2$s (%3$s, %4$s)", cardbase.getCount(card), card.name.get(), card.setCode.get(), card.number.get()));
 	}
 
 	/**
@@ -541,16 +541,16 @@ public final class CardbaseCLI {
 	 */
 	private void printPerusal(Card card) {
 		printGlance(card);
-		if (card.type != null) System.out.println("\t" + card.type);
-		if (card.manaCost != null) System.out.println("\tCost: " + card.manaCost);
-		if (card.power != null && card.toughness != null) System.out.println("\t" + card.power + "/" + card.toughness);
-		if (card.loyalty != null) System.out.println("\tLoyalty: " + card.loyalty);
+		if (card.type.get() != null) System.out.println("\t" + card.type.get());
+		if (card.manaCost.get() != null) System.out.println("\tCost: " + card.manaCost.get());
+		if (card.power.get() != null && card.toughness.get() != null) System.out.println("\t" + card.power.get() + "/" + card.toughness.get());
+		if (card.loyalty.get() != null) System.out.println("\tLoyalty: " + card.loyalty.get());
 
-		if (card.text != null) System.out.println("\t" + card.text.replaceAll("\n", "\n\t"));
-		if (card.flavor != null) System.out.println("\t" + card.flavor.replaceAll("\n", "\n\t"));
+		if (card.text.get() != null) System.out.println("\t" + card.text.get().replaceAll("\n", "\n\t"));
+		if (card.flavor.get() != null) System.out.println("\t" + card.flavor.get().replaceAll("\n", "\n\t"));
 
-		if (card.rarity != null) System.out.println("\t" + card.rarity);
-		if (card.multiverseid != null) System.out.println("\tMID: " + card.multiverseid);
-		if (card.artist != null) System.out.println("\tIllus. " + card.artist);
+		if (card.rarity.get() != null) System.out.println("\t" + card.rarity.get());
+		if (card.multiverseid.get() != null) System.out.println("\tMID: " + card.multiverseid.get());
+		if (card.artist.get() != null) System.out.println("\tIllus. " + card.artist.get());
 	}
 }

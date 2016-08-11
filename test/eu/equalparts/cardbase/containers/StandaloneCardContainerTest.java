@@ -14,9 +14,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.card.Card;
+import eu.equalparts.cardbase.json.JSON;
 
 public class StandaloneCardContainerTest {
 	private StandaloneCardContainer uut;
@@ -30,8 +29,7 @@ public class StandaloneCardContainerTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		testCard = mapper.readValue(StandaloneCardContainerTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
+		testCard = JSON.mapper.readValue(StandaloneCardContainerTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
 	}
 
 	@Before
@@ -44,11 +42,11 @@ public class StandaloneCardContainerTest {
 	 ***********************************************************************************/
 	@Test
 	public void newCardIsAdded() throws Exception {
-		assertNull("Container should not contain the test card to begin with.", uut.getCard(testCard.setCode, testCard.number));
+		assertNull("Container should not contain the test card to begin with.", uut.getCard(testCard.setCode.get(), testCard.number.get()));
 
 		uut.addCard(testCard, 1);
 
-		assertEquals("Container should contain the test card once it is added.", testCard, uut.getCard(testCard.setCode, testCard.number));
+		assertEquals("Container should contain the test card once it is added.", testCard, uut.getCard(testCard.setCode.get(), testCard.number.get()));
 		assertEquals("Container should have contained 1 test card.", 1, uut.getCount(testCard));
 	}
 
@@ -57,7 +55,7 @@ public class StandaloneCardContainerTest {
 		uut.addCard(testCard, 2);
 		uut.addCard(testCard, 4);
 
-		Card addedCard = uut.getCard(testCard.setCode, testCard.number);
+		Card addedCard = uut.getCard(testCard.setCode.get(), testCard.number.get());
 		assertNotNull("Card was not found in cardbase.", addedCard);
 		assertEquals("Card count was not updated correctly.", 6, uut.getCount(addedCard));
 	}
@@ -82,7 +80,7 @@ public class StandaloneCardContainerTest {
 
 		assertEquals("Card count was not updated correctly.", 2, uut.getCount(testCard));
 		assertEquals("Container reports wrong removed count.", 3, removed);
-		assertEquals("Card is missing from container.", testCard, uut.getCard(testCard.setCode, testCard.number));
+		assertEquals("Card is missing from container.", testCard, uut.getCard(testCard.setCode.get(), testCard.number.get()));
 	}
 
 	@Test
@@ -93,7 +91,7 @@ public class StandaloneCardContainerTest {
 
 		assertEquals("Card was not removed from container.", 0, uut.getCount(testCard));
 		assertEquals("Container reports wrong removed count.", 5, removed);
-		assertNull("Card is not missing from container.", uut.getCard(testCard.setCode, testCard.number));
+		assertNull("Card is not missing from container.", uut.getCard(testCard.setCode.get(), testCard.number.get()));
 	}
 
 	@Test
@@ -104,7 +102,7 @@ public class StandaloneCardContainerTest {
 
 		assertEquals("Card was not removed from container.", 0, uut.getCount(testCard));
 		assertEquals("Container reports wrong removed count.", 3, removed);
-		assertNull("Card is not missing from container.", uut.getCard(testCard.setCode, testCard.number));
+		assertNull("Card is not missing from container.", uut.getCard(testCard.setCode.get(), testCard.number.get()));
 	}
 
 	/*
@@ -118,12 +116,12 @@ public class StandaloneCardContainerTest {
 
 	@Test
 	public void removedCardIsNotInContainer() throws Exception {
-		assertNull("Card is not initially missing from container.", uut.getCard(testCard.setCode, testCard.number));
+		assertNull("Card is not initially missing from container.", uut.getCard(testCard.setCode.get(), testCard.number.get()));
 
 		int removed = uut.removeCard(testCard, 1);
 
 		assertEquals("Removed count should be 0.", 0, removed);
-		assertNull("Card is not missing from container.", uut.getCard(testCard.setCode, testCard.number));
+		assertNull("Card is not missing from container.", uut.getCard(testCard.setCode.get(), testCard.number.get()));
 	}
 
 	@Test
@@ -134,7 +132,7 @@ public class StandaloneCardContainerTest {
 
 		assertEquals("Card count in container should be unchanged.", 3, uut.getCount(testCard));
 		assertEquals("Container reports wrong removed count.", 0, removed);
-		assertEquals("Card should not be missing from container.", testCard, uut.getCard(testCard.setCode, testCard.number));
+		assertEquals("Card should not be missing from container.", testCard, uut.getCard(testCard.setCode.get(), testCard.number.get()));
 	}
 
 	/***********************************************************************************
@@ -144,7 +142,7 @@ public class StandaloneCardContainerTest {
 	public void correctCardIsReturnedByGetter() throws Exception {
 		uut.addCard(testCard, 1);
 
-		Card card = uut.getCard(testCard.setCode, testCard.number);
+		Card card = uut.getCard(testCard.setCode.get(), testCard.number.get());
 
 		for (Field field : Card.class.getFields()) {
 			assertEquals("Field " + field.getName(), field.get(testCard), field.get(card));
@@ -165,6 +163,6 @@ public class StandaloneCardContainerTest {
 
 	@Test
 	public void getCardIsNotInCardbase() throws Exception {
-		assertNull("Method should have returned null", uut.getCard(testCard.setCode, testCard.number));
+		assertNull("Method should have returned null", uut.getCard(testCard.setCode.get(), testCard.number.get()));
 	}
 }

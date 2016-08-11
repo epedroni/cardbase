@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import eu.equalparts.cardbase.containers.StandaloneCardContainer;
-import eu.equalparts.cardbase.utils.JSON;
+import eu.equalparts.cardbase.json.JSON;
 
 /**
  * Provides a variety of utility methods to interact with an optionally loaded cardbase.

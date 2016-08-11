@@ -12,9 +12,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import eu.equalparts.cardbase.cards.Card;
-import eu.equalparts.cardbase.cards.CardSetInformation;
-import eu.equalparts.cardbase.cards.FullCardSet;
+import eu.equalparts.cardbase.card.Card;
+import eu.equalparts.cardbase.card.CardSetInformation;
+import eu.equalparts.cardbase.card.FullCardSet;
+import eu.equalparts.cardbase.json.JSON;
 
 /**
  * Access point to the complete set of cards that exist in the
@@ -202,9 +203,9 @@ public final class MTGUniverse {
 			Map<String, Card> cardMap = new HashMap<String, Card>();
 			for (Card card : rawList) {
 				// add set code for convenience
-				card.setCode = setCode;
-				card.imageCode = imageCode;
-				cardMap.put(card.number, card);
+				card.setCode.set(setCode);
+				card.imageCode.set(imageCode);
+				cardMap.put(card.number.get(), card);
 			}
 			fcs.cards = cardMap;
 		} else {

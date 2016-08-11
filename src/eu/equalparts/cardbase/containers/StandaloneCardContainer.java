@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.card.Card;
 
 /**
  * TODO fix comments

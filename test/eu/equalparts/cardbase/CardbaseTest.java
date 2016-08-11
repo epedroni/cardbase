@@ -17,9 +17,9 @@ import org.junit.rules.TemporaryFolder;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.card.Card;
+import eu.equalparts.cardbase.json.JSON;
 
 /**
  * TODO deck functionality needs to be built into these.
@@ -40,8 +40,7 @@ public class CardbaseTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		testCard = mapper.readValue(CardbaseTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
+		testCard = JSON.mapper.readValue(CardbaseTest.class.getResourceAsStream("/shivandragon.json"), Card.class);
 	}
 
 	@AfterClass

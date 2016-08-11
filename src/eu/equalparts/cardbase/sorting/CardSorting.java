@@ -2,7 +2,7 @@ package eu.equalparts.cardbase.sorting;
 
 import java.util.List;
 
-import eu.equalparts.cardbase.cards.Card;
+import eu.equalparts.cardbase.card.Card;
 import eu.equalparts.cardbase.comparator.CardComparator;
 
 public abstract class CardSorting {

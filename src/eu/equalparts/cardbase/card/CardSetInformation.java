@@ -1,4 +1,4 @@
-package eu.equalparts.cardbase.cards;
+package eu.equalparts.cardbase.card;
 
 public class CardSetInformation {
 

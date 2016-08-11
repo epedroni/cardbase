@@ -1,5 +1,6 @@
 package eu.equalparts.cardbase.comparator;
 
+import eu.equalparts.cardbase.cardfield.CardField;
 
 final class ComparatorDelegates {
 
@@ -19,10 +20,10 @@ final class ComparatorDelegates {
 	 * @param field2 the second field to compare.
 	 * @return a value smaller than, equal to or greater than 0 according to the standard comparison convention.
 	 */
-	public static Integer compareDirtyNumber(Comparable<String> field1, Comparable<String> field2) {
+	public static Integer compareDirtyNumber(CardField<String> field1, CardField<String> field2) {
 		// this assumes that the format is uninterrupted numbers and letters
-		String number1 = ((String) field1).replaceAll("[^0-9]+", "");
-		String number2 = ((String) field2).replaceAll("[^0-9]+", "");
+		String number1 = field1.get().replaceAll("[^0-9]+", "");
+		String number2 = field2.get().replaceAll("[^0-9]+", "");
 		
 		Integer int1 = number1.matches("[0-9]+") ? Integer.parseInt(number1) : null;
 		Integer int2 = number2.matches("[0-9]+") ? Integer.parseInt(number2) : null;
@@ -48,10 +49,10 @@ final class ComparatorDelegates {
 		return letter1.compareTo(letter2);
 	}
 
-	public static Integer compareRarity(Comparable<String> field1, Comparable<String> field2) {
+	public static Integer compareRarity(CardField<String> field1, CardField<String> field2) {
 		// assign numerical values based on the different possibilities and compare those instead
-		Integer value1 = getRarityValue((String) field1);
-		Integer value2 = getRarityValue((String) field2);
+		Integer value1 = getRarityValue(field1.get());
+		Integer value2 = getRarityValue(field2.get());
 		
 		return value1.compareTo(value2);
 	}
