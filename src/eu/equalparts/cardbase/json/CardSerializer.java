@@ -115,12 +115,6 @@ public class CardSerializer extends JsonSerializer<Card> {
 			jGen.writeNullField("setCode");
 		}
 
-		if (card.imageCode.get() != null) {
-			jGen.writeStringField("imageCode", card.imageCode.get());
-		} else {
-			jGen.writeNullField("imageCode");
-		}
-
 		jGen.writeEndObject();
 	}
 }

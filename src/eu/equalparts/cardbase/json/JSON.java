@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import eu.equalparts.cardbase.card.Card;
+import eu.equalparts.cardbase.card.FullCardSet;
 
 /**
  * This class simply holds an {@code ObjectMapper} to be used whenever JSON must be parsed.
@@ -43,6 +44,7 @@ public final class JSON {
 		SimpleModule sm = new SimpleModule();
 		sm.addDeserializer(Card.class, new CardDeserializer());
 		sm.addSerializer(Card.class, new CardSerializer());
+		sm.addDeserializer(FullCardSet.class, new FullCardSetDeserializer());
 		
 		objectMapper.registerModule(sm);
 		return objectMapper;

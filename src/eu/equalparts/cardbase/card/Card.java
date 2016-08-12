@@ -29,7 +29,6 @@ public class Card {
 
 	// Not part of upstream JSON
 	public StringCardField setCode;
-	public StringCardField imageCode;
 	
 	public static int makeHash(String setCode, String number) {
 		final int prime = 31;

@@ -1,16 +1,16 @@
 package eu.equalparts.cardbase.utils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import eu.equalparts.cardbase.card.Card;
 import eu.equalparts.cardbase.card.CardSetInformation;
@@ -98,8 +98,8 @@ public final class MTGUniverse {
 				requestedSet = cardSetCache.get(validCode);
 			} 
 			// not cached; fetch and cache
-			else {
-				requestedSet = parseFullSet(JSON.mapper.readTree(new URL(BASE_DATA_URL + validCode + ".json")));
+			else {			
+				requestedSet = JSON.mapper.readValue(getInputStream(BASE_DATA_URL + validCode + ".json"), FullCardSet.class);
 				cardSetCache.put(validCode, requestedSet);
 			}
 		}
@@ -113,7 +113,7 @@ public final class MTGUniverse {
 		// if the list isn't cached, fetch and cache it
 		if (cardSets == null) {
 			try {
-				cardSets = JSON.mapper.readValue(new URL(BASE_DATA_URL + "SetList.json"), new TypeReference<ArrayList<CardSetInformation>>() {});
+				cardSets = JSON.mapper.readValue(getInputStream(BASE_DATA_URL + "SetList.json"), new TypeReference<ArrayList<CardSetInformation>>() {});
 			} catch (Exception e) {
 				System.out.println("Error: could not fetch or parse set code list from upstream, using fallback json...");
 //				e.printStackTrace();
@@ -152,74 +152,17 @@ public final class MTGUniverse {
 	}
 	
 	/**
-	 * This method is necessary to adapt the list of cards in the json to
-	 * the map format used in cardbase.
+	 * Generates and returns a proper input stream with the correct user agent to ensure
+	 * MTG JSON doesn't return any annoying 403s.
 	 * 
-	 * @param jsonTree the tree-representation of the json to be parsed.
-	 * @return the parsed full card set.
-	 * 
-	 * @throws JsonMappingException if the upstream JSON does not map to {@code FullCardSet}.
-	 * @throws IOException if a low-level I/O problem (unexpected end-of-input, network error) occurs.
+	 * @param URL
+	 * @return
+	 * @throws IOException 
 	 */
-	private FullCardSet parseFullSet(JsonNode jsonTree) throws JsonMappingException, IOException {
-		
-		FullCardSet fcs = new FullCardSet();
-		
-		/*
-		 * These fields are critical, if any of them is not present an exception is thrown.
-		 */
-		if (jsonTree.hasNonNull("name")) {
-			fcs.name = jsonTree.get("name").asText();
-		} else {
-			throw new JsonMappingException("Field \"name\" not found.");
-		}
-		
-		String setCode;
-		if (jsonTree.hasNonNull("code")) {
-			setCode = jsonTree.get("code").asText();
-			fcs.code = setCode;
-		} else {
-			throw new JsonMappingException("Field \"code\" not found.");
-		}
-		
-		String imageCode;
-		if (jsonTree.hasNonNull("magicCardsInfoCode")) {
-			imageCode = jsonTree.get("magicCardsInfoCode").asText();
-			fcs.magicCardsInfoCode = imageCode;
-		} else {
-			throw new JsonMappingException("Field \"magicCardsInfoCode\" not found.");
-		}
-		
-		if (jsonTree.hasNonNull("releaseDate")) {
-			fcs.releaseDate = jsonTree.get("releaseDate").asText();
-		} else {
-			throw new JsonMappingException("Field \"releaseDate\" not found.");
-		}
-		
-		if (jsonTree.hasNonNull("cards")) {
-			// attempt to read card list as a POJO using the standard mapper
-			List<Card> rawList = jsonTree.get("cards").traverse(JSON.mapper).readValueAs(new TypeReference<List<Card>>() {});
-			// generate the map
-			Map<String, Card> cardMap = new HashMap<String, Card>();
-			for (Card card : rawList) {
-				// add set code for convenience
-				card.setCode.set(setCode);
-				card.imageCode.set(imageCode);
-				cardMap.put(card.number.get(), card);
-			}
-			fcs.cards = cardMap;
-		} else {
-			throw new JsonMappingException("Field \"cards\" not found.");
-		}
-		
-		/*
-		 * These fields are optional and are set to null if not present.
-		 */
-		fcs.gathererCode = jsonTree.hasNonNull("gathererCode") ? jsonTree.get("gathererCode").asText() : null;
-		fcs.border = jsonTree.hasNonNull("border") ? jsonTree.get("border").asText() : null;
-		fcs.type = jsonTree.hasNonNull("type") ? jsonTree.get("type").asText() : null;
-		fcs.block = jsonTree.hasNonNull("block") ? jsonTree.get("block").asText() : null;
-		
-		return fcs;
+	private InputStream getInputStream(String url) throws IOException {
+		URLConnection connection = new URL(url).openConnection();
+		connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+		connection.connect();
+		return connection.getInputStream();
 	}
 }

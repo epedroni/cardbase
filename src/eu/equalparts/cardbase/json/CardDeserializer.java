@@ -52,7 +52,6 @@ public class CardDeserializer extends StdDeserializer<Card> {
 		newCard.imageName = new StringCardField("imageName", node.hasNonNull("imageName") ? node.get("imageName").asText() : null);
 		newCard.watermark = new StringCardField("watermark", node.hasNonNull("watermark") ? node.get("watermark").asText() : null);
 		newCard.setCode = new StringCardField("setCode", node.hasNonNull("setCode") ? node.get("setCode").asText() : null);
-		newCard.imageCode = new StringCardField("imageCode", node.hasNonNull("imageCode") ? node.get("imageCode").asText() : null);
  
         return newCard;
 	}

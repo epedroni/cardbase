@@ -74,6 +74,28 @@ public class CardFilteringTest {
 			i++;
 		}
 	}
+	
+	@Test
+	public void filterByNameGreaterThan() throws Exception {
+		CardFiltering.filterByField(testCards, "name", Filter.GREATER_THAN, "5");
+		
+		assertEquals("Wrong list size.", 8, testCards.size());
+		int i = 0;
+		String[] names = {
+				"Callow Jushi",
+				"Coerced Confession",
+				"Khalni Hydra",
+				"Nightmare",
+				"Shivan Dragon",
+				"Disrupting Shoal",
+				"Sorin Markov",
+				"Ugin's Construct",
+		};
+		for (Card card : testCards) {
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
+			i++;
+		}
+	}
 
 	@Test
 	public void filterByLayoutEquals() throws Exception {
@@ -156,7 +178,10 @@ public class CardFilteringTest {
 	
 	@Test
 	public void filterByCMCContains() throws Exception {
+		CardFiltering.filterByField(testCards, "cmc", Filter.CONTAINS, "5");
 		
+		assertEquals("Wrong list size.", 1, testCards.size());
+		assertEquals("Coerced Confession", testCards.get(0).name.get());
 	}
 	
 	@Test
@@ -226,11 +251,6 @@ public class CardFilteringTest {
 	
 	@Test
 	public void filterBySetCode() throws Exception {
-
-	}
-	
-	@Test
-	public void filterByImageCode() throws Exception {
 
 	}
 }

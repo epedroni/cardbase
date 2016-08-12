@@ -11,7 +11,6 @@ public class FullCardSet {
 	public String border;
 	public String type;
 	public String block;
-	public String gathererCode;
 	public Map<String, Card> cards;
 
 	/**

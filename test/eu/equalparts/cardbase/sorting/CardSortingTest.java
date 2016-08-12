@@ -350,26 +350,6 @@ public class CardSortingTest {
 		}
 	}
 	
-	@Test
-	public void sortByImageCode() throws Exception {
-		CardSorting.sortByField(testCards, "imageCode");
-		int i = 0;
-		String[] codes = {
-				"bok",
-				"bok",
-				"frf",
-				"gtc",
-				"m12",
-				"m15",
-				"m15",
-				"roe",
-		};
-		for (Card card : testCards) {
-			assertTrue(card.imageCode.get() + " should have been " + codes[i] + ", i = " + i, card.imageCode.get().equals(codes[i]));
-			i++;
-		}
-	}
-	
 	/*
 	 * Edge cases
 	 */

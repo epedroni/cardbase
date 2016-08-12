@@ -16,7 +16,7 @@ import eu.equalparts.cardbase.cardfield.CardField;
 public class CardFiltering {
 
 	public enum Filter {
-		EQUALS, CONTAINS, REGEX;
+		EQUALS, CONTAINS, REGEX, GREATER_THAN, SMALLER_THAN;
 	}
 
 	public static void filterByField(List<Card> cards, String fieldName, Filter filterType, String filterValue) throws NoSuchFieldException {	
