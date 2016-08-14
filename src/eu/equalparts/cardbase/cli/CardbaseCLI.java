@@ -389,14 +389,14 @@ public final class CardbaseCLI {
 				if (cardToRemove != null) {
 					String count = args.length > 1 ? args[1] : "1";
 					
-					if (count.matches("[-]?[0-9]+")) {
-						Integer intCount = Integer.valueOf(count);
+					try {
+						Integer intCount = Integer.parseInt(count);
 						if (intCount > 0) {
 							removeCard(cardToRemove, intCount);
 						} else {
 							System.out.println("Cannot remove " + count + " cards.");
 						}
-					} else {
+					} catch (NumberFormatException e) {
 						System.out.println(count + " is not a valid number of cards.");
 					}
 				} else {
@@ -430,16 +430,14 @@ public final class CardbaseCLI {
 				if (cardToAdd != null) {
 					String count = args != null && args.length > 0 ? args[0] : "1";
 
-					if (count.matches("[-]?[0-9]+")) {
-						
-						Integer intCount = Integer.valueOf(count);
-
+					try {
+						Integer intCount = Integer.parseInt(count);
 						if (intCount > 0) {
 							addCard(cardToAdd, intCount);
 						} else {
 							System.out.println("Cannot add " + intCount + " cards.");
 						}
-					} else {
+					} catch (NumberFormatException e) {
 						System.out.println(count + " is not a valid number of cards.");
 					}
 				} else {

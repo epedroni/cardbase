@@ -25,7 +25,6 @@ public class Card {
 	public IntegerCardField loyalty;
 	public IntegerCardField multiverseid;
 	public StringCardField imageName;
-	public StringCardField watermark;
 
 	// Not part of upstream JSON
 	public StringCardField setCode;

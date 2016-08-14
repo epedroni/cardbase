@@ -50,7 +50,6 @@ public class CardDeserializer extends StdDeserializer<Card> {
 		newCard.loyalty = new IntegerCardField("loyalty", node.hasNonNull("loyalty") ? node.get("loyalty").asInt() : null);
 		newCard.multiverseid = new IntegerCardField("multiverseid", node.hasNonNull("multiverseid") ? node.get("multiverseid").asInt() : null);
 		newCard.imageName = new StringCardField("imageName", node.hasNonNull("imageName") ? node.get("imageName").asText() : null);
-		newCard.watermark = new StringCardField("watermark", node.hasNonNull("watermark") ? node.get("watermark").asText() : null);
 		newCard.setCode = new StringCardField("setCode", node.hasNonNull("setCode") ? node.get("setCode").asText() : null);
  
         return newCard;

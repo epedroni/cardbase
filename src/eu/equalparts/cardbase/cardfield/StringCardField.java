@@ -1,5 +1,5 @@
 package eu.equalparts.cardbase.cardfield;
-import eu.equalparts.cardbase.filtering.CardFiltering.Filter;
+import eu.equalparts.cardbase.filtering.Filter;
 
 public class StringCardField extends CardField<String> {
 	
@@ -8,16 +8,16 @@ public class StringCardField extends CardField<String> {
 	}
 
 	@Override
-	public boolean filter(Filter filter, String s) {
-		switch (filter) {
+	public boolean filter(Filter filter) {
+		switch (filter.type) {
 		case CONTAINS:
-			return get().toLowerCase().contains(s.toLowerCase());
+			return get().toLowerCase().contains(filter.value.toLowerCase());
 		case EQUALS:
-			return get().equalsIgnoreCase(s);
+			return get().equalsIgnoreCase(filter.value);
 		case REGEX:
-			return get().matches(s);
+			return get().matches(filter.value);
 		default:
-			return false;
+			throw new IllegalArgumentException();
 		}
 	}
 }

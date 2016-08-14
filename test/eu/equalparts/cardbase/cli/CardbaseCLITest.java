@@ -860,6 +860,36 @@ public class CardbaseCLITest {
 		assertEquals("Please select a set before removing cards." + EOL, testOutput.toString());
 	}
 	
+	@Test
+	public void removeIntegerOverflowAmount() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("remove 129 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999 is not a valid number of cards." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void removeNonIntAmount() throws Exception {
+		uut = new CardbaseCLI(TEST_REMOTE, path("/testbase.cb"));
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("remove 129 1OO");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("1OO is not a valid number of cards." + EOL, testOutput.toString());
+	}
+	
 	/***********************************************************************************
 	 * add() tests, happy path
 	 ***********************************************************************************/
@@ -1250,6 +1280,34 @@ public class CardbaseCLITest {
 			System.setOut(console);
 		}
 		assertEquals("Total: 0" + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addIntegerOverflowAmount() throws Exception {
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("129 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999 is not a valid number of cards." + EOL, testOutput.toString());
+	}
+	
+	@Test
+	public void addNonIntAmount() throws Exception {
+		uut.interpretInput("set FRF");
+		
+		try {
+			System.setOut(new PrintStream(testOutput));
+			uut.interpretInput("129 1OO");
+		} finally {
+			System.setOut(console);
+		}
+		
+		assertEquals("1OO is not a valid number of cards." + EOL, testOutput.toString());
 	}
 	
 	/***********************************************************************************

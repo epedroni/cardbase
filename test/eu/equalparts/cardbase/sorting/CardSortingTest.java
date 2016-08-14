@@ -310,27 +310,6 @@ public class CardSortingTest {
 	}
 	
 	@Test
-	public void sortByWatermark() throws Exception {
-		CardSorting.sortByField(testCards, "watermark");
-		int i = 0;
-		String[] watermarks = {
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				"Dimir",
-		};
-		for (Card card : testCards) {
-			String watermark = card.watermark.get() != null ? card.watermark.get() : "";
-			assertTrue(watermark + " should have been " + watermarks[i] + ", i = " + i, watermark.equals(watermarks[i]));
-			i++;
-		}
-	}
-	
-	@Test
 	public void sortBySetCode() throws Exception {
 		CardSorting.sortByField(testCards, "setCode");
 		int i = 0;

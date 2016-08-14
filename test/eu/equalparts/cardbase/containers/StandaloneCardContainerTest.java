@@ -68,7 +68,7 @@ public class StandaloneCardContainerTest {
 		exception.expect(NullPointerException.class);
 		uut.addCard(null, 0);
 	}
-
+	
 	/***********************************************************************************
 	 * Removing card tests, happy path
 	 ***********************************************************************************/

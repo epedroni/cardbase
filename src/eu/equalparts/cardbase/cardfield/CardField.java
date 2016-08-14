@@ -1,5 +1,5 @@
 package eu.equalparts.cardbase.cardfield;
-import eu.equalparts.cardbase.filtering.CardFiltering.Filter;
+import eu.equalparts.cardbase.filtering.Filter;
 
 public abstract class CardField<T extends Comparable<T>> implements Comparable<CardField<T>> {
 	private String name;
@@ -27,5 +27,5 @@ public abstract class CardField<T extends Comparable<T>> implements Comparable<C
 		return value.compareTo(o.get());
 	}
 	
-	public abstract boolean filter(Filter filter, String s);
+	public abstract boolean filter(Filter filter);
 }

@@ -1,6 +1,5 @@
 package eu.equalparts.cardbase.comparator;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.function.BiFunction;
@@ -9,6 +8,7 @@ import eu.equalparts.cardbase.card.Card;
 import eu.equalparts.cardbase.cardfield.CardField;
 import eu.equalparts.cardbase.comparator.SpecialFields.DirtyNumber;
 import eu.equalparts.cardbase.comparator.SpecialFields.Rarity;
+import eu.equalparts.cardbase.utils.Utils;
 
 /**
  * I'm new to this reflection business, so bear with me.
@@ -56,12 +56,10 @@ public class CardComparator implements Comparator<Card> {
 			this.fieldToCompare = fieldToCompare;
 			
 			// if annotated with a special comparator, set the comparison delegate here
-			for (Annotation annotation : fieldToCompare.getAnnotations()) {
-				if (annotation.annotationType() == DirtyNumber.class) {
-					this.comparisonDelegate = ComparatorDelegates::compareDirtyNumber;
-				} else if (annotation.annotationType() == Rarity.class) {
-					this.comparisonDelegate = ComparatorDelegates::compareRarity;
-				}
+			if (Utils.hasAnnotation(fieldToCompare, DirtyNumber.class)) {
+				this.comparisonDelegate = ComparatorDelegates::compareDirtyNumber;
+			} else if (Utils.hasAnnotation(fieldToCompare, Rarity.class)) {
+				this.comparisonDelegate = ComparatorDelegates::compareRarity;
 			}
 		} else {
 			throw new IllegalArgumentException("The field provided is not valid.");
