@@ -7,4 +7,7 @@
 "Sorin Markov",
 "Ugin's Construct",
 
+assertEquals("Wrong list size.", 1, testCards.size());
+assertEquals("Callow Jushi", testCards.get(0).name.get());
+
 cat test/testcards.json | sed -e "s/,/,\n/g" | awk '/cmc/ { r = gensub(/.+?\":\"(.+?)\".+/, "\"\\1\",", "g"); print r }'

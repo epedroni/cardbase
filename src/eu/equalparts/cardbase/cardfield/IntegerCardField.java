@@ -9,18 +9,22 @@ public class IntegerCardField extends CardField<Integer> {
 
 	@Override
 	public boolean filter(Filter filter) throws NumberFormatException {
-		switch (filter.type) {
-		case CONTAINS:
-			return get().toString().contains(filter.value);
-		case EQUALS:
-			return get().toString().equalsIgnoreCase(filter.value);
-		case REGEX:
-			return get().toString().matches(filter.value);
-		case GREATER_THAN:
-			return get() > Integer.parseInt(filter.value);
-		case SMALLER_THAN:
-			return get() < Integer.parseInt(filter.value);
-		default:
+		if (get() != null) {
+			switch (filter.type) {
+			case CONTAINS:
+				return get().toString().contains(filter.value);
+			case EQUALS:
+				return get().toString().equalsIgnoreCase(filter.value);
+			case REGEX:
+				return get().toString().matches(filter.value);
+			case GREATER_THAN:
+				return get() > Integer.parseInt(filter.value);
+			case SMALLER_THAN:
+				return get() < Integer.parseInt(filter.value);
+			default:
+				return false;
+			}
+		} else {
 			return false;
 		}
 	}
