@@ -1,10 +1,12 @@
 package eu.equalparts.cardbase.card;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CardSetInformation {
 
-	private String name;
-	private String code;
-	private String releaseDate;
+	@JsonProperty private String name;
+	@JsonProperty private String code;
+	@JsonProperty private String releaseDate;
 	
 	/**
 	 * @return the set's name.

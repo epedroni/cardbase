@@ -3,6 +3,8 @@ LEA          : Limited Edition Alpha
 LEB          : Limited Edition Beta
 ARN          : Arabian Nights
 2ED          : Unlimited Edition
+CED          : Collector's Edition
+CEI          : International Collector's Edition
 pDRC         : Dragon Con
 ATQ          : Antiquities
 3ED          : Revised Edition
@@ -79,7 +81,7 @@ SOK          : Saviors of Kamigawa
 9ED          : Ninth Edition
 RAV          : Ravnica: City of Guilds
 p2HG         : Two-Headed Giant Tournament
-pWPN         : WPN and Gateway
+pGTW         : Gateway
 GPT          : Guildpact
 pCMP         : Champs and States
 DIS          : Dissension
@@ -105,6 +107,7 @@ pSUM         : Summer of Magic
 EVE          : Eventide
 DRB          : From the Vault: Dragons
 ME2          : Masters Edition II
+pWPN         : Wizards Play Network
 ALA          : Shards of Alara
 DD2          : Duel Decks: Jace vs. Chandra
 CON          : Conflux
@@ -163,6 +166,7 @@ MD1          : Modern Event Deck 2014
 CNS          : Magic: The Gathering—Conspiracy
 VMA          : Vintage Masters
 M15          : Magic 2015 Core Set
+CPK          : Clash Pack
 V14          : From the Vault: Annihilation (2014)
 DDN          : Duel Decks: Speed vs. Cunning
 KTK          : Khans of Tarkir
@@ -177,3 +181,15 @@ DDO          : Duel Decks: Elspeth vs. Kiora
 DTK          : Dragons of Tarkir
 TPR          : Tempest Remastered
 MM2          : Modern Masters 2015 Edition
+ORI          : Magic Origins
+V15          : From the Vault: Angels
+DDP          : Duel Decks: Zendikar vs. Eldrazi
+BFZ          : Battle for Zendikar
+EXP          : Zendikar Expeditions
+C15          : Commander 2015
+OGW          : Oath of the Gatewatch
+DDQ          : Duel Decks: Blessed vs. Cursed
+W16          : Welcome Deck 2016
+SOI          : Shadows over Innistrad
+EMA          : Eternal Masters
+EMN          : Eldritch Moon

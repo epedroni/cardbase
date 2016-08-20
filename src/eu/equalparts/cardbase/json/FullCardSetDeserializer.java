@@ -45,7 +45,7 @@ public class FullCardSetDeserializer extends StdDeserializer<FullCardSet> {
 		if (jsonTree.hasNonNull("name")) {
 			fcs.name = jsonTree.get("name").asText();
 		} else {
-			throw new JsonMappingException("Field \"name\" not found.");
+			throw new JsonMappingException(jp, "Field \"name\" not found.");
 		}
 		
 		String setCode;
@@ -53,13 +53,13 @@ public class FullCardSetDeserializer extends StdDeserializer<FullCardSet> {
 			setCode = jsonTree.get("code").asText();
 			fcs.code = setCode;
 		} else {
-			throw new JsonMappingException("Field \"code\" not found.");
+			throw new JsonMappingException(jp, "Field \"code\" not found.");
 		}
 			
 		if (jsonTree.hasNonNull("releaseDate")) {
 			fcs.releaseDate = jsonTree.get("releaseDate").asText();
 		} else {
-			throw new JsonMappingException("Field \"releaseDate\" not found.");
+			throw new JsonMappingException(jp, "Field \"releaseDate\" not found.");
 		}
 		
 		if (jsonTree.hasNonNull("cards")) {
@@ -74,7 +74,7 @@ public class FullCardSetDeserializer extends StdDeserializer<FullCardSet> {
 			}
 			fcs.cards = cardMap;
 		} else {
-			throw new JsonMappingException("Field \"cards\" not found.");
+			throw new JsonMappingException(jp, "Field \"cards\" not found.");
 		}
 		
 		/*

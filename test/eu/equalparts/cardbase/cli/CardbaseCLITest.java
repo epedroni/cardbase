@@ -5,9 +5,12 @@ import static org.junit.Assert.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Scanner;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -33,7 +36,7 @@ public class CardbaseCLITest {
 	 * The test remote URL to "query" from, this is actually the same directory
 	 * as the test class. Test files need to be placed accordingly.
 	 */
-	private final String TEST_REMOTE = getClass().getResource("").toString();
+	private static String TEST_REMOTE;
 	
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
@@ -41,12 +44,17 @@ public class CardbaseCLITest {
 	@Rule
 	public TemporaryFolder tempFolder = new TemporaryFolder();
 	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		TEST_REMOTE = getResourceLocation("SetList.json");
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 		uut = new CardbaseCLI(TEST_REMOTE);
 		testOutput.reset();
 	}
-	
+
 	/***********************************************************************************
 	 * Start up tests, happy path
 	 ***********************************************************************************/
@@ -1566,6 +1574,17 @@ public class CardbaseCLITest {
 	/***********************************************************************************
 	 * Utility methods for dealing with files
 	 ***********************************************************************************/
+	/**
+	 * For deriving the location of local resources for this class from the location 
+	 * of a specific resource.
+	 * 
+	 * @return the URI of the resource directory as a string.
+	 */
+	private static String getResourceLocation(String resourceName) throws URISyntaxException {
+		URI location = new URI(CardbaseCLITest.class.getResource(resourceName).getPath());
+		return "file:" + location.resolve(".").toString();
+	}
+	
 	/**
 	 * Returns the contents of a resource file by reading it with a {@code Scanner}. The file is
 	 * loaded using {@code getClass().getResourceAsStream()}, so make sure to address it relative
