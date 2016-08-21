@@ -856,18 +856,210 @@ public class CardFilteringTest {
 	}
 
 	@Test
-	public void filterByMultiverseID() throws Exception {
+	public void filterByMultiverseIDEquals() throws Exception {
+		Filter filter = new Filter(FilterType.EQUALS, "multiverseid", "74489");
 
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 1, testCards.size());
+		assertEquals("Callow Jushi", testCards.get(0).name.get());
 	}
 
 	@Test
-	public void filterByImageName() throws Exception {
+	public void filterByMultiverseIDContains() throws Exception {
+		Filter filter = new Filter(FilterType.CONTAINS, "multiverseid", "38");
 
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 3, testCards.size());
+		int i = 0;
+		String[] names = {
+				"Nightmare",
+				"Shivan Dragon",
+				"Sorin Markov",
+		};
+		for (Card card : testCards) {
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
+			i++;
+		}
 	}
 
 	@Test
-	public void filterBySetCode() throws Exception {
+	public void filterByMultiverseIDRegex() throws Exception {
+		Filter filter = new Filter(FilterType.REGEX, "multiverseid", ".{5}");
 
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 2, testCards.size());
+		int i = 0;
+		String[] names = {
+				"Callow Jushi",
+				"Disrupting Shoal",
+		};
+		for (Card card : testCards) {
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
+			i++;
+		}
+	}
+
+	@Test
+	public void filterByMultiverseIDGreaterThan() throws Exception {
+		Filter filter = new Filter(FilterType.GREATER_THAN, "multiverseid", "300000");
+
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 4, testCards.size());
+		int i = 0;
+		String[] names = {
+				"Coerced Confession",
+				"Nightmare",
+				"Shivan Dragon",
+				"Ugin's Construct",
+		};
+		for (Card card : testCards) {
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
+			i++;
+		}
+	}
+
+	@Test
+	public void filterByMultiverseIDSmallerThan() throws Exception {
+		Filter filter = new Filter(FilterType.SMALLER_THAN, "multiverseid", "10000");
+
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 0, testCards.size());
+	}
+
+	@Test
+	public void filterByImageNameEquals() throws Exception {
+		Filter filter = new Filter(FilterType.EQUALS, "imageName", "nightmare");
+
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 1, testCards.size());
+		assertEquals("Nightmare", testCards.get(0).name.get());
+	}
+
+	@Test
+	public void filterByImageNameContains() throws Exception {
+		Filter filter = new Filter(FilterType.CONTAINS, "imageName", "co");
+
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 2, testCards.size());
+		int i = 0;
+		String[] names = {
+				"Coerced Confession",
+				"Ugin's Construct",
+		};
+		for (Card card : testCards) {
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
+			i++;
+		}
+	}
+
+	@Test
+	public void filterByImageNameRegex() throws Exception {
+		Filter filter = new Filter(FilterType.REGEX, "imageName", ".+? .+?");
+
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 7, testCards.size());
+		int i = 0;
+		String[] names = {
+				"Callow Jushi",
+				"Coerced Confession",
+				"Khalni Hydra",
+				"Shivan Dragon",
+				"Disrupting Shoal",
+				"Sorin Markov",
+				"Ugin's Construct",
+		};
+		for (Card card : testCards) {
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
+			i++;
+		}
+	}
+
+	@Test
+	public void filterByImageNameGreaterThan() throws Exception {
+		Filter filter = new Filter(FilterType.GREATER_THAN, "imageName", "10");
+
+		exception.expect(IllegalArgumentException.class);
+		CardFiltering.filterByField(testCards, filter);
+	}
+
+	@Test
+	public void filterByImageNameSmallerThan() throws Exception {
+		Filter filter = new Filter(FilterType.SMALLER_THAN, "imageName", "10");
+
+		exception.expect(IllegalArgumentException.class);
+		CardFiltering.filterByField(testCards, filter);
+	}
+
+	@Test
+	public void filterBySetCodeEquals() throws Exception {
+		Filter filter = new Filter(FilterType.EQUALS, "setCode", "GTC");
+
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 1, testCards.size());
+		assertEquals("Coerced Confession", testCards.get(0).name.get());
+	}
+
+	@Test
+	public void filterBySetCodeContains() throws Exception {
+		Filter filter = new Filter(FilterType.CONTAINS, "setCode", "o");
+
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 3, testCards.size());
+		int i = 0;
+		String[] names = {
+				"Callow Jushi",
+				"Khalni Hydra",
+				"Disrupting Shoal",
+		};
+		for (Card card : testCards) {
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
+			i++;
+		}
+	}
+
+	@Test
+	public void filterBySetCodeRegex() throws Exception {
+		Filter filter = new Filter(FilterType.REGEX, "setCode", "M[0-9]{2}");
+
+		CardFiltering.filterByField(testCards, filter);
+
+		assertEquals("Wrong list size.", 3, testCards.size());
+		int i = 0;
+		String[] names = {
+				"Nightmare",
+				"Shivan Dragon",
+				"Sorin Markov",
+		};
+		for (Card card : testCards) {
+			assertTrue(card.name.get() + " should have been " + names[i] + ", i = " + i, card.name.get().equals(names[i]));
+			i++;
+		}
+	}
+
+	@Test
+	public void filterBySetCodeGreaterThan() throws Exception {
+		Filter filter = new Filter(FilterType.GREATER_THAN, "setCode", "10");
+
+		exception.expect(IllegalArgumentException.class);
+		CardFiltering.filterByField(testCards, filter);
+	}
+
+	@Test
+	public void filterBySetCodeSmallerThan() throws Exception {
+		Filter filter = new Filter(FilterType.SMALLER_THAN, "setCode", "10");
+
+		exception.expect(IllegalArgumentException.class);
+		CardFiltering.filterByField(testCards, filter);
 	}
 
 	/*

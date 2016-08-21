@@ -61,4 +61,4 @@ Use the "version" command to see the executable's version.
 
 ## Building
 
-Cardbase now uses [gradle](https://gradle.org/) for building and dependency management. As recommended, use the provided `gradlew` script for best results.
+Cardbase now uses [gradle](https://gradle.org/) for building and dependency management. As recommended, use the provided `gradlew` script for best results. In addition to the standard Java tasks, `./gradlew standalone` can be used to generate a "fat jar" with all necessary dependencies bundled.
